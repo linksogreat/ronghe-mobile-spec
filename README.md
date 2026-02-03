@@ -35,7 +35,7 @@ node server.js
 
 ### 4. 访问项目
 服务启动后，打开浏览器访问：
-http://localhost:3000/融和移动端规范.html
+http://localhost:3000/index.html
 
 ## 使用指南
 
