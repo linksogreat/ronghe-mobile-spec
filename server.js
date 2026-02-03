@@ -21,7 +21,7 @@ app.post('/api/components', require('./api/components/write'));
 
 // Serve index.html for root route
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '融和移动端规范.html'));
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.listen(PORT, () => {
