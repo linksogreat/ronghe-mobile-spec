@@ -1,0 +1,16 @@
+{
+  "name": "ronghe-mobile-spec",
+  "version": "1.0.0",
+  "description": "RongHe Mobile UI Specification",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^4.19.2",
+    "mongoose": "^9.1.5"
+  }
+}

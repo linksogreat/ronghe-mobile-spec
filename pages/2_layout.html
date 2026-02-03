@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>布局规范 - 融和移动端 UI</title>
+    <script src="../assets/lib/js/tailwind.min.js"></script>
+    <script src="../assets/lib/js/vue.global.min.js"></script>
+    <link rel="stylesheet" href="../assets/lib/css/vant.min.css" />
+    <script src="../assets/lib/js/vant.min.js"></script>
+    <link href="../assets/lib/css/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="bg-[#F7F8FA]">
+
+<div id="app" v-cloak class="p-8">
+    <div class="max-w-5xl mx-auto">
+        <header class="mb-8 pb-4 border-b border-gray-200">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">布局规范</h2>
+            <p class="text-gray-500">栅格系统与页面通用结构尺寸。</p>
+        </header>
+
+        <section class="space-y-8">
+            <!-- 2.1 栅格 -->
+            <div id="grid" class="demo-card scroll-mt-6" v-show="isSectionVisible('grid')">
+                <div class="border-b border-gray-100 px-5 py-3 bg-gray-50/50 flex justify-between items-center">
+                    <h3 class="font-bold text-gray-700 text-sm">2.1 栅格</h3>
+                    <span class="text-xs text-gray-400">Grid System</span>
+                </div>
+                <div class="demo-preview">
+                    <van-row class="w-full text-center text-xs text-white">
+                        <van-col span="8" class="bg-[#39a9ed] py-2">span:8</van-col>
+                        <van-col span="8" class="bg-[#66c6f2] py-2">span:8</van-col>
+                        <van-col span="8" class="bg-[#39a9ed] py-2">span:8</van-col>
+                    </van-row>
+                </div>
+                <div class="bg-gray-50 p-4 text-sm text-gray-600 border-t border-gray-100">
+                    <p class="font-bold mb-2">设计规约：</p>
+                    <ul class="list-disc pl-5">
+                        <li>图片中未标注栅格列数、间距等基础参数，待确认。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 2.2 布局 -->
+            <div id="layout" class="bg-white rounded-xl border border-gray-200 p-6 scroll-mt-6" v-show="isSectionVisible('layout')">
+                <h3 class="font-bold text-gray-800 mb-4">2.2 页面结构</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="space-y-4 text-sm text-gray-600">
+                        <p class="font-bold text-gray-800">页面通用结构尺寸：</p>
+                        <ul class="space-y-2">
+                            <li class="flex justify-between border-b border-gray-50 pb-1"><span>状态栏高度</span> <code class="text-[#0088FF]">88px</code></li>
+                            <li class="flex justify-between border-b border-gray-50 pb-1"><span>Tab高度</span> <code class="text-[#0088FF]">88px</code></li>
+                            <li class="flex justify-between border-b border-gray-50 pb-1"><span>数据强调区高度</span> <code class="text-[#0088FF]">82px</code></li>
+                            <li class="flex justify-between border-b border-gray-50 pb-1"><span>按钮行高</span> <code class="text-[#0088FF]">36px</code></li>
+                            <li class="flex justify-between border-b border-gray-50 pb-1"><span>操作栏高度</span> <code class="text-[#0088FF]">60px</code></li>
+                            <li class="flex justify-between border-b border-gray-50 pb-1"><span>卡片间距</span> <code class="text-[#0088FF]">8px</code></li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="font-bold mb-2 text-gray-800 text-sm">适配规则：</p>
+                        <p class="text-sm text-gray-600">以 <strong>375 × 812 px</strong> 屏幕尺寸为设计基准。</p>
+                        <div class="mt-4 w-full h-40 border-2 border-dashed border-gray-300 rounded flex items-center justify-center text-gray-400 text-xs">
+                            Safe Area Diagram Placeholder
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+    <script>
+    const { createApp, ref, onMounted } = Vue;
+    const app = createApp({
+        setup() {
+            const activeSection = ref('');
+
+            // Hash Handling
+            const parseHash = () => {
+                const hash = window.location.hash.slice(1);
+                console.log('Layout Hash:', hash);
+                activeSection.value = hash || 'grid'; // Default to grid if empty
+            };
+
+            const isSectionVisible = (id) => {
+                if (activeSection.value === 'all') return true;
+                return activeSection.value === id;
+            };
+
+            onMounted(() => {
+                parseHash();
+                window.addEventListener('hashchange', parseHash);
+                // No navigate message listener needed
+            });
+
+            return {
+                isSectionVisible
+            };
+        }
+    });
+    app.use(vant);
+    app.mount('#app');
+    </script>
+</body>
+</html>

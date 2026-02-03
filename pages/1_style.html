@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>样式规范 - 融和移动端 UI</title>
+    <script src="../assets/lib/js/tailwind.min.js"></script>
+    <script src="../assets/lib/js/vue.global.min.js"></script>
+    <link rel="stylesheet" href="../assets/lib/css/vant.min.css" />
+    <script src="../assets/lib/js/vant.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="../font_icon/iconfont.js"></script>
+    <link href="../assets/lib/css/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="../font_icon/iconfont.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="bg-[#F7F8FA]">
+
+<div id="app" v-cloak class="p-8">
+        <!-- Debug Indicator (Hidden in production) -->
+        <!-- <div class="mb-4 p-2 bg-gray-100 text-xs text-gray-500 rounded border border-gray-200 flex flex-col gap-1">
+             <div class="flex justify-between items-center">
+                <span>Data: {{ dataSource }} | Section: <strong>{{ activeSection }}</strong></span>
+                <div class="flex gap-2">
+                    <button @click="activeSection = 'all'" class="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300">Show All</button>
+                    <button @click="forceReload" class="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300">Reload</button>
+                </div>
+             </div>
+        </div> -->
+
+        <!-- 编辑模式控制栏 -->
+        <div v-if="isEditMode" class="fixed top-4 right-4 z-50 flex gap-2 animate-fade-in">
+        <van-button icon="cross" type="danger" size="small" @click="exitEdit">退出</van-button>
+        <van-button icon="replay" type="default" size="small" @click="resetData">重置</van-button>
+        <van-button icon="success" type="primary" size="small" @click="saveData">保存修改</van-button>
+    </div>
+
+    <div class="max-w-5xl mx-auto">
+        <header class="mb-8 pb-4 border-b border-gray-200">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">样式规范</h2>
+            <p class="text-gray-500">基础视觉规范，包含色彩、字体、圆角、投影、图标等。</p>
+        </header>
+
+        <!-- 1.1 色彩 -->
+        <section id="color" class="space-y-8 mb-12 scroll-mt-6" v-show="isSectionVisible('color')">
+            <div v-for="(palette, pIndex) in data.colors" :key="pIndex">
+                <h3 class="text-md font-bold text-gray-700 mb-4 pl-2 border-l-4 border-[#0088FF]">{{ palette.name }}</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                    <div v-for="color in palette.list" :key="color.hex" 
+                         class="bg-white rounded-lg shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-shadow group"
+                         :class="{ 'ring-2 ring-blue-500': isEditMode }">
+                        <!-- View Mode -->
+                        <div v-if="!isEditMode" @click="copyText(color.hex)">
+                            <div :style="{ background: color.hex }" class="h-20 w-full relative flex items-center justify-center">
+                                <span class="opacity-0 group-hover:opacity-100 text-white text-xs bg-black/20 px-2 py-1 rounded backdrop-blur-sm">复制</span>
+                            </div>
+                            <div class="p-3">
+                                <div class="font-bold text-gray-800 text-sm">{{ color.name }}</div>
+                                <div class="text-xs text-gray-400 mt-1 font-mono">{{ color.hex }}</div>
+                                <div class="text-xs text-gray-300 mt-0.5 scale-90 origin-left">{{ color.desc }}</div>
+                            </div>
+                        </div>
+                        <!-- Edit Mode -->
+                        <div v-else class="p-2 space-y-2">
+                             <div class="h-10 w-full rounded border border-gray-200 transition-colors duration-300" :style="{ background: color.hex }"></div>
+                             <input v-model="color.name" class="w-full text-xs border border-gray-300 rounded px-1 py-0.5" placeholder="名称">
+                             <input v-model="color.hex" class="w-full text-xs border border-gray-300 rounded px-1 py-0.5 font-mono uppercase" placeholder="#HEX">
+                             <input v-model="color.desc" class="w-full text-xs border border-gray-300 rounded px-1 py-0.5" placeholder="描述">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 1.2 字体 -->
+        <div v-show="isSectionVisible('words')">
+            <h3 id="words" class="text-xl font-bold text-gray-800 mb-4 scroll-mt-6">字体规范</h3>
+            <section class="bg-white rounded-xl border border-gray-200 p-6 mb-12">
+             <div class="mb-4 text-sm text-gray-600 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                <p class="font-bold mb-2">设计规约：</p>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li><strong>字体家族</strong>：开发时需替换为系统默认字体。</li>
+                    <li><strong>文本截断规则</strong>：支持单行/多行截断，超长显示「展开/收起」。</li>
+                    <li><strong>文本颜色映射</strong>：主文字 #101010/#333333，辅助 #666666/#999999，禁用 #BEBEBE。</li>
+                </ul>
+            </div>
+            <table class="w-full text-left">
+                <thead><tr class="text-xs text-gray-400 border-b border-gray-100 uppercase"><th class="pb-3">预览</th><th class="pb-3">用途</th><th class="pb-3">颜色</th></tr></thead>
+                <tbody>
+                    <tr v-for="font in data.typography" :key="font.name" class="border-b border-gray-50 last:border-0">
+                        <!-- View Mode -->
+                        <template v-if="!isEditMode">
+                            <td class="py-4"><span :style="{ fontSize: font.size.replace(' (估算)',''), fontWeight: font.weight, lineHeight: font.lineHeight === '-' ? 'normal' : font.lineHeight, color: font.color }">{{ font.text }}</span></td>
+                            <td class="py-4 text-sm text-gray-500">{{ font.name }}<br><span class="text-xs text-gray-400">{{ font.size }} {{ font.weight }}</span></td>
+                            <td class="py-4 text-xs font-mono text-gray-400">{{ font.color }}</td>
+                        </template>
+                        <!-- Edit Mode -->
+                        <template v-else>
+                            <td class="py-2" colspan="3">
+                                <div class="grid grid-cols-4 gap-2 bg-gray-50 p-2 rounded">
+                                    <input v-model="font.text" class="text-xs border border-gray-300 rounded px-1" placeholder="预览文本">
+                                    <input v-model="font.name" class="text-xs border border-gray-300 rounded px-1" placeholder="用途名称">
+                                    <input v-model="font.size" class="text-xs border border-gray-300 rounded px-1" placeholder="字号 (e.g. 14px)">
+                                    <input v-model="font.color" class="text-xs border border-gray-300 rounded px-1" placeholder="颜色 (#333)">
+                                    <input v-model="font.weight" class="text-xs border border-gray-300 rounded px-1" placeholder="字重">
+                                </div>
+                            </td>
+                        </template>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        </div>
+
+        <!-- 1.3 投影 -->
+        <div id="shadow" class="scroll-mt-6 mb-12" v-show="isSectionVisible('shadow')">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">投影</h3>
+            <div class="flex flex-wrap items-end gap-8">
+                <div v-for="shadow in data.shadows" :key="shadow.name" class="flex flex-col gap-2 group">
+                    <div class="bg-white rounded-lg border border-gray-50 flex items-center justify-center text-xs text-gray-300 transition-all duration-300" 
+                         :style="{ 
+                             boxShadow: shadow.value, 
+                             width: shadow.width || '128px', 
+                             height: shadow.height || '128px' 
+                         }">
+                        <span class="opacity-0 group-hover:opacity-100">{{ shadow.width }} x {{ shadow.height }}</span>
+                    </div>
+                    
+                    <div class="text-center w-full max-w-[200px]">
+                        <template v-if="!isEditMode">
+                            <div class="text-sm font-medium text-gray-600">{{ shadow.name }}</div>
+                            <div class="text-[10px] text-gray-400 font-mono mt-1 break-words px-2">{{ shadow.value }}</div>
+                        </template>
+                        <template v-else>
+                            <input v-model="shadow.name" class="text-xs border border-gray-300 rounded px-1 w-full text-center mb-1" placeholder="名称">
+                            <input v-model="shadow.value" class="text-xs border border-gray-300 rounded px-1 w-full text-center" placeholder="box-shadow value">
+                            <div class="flex gap-1 mt-1">
+                                <input v-model="shadow.width" class="text-[10px] border border-gray-300 rounded px-1 w-1/2 text-center" placeholder="W">
+                                <input v-model="shadow.height" class="text-[10px] border border-gray-300 rounded px-1 w-1/2 text-center" placeholder="H">
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1.4 圆角 -->
+        <div id="corners" class="scroll-mt-6 mb-12" v-show="isSectionVisible('corners')">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">圆角</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-6">
+                <div v-for="corner in data.corners" :key="corner.name" class="text-center group">
+                    <div class="corner-box mb-3 shadow-sm bg-[#0088FF] w-24 h-16 mx-auto flex items-center justify-center text-white/90 text-xs" :style="{ borderRadius: corner.value }">
+                        {{ corner.value }}
+                    </div>
+                    <template v-if="!isEditMode">
+                        <div class="font-bold text-sm text-gray-700">{{ corner.name }}</div>
+                        <div class="text-xs text-gray-400 mt-1">{{ corner.value }}</div>
+                    </template>
+                        <template v-else>
+                        <input v-model="corner.name" class="text-xs border border-gray-300 rounded px-1 w-full text-center mb-1" placeholder="名称">
+                        <input v-model="corner.value" class="text-xs border border-gray-300 rounded px-1 w-full text-center" placeholder="radius value">
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1.5 间距 -->
+        <div id="spacing" class="scroll-mt-6" v-show="isSectionVisible('spacing')">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">间距系统</h3>
+            <section class="bg-white p-6 rounded-xl border border-gray-200 mb-12">
+                 <div class="mb-4 text-sm text-gray-600">
+                    <p>所有间距严格遵守“4的倍数关系”。</p>
+                </div>
+                <div class="space-y-4">
+                    <div v-for="space in data.spacings" :key="space.name" class="flex items-center">
+                        <div class="w-24 text-sm text-gray-500" v-if="!isEditMode">{{ space.name }}</div>
+                        <input v-else v-model="space.name" class="w-24 text-xs border border-gray-300 rounded px-1 mr-2">
+                        
+                        <div class="flex-1 flex items-center gap-3">
+                            <div class="h-4 bg-[#0088FF] rounded opacity-50" :style="{ width: space.value }"></div>
+                            <code class="text-xs text-gray-500" v-if="!isEditMode">{{ space.value }}</code>
+                            <input v-else v-model="space.value" class="w-16 text-xs border border-gray-300 rounded px-1">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 补充：核心间距规范演示 (Visual Demo) -->
+                <div class="mt-10 pt-8 border-t border-gray-100">
+                    <h4 class="text-md font-bold text-gray-700 mb-6 flex items-center">
+                        <i class="ri-layout-top-line mr-2 text-[#0088FF]"></i>
+                        核心页面布局规范
+                    </h4>
+                    
+                    <div class="flex flex-col gap-10">
+                        <!-- Rules Description -->
+                        <div class="flex-1 space-y-6 text-sm text-gray-600">
+                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="bg-gray-50 p-5 rounded-lg border border-gray-100">
+                                    <h5 class="font-bold text-gray-800 mb-3 flex items-center"><i class="ri-ruler-2-line mr-2"></i>全局尺寸</h5>
+                                    <ul class="list-disc pl-5 space-y-2 marker:text-gray-400">
+                                        <li><strong>页面背景</strong>：<span class="bg-white px-1 border rounded">#F7F8FA</span></li>
+                                        <li><strong>水平边距</strong>：<span class="text-[#0088FF] font-mono">16px</span> (左右一致)</li>
+                                        <li><strong>状态栏高度</strong>：<span class="text-[#0088FF] font-mono">88px</span></li>
+                                        <li><strong>Tab区域高度</strong>：<span class="text-[#0088FF] font-mono">88px</span></li>
+                                        <li><strong>底部操作栏</strong>：<span class="text-[#0088FF] font-mono">60px</span></li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="bg-gray-50 p-5 rounded-lg border border-gray-100">
+                                    <h5 class="font-bold text-gray-800 mb-3 flex items-center"><i class="ri-arrow-up-down-line mr-2"></i>垂直间距 (4px 步进)</h5>
+                                    <div class="space-y-3">
+                                        <div class="flex justify-between items-center border-b border-gray-200 pb-2">
+                                            <span>最小间距 (Smallest Gap)</span>
+                                            <code class="text-[#FF3030] font-bold">2px</code>
+                                        </div>
+                                        <div class="flex justify-between items-center border-b border-gray-200 pb-2">
+                                            <span>列表/卡片间距 (Item Gap)</span>
+                                            <code class="text-[#FF3030] font-bold">8px</code>
+                                        </div>
+                                        <div class="flex justify-between items-center border-b border-gray-200 pb-2">
+                                            <span>模块起始间距 (Initial Spacing)</span>
+                                            <code class="text-[#FF3030] font-bold">12px</code>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span>模块分隔间距 (Sectional Gap)</span>
+                                            <code class="text-[#FF3030] font-bold">16px</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Vant 4 Implementation Demo (Moved to Right Preview) -->
+                        <div class="hidden">
+                            <!-- Placeholder to keep code structure if needed -->
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+
+        <!-- 1.6 图标 -->
+        <div id="icons" class="scroll-mt-6 mb-12" v-show="isSectionVisible('icons')">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 flex justify-between items-center">
+                <span>图标系统</span>
+                <!-- Download Controls -->
+                <div class="flex items-center gap-2">
+                    <span v-if="selectedIcons.length > 0" class="text-xs text-gray-500 mr-2">已选 {{ selectedIcons.length }} 个</span>
+                    <van-button size="small" plain type="primary" @click="selectAll">全选</van-button>
+                    <van-button size="small" plain type="default" @click="deselectAll">取消全选</van-button>
+                    <van-button size="small" type="primary" icon="down" @click="downloadIcons">下载 SVG</van-button>
+                </div>
+            </h3>
+            <section class="bg-white p-6 rounded-xl border border-gray-200 space-y-8">
+            <div>
+                <h4 class="text-sm font-bold text-gray-700 mb-4 pl-2 border-l-4 border-gray-300">通用图标 (Vant) <span class="text-xs font-normal text-gray-400 ml-2">(不支持 SVG 下载)</span></h4>
+                <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-6">
+                    <div v-for="icon in data.commonIcons" :key="icon" class="relative flex flex-col items-center gap-2 group cursor-pointer p-2 rounded hover:bg-gray-50 transition-colors" @click="copyText(icon)" :title="icon">
+                        <van-icon :name="icon" size="24" class="text-gray-600 group-hover:text-[#0088FF] transition-colors" />
+                         <!-- Tooltip -->
+                         <div class="absolute bottom-full mb-2 hidden group-hover:block bg-black/80 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap z-10 pointer-events-none">
+                            {{ icon }}
+                         </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <h4 class="text-sm font-bold text-gray-700 mb-4 pl-2 border-l-4 border-[#0088FF]">业务图标 (Custom)</h4>
+                <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-6">
+                    <div v-for="icon in data.customIcons" :key="icon" 
+                         class="relative flex flex-col items-center gap-2 group cursor-pointer p-2 rounded transition-all border-2"
+                         :class="selectedIcons.includes(icon) ? 'border-[#0088FF] bg-blue-50/50' : 'border-transparent hover:bg-gray-50'"
+                         @click="toggleSelection(icon)" :title="icon">
+                        <van-icon class-prefix="icon" :name="icon" size="24" class="text-gray-600 transition-colors" :class="selectedIcons.includes(icon) ? 'text-[#0088FF]' : 'group-hover:text-[#0088FF]'" />
+                        <!-- Tooltip on Hover -->
+                         <div class="absolute bottom-full mb-2 hidden group-hover:block bg-black/80 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap z-10 pointer-events-none">
+                            {{ icon }}
+                         </div>
+                    </div>
+                </div>
+            </div>
+            </section>
+        </div>
+
+        <!-- 1.7 按钮 -->
+        <div id="buttons" class="scroll-mt-6" v-show="isSectionVisible('buttons')">
+             <h3 class="text-xl font-bold text-gray-800 mb-4">按钮规范</h3>
+             <section class="bg-white p-6 rounded-xl border border-gray-200 space-y-8">
+                
+                <!-- 尺寸规范 -->
+                <div>
+                    <h4 class="text-sm font-bold text-gray-700 mb-4 pl-2 border-l-4 border-[#0088FF]">尺寸标准 (Size Specifications)</h4>
+                    <div class="space-y-6">
+                        <div v-for="size in data.buttons?.sizes" :key="size.name" class="flex flex-col md:flex-row gap-4 items-start md:items-center border-b border-gray-50 pb-4 last:border-0">
+                            <!-- Demo Area (Hidden on mobile, shown in preview) -->
+                            <div class="hidden md:flex w-full md:w-[200px] items-center justify-center bg-gray-50 p-4 rounded border border-gray-100 shrink-0">
+                                <button class="bg-[#1989FA] text-white flex items-center justify-center font-medium transition-opacity hover:opacity-90 active:opacity-80"
+                                        :style="{ 
+                                            width: size.width, 
+                                            height: size.height, 
+                                            borderRadius: size.radius.includes('胶囊') ? '999px' : (size.radius.includes('4px') ? '4px' : size.radius),
+                                            fontSize: size.fontSize.split('/')[0].trim()
+                                        }">
+                                    按钮
+                                </button>
+                            </div>
+                            <!-- Info Area -->
+                            <div class="flex-1 space-y-1">
+                                <div class="font-bold text-gray-800">{{ size.name }}</div>
+                                <div class="text-xs text-gray-500">{{ size.desc }}</div>
+                                <div class="flex flex-wrap gap-2 mt-2 text-xs font-mono text-gray-400 bg-gray-50 p-2 rounded w-fit">
+                                    <span>W: {{ size.width }}</span>
+                                    <span class="border-l border-gray-200 pl-2">H: {{ size.height }}</span>
+                                    <span class="border-l border-gray-200 pl-2">R: {{ size.radius }}</span>
+                                    <span class="border-l border-gray-200 pl-2">F: {{ size.fontSize }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 交互状态与圆角规范 (合并展示) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- 交互状态 -->
+                    <div>
+                        <h4 class="text-sm font-bold text-gray-700 mb-4 pl-2 border-l-4 border-green-500">交互状态 (Interaction)</h4>
+                        <div class="space-y-4 text-sm text-gray-600 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold w-16">常规态</span>
+                                <span>100% 透明度</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold w-16">点击态</span>
+                                <span>增加 10% 黑色遮罩 / Opacity 0.8</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold w-16">禁用态</span>
+                                <span>Opacity 0.5，置灰背景，不可点击</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold w-16">加载态</span>
+                                <span>保留背景色，左侧 Loading 图标，防重复提交</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 圆角规范 -->
+                    <div>
+                        <h4 class="text-sm font-bold text-gray-700 mb-4 pl-2 border-l-4 border-orange-500">圆角规约 (Radius)</h4>
+                        <div class="space-y-4 text-sm text-gray-600 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold w-20">大按钮</span>
+                                <span>胶囊圆角 (999px / 24px) - 亲和力</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold w-20">置底按钮</span>
+                                <span>胶囊圆角 (22px) - 配合底部栏</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold w-20">中/小按钮</span>
+                                <span>4px - 6px - 适应紧凑布局</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 代码落地参考 -->
+                <div>
+                    <h4 class="text-sm font-bold text-gray-700 mb-4 pl-2 border-l-4 border-purple-500">代码落地参考 (CSS Variables)</h4>
+                    <div class="bg-gray-800 text-gray-300 p-4 rounded-lg font-mono text-xs overflow-x-auto leading-relaxed">
+<pre>/* Vant 4 变量覆盖 */
+:root {
+  /* 大按钮覆盖 (Large) */
+  --van-button-large-height: 48px;
+  --van-button-large-font-size: 16px;
+  --van-button-radius: 24px; /* 全局圆角或针对类名覆盖 */
+
+  /* 普通按钮 (Normal) */
+  --van-button-normal-height: 32px;
+  --van-button-normal-font-size: 14px;
+  --van-button-normal-padding: 0 15px;
+
+  /* 小按钮 (Small) */
+  --van-button-small-height: 24px;
+  --van-button-small-font-size: 12px;
+  --van-button-small-padding: 0 8px;
+}
+
+/* 特殊尺寸类名 */
+.btn-block-custom { width: 345px; height: 48px; border-radius: 999px; }
+.btn-bottom-custom { width: 162px; height: 44px; border-radius: 999px; }</pre>
+                    </div>
+                </div>
+
+             </section>
+        </div>
+
+        <!-- 1.8 IP吉祥物 -->
+        <div id="ip-mascot" class="scroll-mt-6 mb-12" v-show="isSectionVisible('ip-mascot')">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">IP吉祥物</h3>
+            <section class="bg-white p-6 rounded-xl border border-gray-200">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                    <div v-for="mascot in data.ipMascots" :key="mascot.name" class="flex flex-col items-center group">
+                        <div class="relative w-[240px] h-[240px] bg-gray-50 rounded-xl overflow-hidden border border-gray-100 flex items-center justify-center cursor-zoom-in group-hover:shadow-lg transition-all duration-300"
+                             @click="showImagePreview(mascot)">
+                            <img :src="'../IP-IMG/' + mascot.file" :alt="mascot.name" class="max-w-[80%] max-h-[80%] object-contain transition-transform duration-300 group-hover:scale-110">
+                            
+                            <!-- Overlay with Download Button -->
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                                <a :href="'../IP-IMG/' + mascot.file" :download="mascot.file" @click.stop class="bg-white text-gray-800 px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-100 flex items-center gap-2 shadow-lg transform transition-transform hover:scale-105">
+                                    <i class="ri-download-line text-lg"></i> 下载原图
+                                </a>
+                            </div>
+                        </div>
+                        <div class="mt-5 text-center">
+                            <div class="text-[18px] font-bold text-gray-800 leading-tight">{{ mascot.name }}</div>
+                            <div class="text-xs text-gray-400 mt-1.5 font-mono bg-gray-50 px-2 py-0.5 rounded inline-block">{{ mascot.file }}</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+    </div>
+</div>
+
+<script src="../assets/js/data.js"></script>
+    <script>
+    const { createApp, ref, onMounted } = Vue;
+    const app = createApp({
+        setup() {
+            const data = ref({
+                colors: [],
+                typography: [],
+                shadows: [],
+                corners: [],
+                spacings: [],
+                commonIcons: [],
+                customIcons: []
+            });
+            const isEditMode = ref(false);
+            const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000' : '';
+            const activeSection = ref('');
+
+            const dataSource = ref('Initializing...');
+            
+            // Demo Data for Spacing Section
+            const demoActive = ref(0);
+            const demoListData = ref([
+                { title: '标题文本', value: '文本内容' },
+                { title: '弱化文本', value: '文本内容' },
+                { title: '标题文本', value: '中度文本长度内容中度文本...' },
+            ]);
+            
+            // Icon Selection
+            const selectedIcons = ref([]);
+
+            const toggleSelection = (icon) => {
+                const index = selectedIcons.value.indexOf(icon);
+                if (index > -1) {
+                    selectedIcons.value.splice(index, 1);
+                } else {
+                    selectedIcons.value.push(icon);
+                }
+            };
+
+            const selectAll = () => {
+                if (!data.value.customIcons) return;
+                // Add all custom icons that are not already selected
+                data.value.customIcons.forEach(icon => {
+                    if (!selectedIcons.value.includes(icon)) {
+                        selectedIcons.value.push(icon);
+                    }
+                });
+            };
+
+            const deselectAll = () => {
+                selectedIcons.value = [];
+            };
+
+            const downloadIcons = async () => {
+                if (selectedIcons.value.length === 0) {
+                    vant.showToast('请先选择需要下载的图标');
+                    return;
+                }
+                
+                const zip = new JSZip();
+                let count = 0;
+                
+                // Process Custom Icons (SVG)
+                selectedIcons.value.forEach(icon => {
+                    // Try to find SVG symbol from iconfont.js injection
+                    const symbolId = `icon-${icon}`;
+                    const symbol = document.getElementById(symbolId);
+                    
+                    if (symbol) {
+                        const viewBox = symbol.getAttribute('viewBox') || '0 0 1024 1024';
+                        const innerHTML = symbol.innerHTML;
+                        const svgContent = `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="${viewBox}" version="1.1" xmlns="http://www.w3.org/2000/svg">
+${innerHTML}
+</svg>`;
+                        zip.file(`${icon}.svg`, svgContent);
+                        count++;
+                    } else {
+                        console.warn(`Symbol not found for icon: ${icon}`);
+                    }
+                });
+
+                if (count === 0) {
+                    vant.showFailToast('未找到选定图标的 SVG 源数据');
+                    return;
+                }
+
+                try {
+                    const content = await zip.generateAsync({ type: "blob" });
+                    const link = document.createElement("a");
+                    link.href = URL.createObjectURL(content);
+                    link.download = "ronghe_icons.zip";
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    vant.showSuccessToast(`成功导出 ${count} 个图标`);
+                } catch (e) {
+                    console.error('Zip generation failed:', e);
+                    vant.showFailToast('打包下载失败');
+                }
+            };
+
+            const { computed } = Vue;
+            
+            // Hash Handling
+            const parseHash = () => {
+                const hash = window.location.hash.slice(1);
+                console.log('Hash changed:', hash);
+                activeSection.value = hash || 'color'; // Default to color if empty
+            };
+
+            const isSectionVisible = (id) => {
+                // If activeSection is 'all', show everything (debug/fallback)
+                if (activeSection.value === 'all') return true;
+                // Strict match or loose match for safety
+                return activeSection.value === id || activeSection.value === '#' + id;
+            };
+            const isAllVisible = computed(() => activeSection.value === 'all');
+
+            const forceReload = () => {
+                window.location.reload();
+            };
+
+            const showImagePreview = (mascot) => {
+                vant.showImagePreview({
+                    images: ['../IP-IMG/' + mascot.file],
+                    closeable: true,
+                });
+            };
+
+            const copyText = (text) => {
+                const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+                vant.showToast({ message: '已复制', position: 'bottom' });
+            };
+
+            const fetchData = async () => {
+                try {
+                    const res = await fetch(`${API_BASE}/api/data`);
+                    if (res.ok) {
+                        const jsonData = await res.json();
+                        if (jsonData && jsonData.colors && jsonData.colors.length > 0) {
+                            data.value = jsonData;
+                            dataSource.value = 'API';
+                            window.parent.postMessage({ type: 'frameLoaded' }, '*');
+                        } else {
+                            console.warn('API data incomplete, using fallback');
+                            throw new Error('Incomplete data');
+                        }
+                    } else {
+                        throw new Error('API response not ok');
+                    }
+                } catch (e) {
+                    console.warn('Fetch failed or rejected:', e);
+                    if (window.RongHeData && window.RongHeData.colors && window.RongHeData.colors.length > 0) {
+                        data.value = window.RongHeData;
+                        dataSource.value = 'Fallback JS';
+                    } else {
+                        dataSource.value = 'Error: No Data Available';
+                        vant.showFailToast('数据加载失败，请联系管理员');
+                    }
+                }
+            };
+
+            const saveData = async () => {
+                if (!data.value || !data.value.colors || data.value.colors.length === 0) {
+                    vant.showFailToast('当前数据为空，禁止保存！');
+                    return;
+                }
+                try {
+                    const res = await fetch(`${API_BASE}/api/data`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data.value)
+                    });
+                    if (res.ok) {
+                        vant.showSuccessToast('保存成功');
+                    } else {
+                        const errText = await res.text();
+                        vant.showFailToast('保存失败: ' + (errText || res.statusText));
+                    }
+                } catch (e) {
+                    vant.showFailToast('保存出错: ' + e.message);
+                    console.error('Save error:', e);
+                }
+            };
+
+            const exitEdit = () => {
+                window.parent.postMessage({ type: 'requestExitEdit' }, '*');
+            };
+
+            const resetData = () => {
+                vant.showConfirmDialog({ title: '确认重置', message: '将放弃当前未保存的修改，重新加载数据？' })
+                    .then(() => {
+                        fetchData();
+                        vant.showSuccessToast('已重置');
+                    });
+            };
+
+            onMounted(() => {
+                parseHash();
+                window.addEventListener('hashchange', parseHash);
+                fetchData();
+                window.addEventListener('message', (event) => {
+                    if (event.data) {
+                        if (event.data.type === 'editMode') {
+                            isEditMode.value = event.data.value;
+                        } else if (event.data.type === 'navigate') {
+                            // Backup navigation handler
+                            console.log('Navigate message received:', event.data.id);
+                            activeSection.value = event.data.id;
+                        }
+                    }
+                });
+            });
+
+            return {
+                data,
+                isEditMode,
+                isSectionVisible,
+                isAllVisible,
+                activeSection, // Expose for template
+                dataSource,    // Expose for template
+                forceReload,   // Expose
+                demoActive, demoListData, // Spacing Demo
+                selectedIcons, toggleSelection, selectAll, deselectAll, downloadIcons, // Icon Download
+                showImagePreview, // IP Mascot Preview
+                copyText,
+                saveData,
+                resetData,
+                exitEdit
+            };
+        }
+    });
+    app.use(vant);
+    app.mount('#app');
+</script>
+</body>
+</html>

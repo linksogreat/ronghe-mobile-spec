@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>融和移动端 UI 设计规范 (Vant 4)</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="assets/lib/js/tailwind.min.js"></script>
+    
+    <!-- Vue 3 -->
+    <script src="assets/lib/js/vue.global.min.js"></script>
+
+    <!-- Vant 4 -->
+    <link rel="stylesheet" href="assets/lib/css/vant.min.css">
+    <script src="assets/lib/js/vant.min.js"></script>
+
+    <!-- Remix Icon -->
+    <link href="assets/lib/css/remixicon.css" rel="stylesheet">
+
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', sans-serif; }
+        .nav-group-title {
+            font-size: 12px;
+            color: #969799;
+            padding: 16px 12px 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .nav-item {
+            font-size: 13px;
+            color: #646566;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+            text-decoration: none;
+        }
+        .nav-item:hover { background-color: #f7f8fa; color: #323233; }
+        .nav-item.active { background-color: #eef2ff; color: #0088FF; font-weight: 600; }
+        
+        iframe { width: 100%; height: 100%; border: none; }
+        
+        /* Loading State */
+        #app-loading {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff; z-index: 9999; display: flex; justify-content: center; align-items: center;
+            flex-direction: column; color: #666; font-size: 14px;
+        }
+        [v-cloak] { display: none !important; }
+        
+        /* Mobile Mockup Responsive Scale */
+        .mobile-mockup-wrapper {
+            transform-origin: center center;
+            transition: transform 0.3s ease;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden bg-white">
+
+    <!-- Loading -->
+    <div id="app-loading">
+        <svg class="animate-spin h-8 w-8 text-[#0088FF] mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span>加载资源中...</span>
+    </div>
+
+    <div id="app" v-cloak class="flex w-full h-full">
+        <!-- 登录弹窗 -->
+        <van-dialog v-model:show="showLoginDialog" title="管理员登录" show-cancel-button @confirm="handleLogin">
+            <div class="p-4">
+                <van-field v-model="loginPassword" type="password" placeholder="请输入密码" border></van-field>
+            </div>
+        </van-dialog>
+        <!-- 侧边导航 -->
+        <aside class="w-[260px] flex-shrink-0 border-r border-gray-200 flex flex-col h-full bg-white z-10">
+            <div class="p-6 border-b border-gray-100 flex-shrink-0 relative">
+                <h1 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <i class="ri-palette-fill text-[#0088FF]"></i>
+                    融和移动端规范
+                </h1>
+                <p class="text-xs text-gray-400 mt-2 pl-7">Vant 4 Design System</p>
+                
+                <!-- 登录入口 -->
+                <div class="absolute top-6 right-6 cursor-pointer text-gray-400 hover:text-[#0088FF] z-50 flex items-center gap-2">
+                    <div @click="openLogin" title="管理员登录">
+                        <i class="text-xl" :class="isEditMode ? 'ri-lock-unlock-fill text-[#0088FF]' : 'ri-lock-fill'"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="flex-1 overflow-y-auto px-3 py-2 space-y-1">
+                <template v-for="(group, gIndex) in navGroups" :key="gIndex">
+                    <div class="nav-group-title">{{ group.title }}</div>
+                    <div 
+                        v-for="item in group.items" 
+                        :key="item.id"
+                        class="nav-item"
+                        :class="{ 'active': currentId === item.id }"
+                        @click="handleNavClick(item)"
+                    >
+                        <span>{{ item.name }}</span>
+                    </div>
+                </template>
+            </nav>
+
+            <div class="p-4 border-t border-gray-100 text-xs text-center text-gray-400 flex-shrink-0">
+                &copy; 2024 Ronghe Mobile Spec
+            </div>
+        </aside>
+
+        <!-- 主内容区 (Iframe) -->
+        <main class="flex-1 h-full bg-[#F7F8FA] relative flex">
+            <div class="flex-1 h-full relative border-r border-gray-200">
+                <iframe id="content-frame" :src="currentUrl" name="content-frame" title="Content Frame"></iframe>
+            </div>
+            
+            <!-- 手机样机预览区 -->
+            <div class="w-[420px] bg-[#F0F2F5] flex-shrink-0 flex items-center justify-center p-6 overflow-hidden">
+                <div class="mobile-mockup-wrapper w-[375px] h-[812px] bg-white rounded-[40px] shadow-2xl border-[8px] border-gray-900 relative overflow-hidden ring-4 ring-gray-200 flex-shrink-0">
+                    <!-- 顶部刘海 -->
+                    <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-40 h-7 bg-gray-900 rounded-b-2xl z-50"></div>
+                    <!-- 预览 iframe -->
+                    <iframe id="mobile-frame" src="pages/mobile_preview.html" class="w-full h-full bg-white"></iframe>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const { createApp, ref, onMounted, provide } = Vue;
+
+        const app = createApp({
+            setup() {
+                const currentId = ref('color');
+                const currentUrl = ref('pages/1_style.html#color');
+                const showLoginDialog = ref(false);
+                const loginPassword = ref('');
+                const isEditMode = ref(false);
+
+                // 移除 Loading 状态
+                onMounted(() => {
+                    const loading = document.getElementById('app-loading');
+                    if (loading) loading.style.display = 'none';
+                    
+                    // 检查本地存储
+                    if (localStorage.getItem('ronghe_edit_mode') === 'true') {
+                        isEditMode.value = true;
+                        notifyEditMode(true);
+                    }
+                });
+
+                const handleLogout = () => {
+                    vant.showConfirmDialog({
+                        title: '退出编辑模式',
+                        message: '确定要退出编辑模式吗？'
+                    }).then(() => {
+                        isEditMode.value = false;
+                        localStorage.removeItem('ronghe_edit_mode');
+                        notifyEditMode(false);
+                        vant.showSuccessToast('已退出编辑模式');
+                    }).catch(() => {});
+                };
+
+                const openLogin = () => {
+                    if (isEditMode.value) {
+                        handleLogout();
+                    } else {
+                        // 尝试从缓存读取密码
+                        const cachedPassword = localStorage.getItem('admin_password');
+                        if (cachedPassword) {
+                            loginPassword.value = cachedPassword;
+                        } else {
+                            // 确保如果没有缓存，清空输入框
+                            loginPassword.value = '';
+                        }
+                        showLoginDialog.value = true;
+                    }
+                };
+
+                const handleLogin = () => {
+                    if (loginPassword.value === 'Rong@123') {
+                        isEditMode.value = true;
+                        localStorage.setItem('ronghe_edit_mode', 'true');
+                        // 登录成功后缓存密码
+                        localStorage.setItem('admin_password', loginPassword.value);
+                        vant.showSuccessToast('已进入编辑模式');
+                        notifyEditMode(true);
+                        // 登录成功后不立即清空密码，以便下次打开时使用缓存值（或者可以在 openLogin 时再清空非缓存值，但这里为了逻辑简单保留缓存值在内存中也没问题，openLogin 会重置）
+                        // loginPassword.value = ''; // 移除这行，或者在 close 时清空
+                    } else {
+                        vant.showFailToast('密钥错误');
+                        isEditMode.value = false; // Ensure strictly
+                        localStorage.removeItem('ronghe_edit_mode');
+                        notifyEditMode(false);
+                        loginPassword.value = ''; // 失败时清空
+                    }
+                };
+
+                // 通知所有 iframe 编辑模式变更
+                const notifyEditMode = (mode) => {
+                    const contentFrame = document.getElementById('content-frame');
+                    if (contentFrame && contentFrame.contentWindow) {
+                        contentFrame.contentWindow.postMessage({ type: 'editMode', value: mode }, '*');
+                    }
+                };
+                
+                // 监听 iframe 消息
+                window.addEventListener('message', (event) => {
+                    if (!event.data) return;
+
+                    if (event.data.type === 'frameLoaded') {
+                        // 子页面主动报告加载完成
+                        notifyEditMode(isEditMode.value);
+                        // 如果有当前选中的 ID，也发送导航消息（用于修正 hash 状态）
+                        if (currentId.value) {
+                            const contentFrame = document.getElementById('content-frame');
+                            if (contentFrame && contentFrame.contentWindow) {
+                                contentFrame.contentWindow.postMessage({ type: 'navigate', id: currentId.value }, '*');
+                            }
+                        }
+                    } else if (event.data.type === 'requestExitEdit') {
+                        handleLogout();
+                    }
+                });
+
+                const navGroups = [
+                    { 
+                        title: '1. 样式规范', 
+                        items: [ 
+                            { id: 'color', name: '1.1 色彩', url: 'pages/1_style.html#color' }, 
+                            { id: 'words', name: '1.2 字体', url: 'pages/1_style.html#words' }, 
+                            { id: 'shadow', name: '1.3 投影', url: 'pages/1_style.html#shadow' }, 
+                            { id: 'corners', name: '1.4 圆角', url: 'pages/1_style.html#corners' }, 
+                            { id: 'spacing', name: '1.5 间距', url: 'pages/1_style.html#spacing' }, 
+                            { id: 'icons', name: '1.6 图标', url: 'pages/1_style.html#icons' },
+                            { id: 'buttons', name: '1.7 按钮', url: 'pages/1_style.html#buttons' },
+                            { id: 'grid', name: '1.8 栅格', url: 'pages/2_layout.html#grid' }, 
+                            { id: 'layout', name: '1.9 布局', url: 'pages/2_layout.html#layout' },
+                            { id: 'ip-mascot', name: '1.10 IP吉祥物', url: 'pages/1_style.html#ip-mascot' }
+                        ] 
+                    },
+                    { 
+                        title: '2. 常规类', 
+                        items: [ 
+                            { id: 'button', name: '2.1 按钮', url: 'pages/3_components.html#button' }, 
+                            { id: 'search', name: '2.2 搜索', url: 'pages/3_components.html#search' }, 
+                            { id: 'popover', name: '2.3 气泡弹出框', url: 'pages/3_components.html#popover' } 
+                        ] 
+                    },
+                    { 
+                        title: '3. 数据录入', 
+                        items: [ 
+                            { id: 'field', name: '3.1 输入框', url: 'pages/3_components.html#field' }, 
+                            { id: 'radio', name: '3.2 选择框', url: 'pages/3_components.html#radio' },
+                            { id: 'uploader', name: '3.3 文件/图片上传', url: 'pages/3_components.html#uploader' }, 
+                            { id: 'picker', name: '3.4 基础选择器', url: 'pages/3_components.html#picker' }, 
+                            { id: 'cascader', name: '3.5 级联选择器', url: 'pages/3_components.html#cascader' }, 
+                            { id: 'treeselect', name: '3.6 分类分组选择器', url: 'pages/3_components.html#treeselect' }, 
+                            { id: 'datetime', name: '3.7 时间选择器', url: 'pages/3_components.html#datetime' }, 
+                            { id: 'calendar', name: '3.8 日历选择器', url: 'pages/3_components.html#calendar' }, 
+                            { id: 'actionsheet', name: '3.9 上拉菜单', url: 'pages/3_components.html#actionsheet' }, 
+                            { id: 'dropdown', name: '3.10 下拉菜单', url: 'pages/3_components.html#dropdown' }, 
+                            { id: 'stepper', name: '3.11 步进器', url: 'pages/3_components.html#stepper' }, 
+                            { id: 'keyboard', name: '3.12 数字键盘', url: 'pages/3_components.html#keyboard' }
+                        ] 
+                    },
+                    { 
+                        title: '4. 导航类', 
+                        items: [ 
+                            { id: 'navbar', name: '4.1 导航栏', url: 'pages/3_components.html#navbar' }, 
+                            { id: 'tab', name: '4.2 标签页', url: 'pages/3_components.html#tab' }, 
+                            { id: 'indexbar', name: '4.3 索引栏', url: 'pages/3_components.html#indexbar' }, 
+                            { id: 'sidebar', name: '4.4 侧边导航', url: 'pages/3_components.html#sidebar' }, 
+                            { id: 'tabbar', name: '4.5 标签栏', url: 'pages/3_components.html#tabbar' }, 
+                            { id: 'grid-nav', name: '4.6 宫格', url: 'pages/3_components.html#grid-nav' }, 
+                            { id: 'steps', name: '4.7 步骤条', url: 'pages/3_components.html#steps' }
+                        ] 
+                    },
+                    { 
+                        title: '5. 数据展示', 
+                        items: [ 
+                            { id: 'cell', name: '5.1 单元格', url: 'pages/3_components.html#cell' }, 
+                            { id: 'empty', name: '5.2 空状态', url: 'pages/3_components.html#empty' },
+                            { id: 'default-page', name: '5.3 缺省页', url: 'pages/3_components.html#default-page' },
+                            { id: 'image-preview', name: '5.4 图片预览', url: 'pages/3_components.html#image-preview' },
+                            { id: 'popup', name: '5.5 弹窗层', url: 'pages/3_components.html#popup' }
+                        ] 
+                    },
+                    { 
+                        title: '6. 弹窗组件', 
+                        items: [ 
+                            { id: 'dialog-modal', name: '6.1 对话弹窗', url: 'pages/3_components.html#dialog-modal' }, 
+                            { id: 'business-popup', name: '6.2 业务弹窗', url: 'pages/3_components.html#business-popup' }, 
+                            { id: 'drawer-popup', name: '6.3 抽屉弹窗', url: 'pages/3_components.html#drawer-popup' } 
+                        ] 
+                    },
+                    { 
+                        title: '7. 卡片样式', 
+                        items: [ 
+                            { id: 'card', name: '7.1 卡片', url: 'pages/3_components.html#card' } 
+                        ] 
+                    },
+                    { 
+                        title: '8. 蒙层引导页', 
+                        items: [ 
+                            { id: 'overlay-guide', name: '8.1 蒙层引导页', url: 'pages/3_components.html#overlay-guide' } 
+                        ] 
+                    },
+                    { 
+                        title: '9. 反馈', 
+                        items: [ 
+                            { id: 'dialog', name: '9.1 对话框', url: 'pages/3_components.html#dialog' }, 
+                            { id: 'toast', name: '9.2 轻提示', url: 'pages/3_components.html#toast' }, 
+                            { id: 'noticebar', name: '9.3 通知栏', url: 'pages/3_components.html#noticebar' }, 
+                            { id: 'overlay', name: '9.4 遮罩', url: 'pages/3_components.html#overlay' }, 
+                            { id: 'loading', name: '9.5 加载', url: 'pages/3_components.html#loading' }, 
+                            { id: 'pull-refresh', name: '9.6 下拉刷新', url: 'pages/3_components.html#pull-refresh' }, 
+                            { id: 'swipe-cell', name: '9.7 滑动单元格', url: 'pages/3_components.html#swipe-cell' } 
+                        ] 
+                    }
+                ];
+
+                const handleNavClick = (item) => {
+                    currentId.value = item.id;
+                    
+                    // 1. Update Content Frame
+                    const contentFrame = document.getElementById('content-frame');
+                    if (contentFrame) {
+                        // Check if we are staying on the same page but changing hash
+                        const currentSrc = contentFrame.contentWindow.location.href;
+                        const targetUrl = item.url;
+                        
+                        contentFrame.src = item.url;
+                        
+                        // Send explicit message to ensure update (especially for hash changes)
+                        contentFrame.contentWindow.postMessage({
+                            type: 'navigate',
+                            id: item.id
+                        }, '*');
+                    }
+
+                    // 2. Notify Mobile Frame
+                    const mobileFrame = document.getElementById('mobile-frame');
+                    if (mobileFrame && mobileFrame.contentWindow) {
+                        mobileFrame.contentWindow.postMessage({
+                            type: 'navigate',
+                            id: item.id
+                        }, '*');
+                    }
+                };
+
+                return {
+                    currentId,
+                    currentUrl,
+                    navGroups,
+                    handleNavClick,
+                    showLoginDialog,
+                    loginPassword,
+                    isEditMode,
+                    handleLogin,
+                    openLogin
+                };
+            }
+        });
+        
+        app.use(vant);
+        app.mount('#app');
+    </script>
+</body>
+</html>

@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>组件规范 - 融和移动端 UI</title>
+    <script src="../assets/lib/js/tailwind.min.js"></script>
+    <script src="../assets/lib/js/vue.global.min.js"></script>
+    <link rel="stylesheet" href="../assets/lib/css/vant.min.css" />
+    <script src="../assets/lib/js/vant.min.js"></script>
+    <link href="../assets/lib/css/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="../font_icon/iconfont.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        /* 覆盖一些在手机容器中不合适的样式 */
+        .demo-card { border: none; box-shadow: none; margin-bottom: 0; }
+        .demo-preview { padding: 0; min-height: auto; }
+        .van-nav-bar { position: sticky; top: 0; z-index: 100; }
+        
+        /* Demo Block Styles */
+        .van-doc-demo-block__title {
+            margin: 0;
+            padding: 20px 0 10px;
+            color: #969799;
+            font-weight: normal;
+            font-size: 14px;
+            line-height: 16px;
+        }
+        .demo-button-row {
+            margin-bottom: 12px;
+        }
+        .demo-button-row .van-button {
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body class="bg-[#F7F8FA]">
+
+<div id="app" v-cloak class="p-8">
+    <!-- 编辑模式控制栏 -->
+    <div v-if="isEditMode" class="fixed top-4 right-4 z-50 flex gap-2 animate-fade-in">
+        <van-button icon="cross" type="danger" size="small" @click="exitEdit">退出</van-button>
+        <van-button icon="replay" type="default" size="small" @click="resetData">重置</van-button>
+        <van-button icon="success" type="primary" size="small" @click="saveData">保存修改</van-button>
+    </div>
+
+    <div class="max-w-5xl mx-auto">
+        <!-- 头部：动态显示当前组件名称 -->
+        <header class="mb-8 pb-4 border-b border-gray-200" v-if="activeComponent">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">
+                <span v-if="!isEditMode">{{ activeComponent.name }}</span>
+                <input v-else v-model="activeComponent.name" class="border border-gray-300 rounded px-2 py-1">
+            </h2>
+            <p class="text-gray-500">组件规范文档与代码演示</p>
+        </header>
+        <header class="mb-8 pb-4 border-b border-gray-200" v-else>
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">组件规范</h2>
+            <p class="text-gray-500">请从左侧导航选择组件查看详情</p>
+        </header>
+
+        <!-- 单组件展示模式 -->
+        <div v-if="activeCompKey && componentsData[activeCompKey]" class="mb-12 animate-fade-in">
+            <!-- 上半部分：演示与规约 -->
+            <div class="mb-10">
+                <!-- 左侧：规约 -->
+                <div class="space-y-6">
+                    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                        <h3 class="font-bold text-gray-800 mb-4 flex items-center justify-between">
+                            <div class="flex items-center"><i class="ri-file-list-3-line mr-2 text-[#0088FF]"></i>设计规约</div>
+                            <van-button v-if="isEditMode" size="mini" icon="plus" type="primary" plain @click="addRule">添加</van-button>
+                        </h3>
+                        <div v-if="componentsData[activeCompKey].rules && componentsData[activeCompKey].rules.length" class="text-sm text-gray-600 space-y-3 leading-relaxed">
+                            <div v-for="(rule, rIndex) in componentsData[activeCompKey].rules" :key="rIndex" class="relative group">
+                                <p v-if="!isEditMode" v-html="rule" class="flex items-start gap-2">
+                                    <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-gray-300 flex-shrink-0"></span>
+                                    <span>{{ rule.replace(/<[^>]+>/g, '') }}</span>
+                                </p>
+                                <div v-else class="flex gap-2 items-start mb-2">
+                                    <textarea v-model="componentsData[activeCompKey].rules[rIndex]" class="w-full border border-gray-300 rounded p-2 text-xs" rows="3"></textarea>
+                                    <van-button size="mini" icon="cross" type="danger" plain @click="removeRule(rIndex)"></van-button>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-else class="text-gray-400 text-sm italic">暂无特殊设计规约</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 下半部分：代码展示 (浅灰色底) -->
+            <div class="space-y-6">
+                <h3 class="font-bold text-gray-800 border-l-4 border-[#0088FF] pl-3">代码示例</h3>
+                
+                <div v-for="(demo, dIndex) in componentsData[activeCompKey].demos" :key="dIndex" class="group relative mb-6">
+                    <!-- Title Edit -->
+                    <div class="mb-2" v-if="isEditMode">
+                        <label class="text-xs text-gray-400">示例标题</label>
+                        <input v-model="demo.title" class="w-full border border-gray-300 rounded px-2 py-1 text-sm">
+                    </div>
+
+                    <div class="absolute right-4 top-4 opacity-0 group-hover:opacity-100 transition-opacity" v-if="!isEditMode">
+                        <button @click="copyText(demo.code || demo.template || demo.html)" class="bg-white text-gray-600 hover:text-[#0088FF] shadow-sm border border-gray-200 rounded px-3 py-1 text-xs flex items-center gap-1">
+                            <i class="ri-file-copy-line"></i> 复制代码
+                        </button>
+                    </div>
+                    
+                    <div class="bg-[#F5F7FA] rounded-xl border border-gray-200 overflow-hidden">
+                        <div class="px-4 py-2 border-b border-gray-200 bg-[#EBEDF0] text-xs text-gray-500 font-mono flex justify-between">
+                            <span>{{ demo.title || 'Example' }}</span>
+                            <span>{{ demo.type === 'vue' ? 'Vue Template' : 'HTML' }}</span>
+                        </div>
+                        
+                        <!-- Read Mode -->
+                        <div v-if="!isEditMode" class="p-4 overflow-x-auto">
+                            <pre class="text-sm font-mono text-gray-700 leading-relaxed"><code>{{ formatCode(demo.code || demo.template || demo.html || '<!-- No code available -->') }}</code></pre>
+                        </div>
+
+                        <!-- Edit Mode -->
+                        <div v-else class="p-4 space-y-4">
+                            <!-- Template/HTML/Code -->
+                            <div>
+                                <label class="text-xs text-gray-400 block mb-1">Template / HTML</label>
+                                <textarea v-if="demo.template" v-model="demo.template" class="w-full border border-gray-300 rounded p-2 text-xs font-mono h-32"></textarea>
+                                <textarea v-else-if="demo.html" v-model="demo.html" class="w-full border border-gray-300 rounded p-2 text-xs font-mono h-32"></textarea>
+                                <textarea v-else-if="demo.code" v-model="demo.code" class="w-full border border-gray-300 rounded p-2 text-xs font-mono h-32"></textarea>
+                            </div>
+
+                            <!-- Vue Setup (only for vue type) -->
+                            <div v-if="demo.type === 'vue'">
+                                <label class="text-xs text-gray-400 block mb-1">Setup Function (JS)</label>
+                                <textarea v-model="demo.setupStr" class="w-full border border-gray-300 rounded p-2 text-xs font-mono h-32"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 空状态 -->
+        <div v-else class="flex flex-col items-center justify-center h-[60vh] text-gray-400">
+            <i class="ri-layout-masonry-line text-6xl mb-4 text-gray-200"></i>
+            <p>选择左侧组件以查看详情</p>
+        </div>
+
+    </div>
+
+    <!-- Global Popups -->
+    <van-popup v-model:show="state.showPopup" :position="state.popupPosition" :style="{ padding: '40px', width: state.popupPosition === 'center'?'80%':'100%' }"><div class="text-center">内容区域</div></van-popup>
+    <van-calendar v-model:show="state.showCalendar" @confirm="onCalendarConfirm" />
+    <van-action-sheet v-model:show="state.showActionSheet" :actions="[{ name: '选项一' }, { name: '选项二' }]" cancel-text="取消" />
+    <van-popup v-model:show="state.showTimePicker" position="bottom"><van-time-picker v-model="state.currentTime" title="选择时间" @confirm="onTimeConfirm" @cancel="state.showTimePicker = false" /></van-popup>
+    <van-popup v-model:show="state.showDatePicker" position="bottom"><van-date-picker v-model="state.currentDate" title="选择日期" @confirm="onDateConfirm" @cancel="state.showDatePicker = false" /></van-popup>
+    <van-popup v-model:show="state.showCascader" round position="bottom"><van-cascader v-model="state.cascaderValue" title="请选择所在地区" :options="state.cascaderOptions" @close="state.showCascader = false" @finish="onCascaderFinish" /></van-popup>
+
+</div>
+
+<script src="../assets/js/components.js"></script>
+<script>
+    const { createApp, reactive, ref, computed, onMounted } = Vue;
+    const app = createApp({
+        setup() {
+            const sections = {
+                'common': { title: '常规类', items: ['button', 'search', 'popover'] },
+                'entry': { title: '数据录入', items: ['field', 'radio', 'uploader', 'picker', 'cascader', 'treeselect', 'datetime', 'calendar', 'actionsheet', 'dropdown', 'stepper', 'keyboard'] },
+                'nav': { title: '导航类', items: ['navbar', 'tab', 'indexbar', 'sidebar', 'tabbar', 'grid-nav', 'steps'] },
+                'display': { title: '数据展示', items: ['cell', 'ip-mascot', 'empty', 'default-page', 'image-preview', 'popup'] },
+                'popup': { title: '弹窗组件', items: ['dialog-modal', 'business-popup', 'drawer-popup'] },
+                'card': { title: '卡片样式', items: ['card'] },
+                'guide': { title: '蒙层引导页', items: ['overlay-guide'] },
+                'feedback': { title: '反馈', items: ['dialog', 'toast', 'noticebar', 'overlay', 'loading', 'pull-refresh', 'swipe-cell'] }
+            };
+
+            const activeCompKey = ref('');
+            
+            // 解析 URL Hash 获取当前组件
+            const parseHash = () => {
+                const hash = window.location.hash.replace('#', '');
+                if (hash && window.RongHeComponents[hash]) {
+                    activeCompKey.value = hash;
+                }
+            };
+
+            const isEditMode = ref(false);
+            const componentsData = reactive(window.RongHeComponents);
+            
+            // Auto-detect API base URL
+            const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000' : '';
+
+            // Listen for messages from parent
+            window.addEventListener('message', (event) => {
+                if (event.data && event.data.type === 'editMode') {
+                    isEditMode.value = event.data.value;
+                }
+            });
+
+            // Helper to revive functions from strings
+            const reviveFunctions = (data) => {
+                Object.values(data).forEach(comp => {
+                    if (comp.demos) {
+                        comp.demos.forEach(demo => {
+                            if (demo.type === 'vue') {
+                                // 1. Generate string from function if missing
+                                if (demo.setup && !demo.setupStr) {
+                                    demo.setupStr = demo.setup.toString();
+                                }
+                                // 2. Revive function from string if missing
+                                if (demo.setupStr && !demo.setup) {
+                                    try {
+                                        // Be careful with eval/Function in production, but acceptable for local tool
+                                        // Assuming setupStr is "() => { ... }" or "function() { ... }"
+                                        // OR if it starts with "return" or "{", treat as function body
+                                        let fn;
+                                        const str = demo.setupStr.trim();
+                                        if (str.startsWith('return') || str.startsWith('{')) {
+                                            fn = new Function(demo.setupStr);
+                                        } else {
+                                            fn = new Function('return ' + demo.setupStr)();
+                                        }
+                                        demo.setup = fn;
+                                    } catch (e) {
+                                        console.error('Failed to revive setup function:', e);
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+                return data;
+            };
+
+            // Data Persistence
+            const loadData = async () => {
+                try {
+                    // First ensure initial data has strings
+                    reviveFunctions(componentsData);
+                    
+                    const res = await fetch(`${API_BASE}/api/components`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        const revivedData = reviveFunctions(data);
+                        Object.assign(componentsData, revivedData);
+                    }
+                } catch (e) {
+                    console.warn('Failed to load remote data, using local defaults', e);
+                }
+            };
+
+            const saveData = async () => {
+                try {
+                    // Ensure strings are up to date before saving
+                    reviveFunctions(componentsData);
+
+                    const res = await fetch(`${API_BASE}/api/components`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(componentsData)
+                    });
+                    
+                    if (res.ok) {
+                        vant.showSuccessToast('保存成功');
+                    } else {
+                        const errText = await res.text();
+                        vant.showFailToast('保存失败: ' + (errText || res.statusText));
+                        console.error('Save failed:', errText);
+                    }
+                } catch (e) {
+                    vant.showFailToast('保存出错: ' + e.message);
+                    console.error('Save error:', e);
+                }
+            };
+
+            const resetData = async () => {
+                vant.showConfirmDialog({
+                    title: '确认重置',
+                    message: '确定要重置所有更改吗？这将重新加载服务器数据。'
+                }).then(() => {
+                    loadData();
+                    vant.showSuccessToast('已重置');
+                }).catch(() => {});
+            };
+
+            const addRule = () => {
+                if (!activeCompKey.value) return;
+                const comp = componentsData[activeCompKey.value];
+                if (!comp.rules) comp.rules = [];
+                comp.rules.push('新规约内容');
+            };
+
+            const removeRule = (index) => {
+                if (!activeCompKey.value) return;
+                const comp = componentsData[activeCompKey.value];
+                if (comp.rules) comp.rules.splice(index, 1);
+            };
+
+            const exitEdit = () => {
+                isEditMode.value = false;
+                window.parent.postMessage({ type: 'requestExitEdit' }, '*');
+            };
+
+            onMounted(() => {
+                parseHash();
+                window.addEventListener('hashchange', parseHash);
+                loadData();
+            });
+
+            const activeComponent = computed(() => {
+                return activeCompKey.value ? window.RongHeComponents[activeCompKey.value] : null;
+            });
+
+            const formatCode = (code) => {
+                if (!code) return '';
+                return code.trim();
+            };
+
+            const state = reactive({
+                activeTab: 0, activeStep: 1, activeCollapse: ['1'],
+                dropdownVal1: 0, dropdownOpt1: [{ text: '全部商品', value: 0 }, { text: '新款商品', value: 1 }],
+                switchVal: true, radioVal: '1', checkVal: ['a'], rateVal: 3, sliderVal: 50, stepperVal: 1, pageNum: 1,
+                searchVal: '', showPopover: false, activeSidebar: 0, activeTabbar: 0,
+                showPopup: false, popupPosition: 'center', showCalendar: false, showActionSheet: false,
+                showTimePicker: false, showDatePicker: false, currentTime: ['12', '00'], currentDate: ['2023', '01', '01'],
+                showCascader: false, cascaderValue: '', cascaderOptions: [{ text: '浙江省', value: '330000', children: [{ text: '杭州市', value: '330100' }] }],
+                treeActiveId: 1, treeActiveIndex: 0, treeItems: [{ text: '分组 1', children: [{ text: '杭州', id: 1 }, { text: '温州', id: 2 }] }, { text: '分组 2', children: [{ text: '宁波', id: 3 }] }],
+                showKeyboard: false,
+                fileList: [
+                    { url: 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%22100%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23eeeeee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22sans-serif%22%20font-size%3D%2214%22%20fill%3D%22%23999%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3EImage%3C%2Ftext%3E%3C%2Fsvg%3E' },
+                    { url: 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%22100%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23eeeeee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22sans-serif%22%20font-size%3D%2214%22%20fill%3D%22%23999%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3EImage%3C%2Ftext%3E%3C%2Fsvg%3E', isImage: true },
+                ]
+            });
+
+            const copyText = (text) => {
+                const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+                vant.showToast({ message: '已复制', position: 'bottom' });
+            };
+
+            const defineDemoComponent = (demo) => {
+                return {
+                    template: demo.template,
+                    setup() {
+                        return demo.setup ? demo.setup() : {};
+                    }
+                };
+            };
+
+            const triggerAction = (btn) => {
+                const { action } = btn;
+                if(action === 'dialog-alert') vant.showDialog({ title: '提示', message: '这是一个模态弹窗' });
+                if(action === 'dialog-confirm') vant.showConfirmDialog({ title: '确认', message: '是否确认删除？' });
+                if(action === 'toast-success') vant.showSuccessToast('操作成功');
+                if(action === 'toast-loading') vant.showToast({ type: 'loading', message: '加载中...', forbidClick: true });
+                if(action === 'popup-top') { state.popupPosition = 'top'; state.showPopup = true; }
+                if(action === 'popup-center') { state.popupPosition = 'center'; state.showPopup = true; }
+                if(action === 'calendar') state.showCalendar = true;
+                if(action === 'actionsheet') state.showActionSheet = true;
+                if(action === 'time-picker') state.showTimePicker = true;
+                if(action === 'date-picker') state.showDatePicker = true;
+            };
+
+            const onCalendarConfirm = (date) => { state.showCalendar = false; vant.showToast(`已选: ${date.getDate()}号`); };
+            const onTimeConfirm = ({ selectedValues }) => { state.showTimePicker = false; vant.showToast(`时间: ${selectedValues.join(':')}`); };
+            const onDateConfirm = ({ selectedValues }) => { state.showDatePicker = false; vant.showToast(`日期: ${selectedValues.join('-')}`); };
+            const onCascaderFinish = ({ selectedOptions }) => { state.showCascader = false; state.cascaderValue = selectedOptions.map((option) => option.text).join('/'); };
+            const onInput = (val) => vant.showToast('输入：' + val);
+            const onDelete = () => vant.showToast('删除');
+            const onSubmit = () => vant.showToast('点击提交');
+
+            return {
+                componentsData,
+                components: componentsData, // Alias for template compatibility
+                sections,
+                state,
+                activeCompKey, activeComponent, formatCode,
+                copyText, triggerAction, defineDemoComponent,
+                onCalendarConfirm, onTimeConfirm, onDateConfirm, onCascaderFinish, onInput, onDelete, onSubmit,
+                isEditMode, saveData, resetData, addRule, removeRule, exitEdit
+            };
+        }
+    });
+    app.use(vant);
+    app.mount('#app');
+</script>
+</body>
+</html>

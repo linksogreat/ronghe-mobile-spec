@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>业务模版 - 融和移动端 UI</title>
+    <script src="../assets/lib/js/tailwind.min.js"></script>
+    <script src="../assets/lib/js/vue.global.min.js"></script>
+    <link rel="stylesheet" href="../assets/lib/css/vant.min.css" />
+    <script src="../assets/lib/js/vant.min.js"></script>
+    <link href="../assets/lib/css/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="bg-[#F7F8FA]">
+
+<div id="app" v-cloak class="p-8">
+    <div class="max-w-5xl mx-auto">
+        <header class="mb-8 pb-4 border-b border-gray-200">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">业务模版</h2>
+            <p class="text-gray-500">常用业务场景的页面模版。</p>
+        </header>
+
+        <section class="space-y-8">
+            <div v-for="(template, key) in templates" :key="key" :id="key" class="demo-card scroll-mt-6">
+                <div class="border-b border-gray-100 px-5 py-3 bg-gray-50/50 flex justify-between items-center">
+                    <h3 class="font-bold text-gray-700 text-sm">{{ template.name }}</h3>
+                    <span class="text-xs text-gray-400">Template Demo</span>
+                </div>
+                
+                <div class="demo-preview bg-gray-100">
+                    <!-- Static HTML Render -->
+                    <div v-if="template.demos[0]" v-html="template.demos[0].html" class="w-full max-w-sm mx-auto shadow-lg"></div>
+                </div>
+
+                <div class="code-area group">
+                    <button @click="copyText(template.demos[0].html)" class="absolute top-2 right-2 text-xs text-gray-500 hover:text-white bg-gray-800 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">Copy HTML</button>
+                    <pre class="code-content">{{ template.demos[0].html }}</pre>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</div>
+
+<script src="../assets/js/components.js"></script>
+<script>
+    const { createApp } = Vue;
+    const app = createApp({
+        setup() {
+            const templates = {
+                'login': window.RongHeComponents['login-template'],
+                'approval': window.RongHeComponents['approval-template']
+            };
+
+            const copyText = (text) => {
+                const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+                vant.showToast({ message: '已复制', position: 'bottom' });
+            };
+
+            return { templates, copyText };
+        }
+    });
+    app.use(vant);
+    app.mount('#app');
+</script>
+</body>
+</html>

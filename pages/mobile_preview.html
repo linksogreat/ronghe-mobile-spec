@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>Mobile Preview</title>
+    
+    <script src="../assets/lib/js/tailwind.min.js"></script>
+    <script src="../assets/lib/js/vue.global.min.js"></script>
+    <link rel="stylesheet" href="../assets/lib/css/vant.min.css" />
+    <script src="../assets/lib/js/vant.min.js"></script>
+    <link href="../assets/lib/css/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="../font_icon/iconfont.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    
+    <style>
+        body { background-color: #F7F8FA; }
+        .mobile-section {
+            min-height: 100vh;
+            padding-bottom: 40px;
+            display: none; /* 默认隐藏所有部分，只显示当前激活的 */
+        }
+        .mobile-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        .component-demo {
+            margin-bottom: 16px;
+            background: #fff;
+            padding: 16px;
+        }
+        .demo-title {
+            font-size: 14px;
+            color: #969799;
+            margin-bottom: 16px;
+            padding-left: 16px;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* 覆盖一些在手机容器中不合适的样式 */
+        .demo-card { border: none; box-shadow: none; margin-bottom: 0; }
+        .demo-preview { padding: 0; min-height: auto; }
+        .van-nav-bar { position: sticky; top: 0; z-index: 100; }
+        
+        /* Demo Block Styles */
+        .van-doc-demo-block__title {
+            margin: 0;
+            padding: 20px 0 10px;
+            color: #969799;
+            font-weight: normal;
+            font-size: 14px;
+            line-height: 16px;
+        }
+        .demo-button-row {
+            margin-bottom: 12px;
+        }
+        .demo-button-row .van-button {
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app" v-cloak>
+    
+    <!-- 顶部状态栏模拟 -->
+    <div class="h-6 bg-white w-full flex justify-between items-center px-4 text-[10px] font-bold text-black sticky top-0 z-50 border-b border-gray-100">
+        <span>9:41</span>
+        <div class="flex gap-1">
+            <i class="ri-signal-wifi-fill"></i>
+            <i class="ri-battery-fill"></i>
+        </div>
+    </div>
+
+    <!-- 动态渲染组件演示区域 -->
+    <div class="pb-10">
+        <!-- 默认欢迎页 -->
+        <div id="welcome" class="mobile-section" :class="{ active: currentId === 'welcome' || !currentId }">
+            <div class="flex flex-col items-center justify-center h-[600px] text-gray-400">
+                <i class="ri-smartphone-line text-4xl mb-2"></i>
+                <p>请在左侧选择组件预览</p>
+            </div>
+        </div>
+
+        <!-- Spacing Demo (New) -->
+        <div id="spacing" class="mobile-section" :class="{ active: currentId === 'spacing' }">
+             <van-config-provider :theme-vars="{
+                cellFontSize: '14px',
+                cellLineHeight: '20px',
+                cellVerticalPadding: '8px',
+                cellHorizontalPadding: '16px',
+                tabLineHeight: '88px'
+            }">
+                <div class="spec-page relative h-full flex flex-col bg-[#f7f8fa] min-h-[750px]">
+                    
+                    <!-- Status Bar -->
+                    <header class="status-bar h-[88px] bg-white flex justify-between items-center px-4 shrink-0 relative z-10">
+                        <div class="time font-bold text-lg">12:00</div>
+                        <div class="icons flex gap-2 text-lg">
+                            <i class="ri-signal-wifi-fill"></i>
+                            <i class="ri-battery-fill"></i>
+                        </div>
+                        <div class="absolute right-2 top-2 text-[10px] text-red-400 opacity-60">H:88px</div>
+                    </header>
+
+                    <!-- Tabs -->
+                    <van-tabs v-model:active="state.demoActive" class="business-tabs shrink-0" color="#0052D9">
+                        <van-tab title="标题文本"></van-tab>
+                        <van-tab title="标题文本"></van-tab>
+                    </van-tabs>
+
+                    <!-- Main Content -->
+                    <main class="page-container px-4 flex-1 overflow-y-auto pb-[60px]">
+                        
+                        <!-- Section Title -->
+                        <div class="relative">
+                            <h3 class="section-title mt-[12px] mb-[8px] text-[15px] font-medium text-gray-800 border border-dashed border-transparent">
+                                标题文本区域
+                            </h3>
+                            <!-- MT:12px Marker -->
+                            <div class="absolute -top-[12px] left-1/2 -translate-x-1/2 h-[12px] w-px bg-red-400"></div>
+                            <span class="absolute -top-[12px] left-[52%] text-[10px] text-red-500 font-bold">12px</span>
+                        </div>
+
+                        <!-- Data Block -->
+                        <div class="relative mb-[16px]">
+                            <div class="data-highlight-area h-[82px] bg-[#ebedf0] rounded flex items-center justify-center text-[#646566]">
+                                数据强调区域
+                            </div>
+                            <!-- Height Marker -->
+                            <div class="absolute right-[-12px] top-0 h-full border-r border-red-400 flex items-center">
+                                <span class="text-[10px] text-red-500 font-bold rotate-90 whitespace-nowrap">82px</span>
+                            </div>
+                            <!-- Bottom Gap Marker (16px) -->
+                            <div class="absolute -bottom-[16px] left-1/2 w-px h-[16px] bg-red-400"></div>
+                            <span class="absolute -bottom-[14px] left-[52%] text-[10px] text-red-500 font-bold">16px</span>
+                        </div>
+
+                        <!-- List Section -->
+                        <div class="list-section relative">
+                            <van-cell 
+                                v-for="(item, index) in state.demoListData" 
+                                :key="index" 
+                                :title="item.title" 
+                                :value="item.value" 
+                                class="spec-cell !mb-[2px] !items-center !h-[36px]"
+                            />
+                            <!-- Item Gap Marker (2px) -->
+                            <div class="absolute top-[36px] left-[-8px] w-[4px] h-[2px] bg-red-400"></div>
+                            <span class="absolute top-[30px] left-[-24px] text-[10px] text-red-500 font-bold">2px</span>
+                        </div>
+
+                        <!-- Card Section -->
+                        <div class="card-section mt-[12px] relative">
+                            <!-- MT:12px Marker -->
+                            <div class="absolute -top-[12px] left-1/2 w-px h-[12px] bg-red-400"></div>
+                            <span class="absolute -top-[12px] left-[52%] text-[10px] text-red-500 font-bold">12px</span>
+
+                            <div class="business-card h-[100px] bg-white mb-[8px] rounded flex items-center pl-4 text-[#323233] relative border border-transparent">
+                                业务卡片区域
+                                <!-- Card Gap Marker (8px) -->
+                                <div class="absolute -bottom-[8px] left-8 w-px h-[8px] bg-red-400"></div>
+                                <span class="absolute -bottom-[8px] left-10 text-[10px] text-red-500 font-bold">8px</span>
+                            </div>
+                            <div class="business-card h-[100px] bg-white mb-[8px] rounded flex items-center pl-4 text-[#323233]">业务卡片区域</div>
+                        </div>
+
+                    </main>
+
+                    <!-- Bottom Bar -->
+                    <footer class="bottom-action-bar h-[60px] bg-[#ccc] flex items-center justify-center font-bold text-gray-700 absolute bottom-0 w-full z-20">
+                        操作栏 (Height: 60px)
+                    </footer>
+
+                </div>
+            </van-config-provider>
+        </div>
+
+        <!-- Buttons Demo (New) -->
+        <div id="buttons" class="mobile-section" :class="{ active: currentId === 'buttons' }">
+             <van-nav-bar title="按钮规范" left-arrow @click-left="onBack"></van-nav-bar>
+             
+             <!-- 尺寸演示 -->
+             <div class="p-4 space-y-6">
+                 <div class="text-sm text-gray-500 font-bold mb-2">尺寸标准</div>
+                 
+                 <!-- 大按钮 (Large) -->
+                 <div class="flex flex-col items-center gap-4 w-full">
+                     <!-- 胶囊型 -->
+                     <div class="flex flex-col items-center gap-1 w-full">
+                        <button class="bg-[#1989FA] text-white flex items-center justify-center font-medium transition-opacity active:opacity-80 mx-auto"
+                                style="width: 100%; height: 48px; border-radius: 999px; font-size: 16px;">
+                            大按钮 (胶囊 24px)
+                        </button>
+                        <span class="text-xs text-gray-400">主行动点 (亲和风格)</span>
+                     </div>
+                     
+                     <!-- 圆角矩形 -->
+                     <div class="flex flex-col items-center gap-1 w-full">
+                        <button class="bg-[#1989FA] text-white flex items-center justify-center font-medium transition-opacity active:opacity-80 mx-auto"
+                                style="width: 100%; height: 48px; border-radius: 4px; font-size: 16px;">
+                            大按钮 (圆角 4px)
+                        </button>
+                        <span class="text-xs text-gray-400">主行动点 (硬朗风格)</span>
+                     </div>
+                 </div>
+
+                 <!-- 置底按钮 -->
+                 <div class="flex flex-col items-center gap-2">
+                     <button class="bg-[#1989FA] text-white flex items-center justify-center font-medium transition-opacity active:opacity-80"
+                             style="width: 162px; height: 44px; border-radius: 999px; font-size: 16px;">
+                         置底按钮
+                     </button>
+                     <span class="text-xs text-gray-400">底部操作栏 (162x44)</span>
+                 </div>
+
+                 <!-- 中按钮 -->
+                 <div class="flex flex-col items-center gap-2">
+                     <button class="bg-[#1989FA] text-white flex items-center justify-center font-medium transition-opacity active:opacity-80"
+                             style="width: 74px; height: 32px; border-radius: 4px; font-size: 14px;">
+                         中按钮
+                     </button>
+                     <span class="text-xs text-gray-400">次级操作 (74x32)</span>
+                 </div>
+
+                 <!-- 小按钮 -->
+                 <div class="flex flex-col items-center gap-2">
+                     <button class="bg-[#1989FA] text-white flex items-center justify-center font-medium transition-opacity active:opacity-80"
+                             style="width: 54px; height: 24px; border-radius: 4px; font-size: 12px;">
+                         小按钮
+                     </button>
+                     <span class="text-xs text-gray-400">辅助操作 (54x24)</span>
+                 </div>
+             </div>
+
+             <!-- 类型演示 -->
+             <div class="p-4 space-y-4 border-t border-gray-100 mt-4">
+                 <div class="text-sm text-gray-500 font-bold mb-2">类型与状态</div>
+                 <div class="grid grid-cols-2 gap-4">
+                     <van-button type="primary" block>主要按钮</van-button>
+                     <van-button type="success" block>成功按钮</van-button>
+                     <van-button type="default" block>默认按钮</van-button>
+                     <van-button type="danger" block>危险按钮</van-button>
+                     <van-button type="warning" block>警告按钮</van-button>
+                     <van-button type="primary" disabled block>禁用状态</van-button>
+                     <van-button type="primary" loading block>加载状态</van-button>
+                 </div>
+             </div>
+        </div>
+
+        <!-- IP Mascot Demo (New) -->
+        <div id="ip-mascot" class="mobile-section" :class="{ active: currentId === 'ip-mascot' }">
+            <van-nav-bar title="IP吉祥物" left-arrow @click-left="onBack"></van-nav-bar>
+            
+            <div class="p-4 grid grid-cols-2 gap-4">
+                <div v-for="mascot in ipMascots" :key="mascot.name" class="flex flex-col items-center bg-white p-2 rounded shadow-sm">
+                    <div class="w-full aspect-square bg-gray-50 rounded flex items-center justify-center mb-2 overflow-hidden">
+                        <img :src="'../IP-IMG/' + mascot.file" :alt="mascot.name" class="max-w-full max-h-full object-contain">
+                    </div>
+                    <span class="text-xs text-gray-600 text-center truncate w-full">{{ mascot.name }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 遍历所有组件配置进行渲染 -->
+        <template v-for="(comp, key) in components" :key="key">
+            <div :id="key" class="mobile-section" :class="{ active: currentId === key }">
+                <!-- 模拟导航栏 -->
+                <van-nav-bar
+                    :title="comp.name"
+                    left-arrow
+                    @click-left="onBack"
+                ></van-nav-bar>
+                
+                <div class="p-4 space-y-4">
+                    <div v-for="(demo, dIndex) in comp.demos" :key="dIndex" class="bg-white rounded-lg p-4 shadow-sm">
+                        <div class="text-xs text-gray-400 mb-3 pb-2 border-b border-gray-50">{{ demo.title }}</div>
+                        
+                        <!-- 复用组件渲染逻辑 -->
+                        <!-- Action Buttons -->
+                        <div v-if="demo.type === 'action'" class="flex flex-wrap gap-2 justify-center">
+                            <van-button 
+                                v-for="btn in demo.actions" 
+                                :key="btn.text" 
+                                :type="btn.type || 'primary'" 
+                                :plain="btn.plain"
+                                :color="btn.color"
+                                size="small" 
+                                @click="triggerAction(btn)"
+                            >
+                                {{ btn.text }}
+                            </van-button>
+                        </div>
+
+                        <!-- Static HTML -->
+                        <div v-else-if="demo.type === 'static'" v-html="demo.html"></div>
+
+                        <!-- Simple Component -->
+                        <component 
+                            v-else-if="demo.type === 'simple'"
+                            :is="demo.component" 
+                            v-bind="demo.props"
+                        >{{ demo.text }}</component>
+
+                        <!-- Input Component -->
+                        <component
+                            v-else-if="demo.type === 'input'"
+                            :is="demo.component"
+                            v-bind="demo.props"
+                            v-model="state[demo.model]"
+                        ></component>
+
+                        <!-- Vue Component -->
+                        <div v-else-if="demo.type === 'vue'" class="w-full">
+                             <component :is="defineDemoComponent(demo)"></component>
+                        </div>
+
+                        <!-- Custom Components (Logic copied from components.js) -->
+                        <div v-else-if="demo.type === 'custom'" class="w-full">
+                            <!-- Search -->
+                            <van-search v-if="demo.id === 'search'" v-model="state.searchVal" placeholder="请输入搜索关键词" />
+                            <!-- Popover -->
+                            <div v-if="demo.id === 'popover'" class="text-center">
+                                <van-popover v-model:show="state.showPopover" :actions="[{ text: '选项一' }, { text: '选项二' }]">
+                                    <template #reference><van-button type="primary" size="small">点击弹出</van-button></template>
+                                </van-popover>
+                            </div>
+                            <!-- Tabs -->
+                            <van-tabs v-if="demo.id === 'tabs'" v-model:active="state.activeTab">
+                                <van-tab title="标签 1"><div class="p-4 text-center text-gray-400">内容 1</div></van-tab>
+                                <van-tab title="标签 2"><div class="p-4 text-center text-gray-400">内容 2</div></van-tab>
+                            </van-tabs>
+                            <!-- Steps -->
+                            <van-steps v-if="demo.id === 'steps'" :active="state.activeStep">
+                                <van-step>买家下单</van-step>
+                                <van-step>商家接单</van-step>
+                            </van-steps>
+                            <!-- Sidebar -->
+                            <div v-if="demo.id === 'sidebar'" class="flex h-32 border border-gray-100">
+                                <van-sidebar v-model="state.activeSidebar">
+                                    <van-sidebar-item title="标签名" />
+                                    <van-sidebar-item title="标签名" />
+                                </van-sidebar>
+                                <div class="p-4 text-sm text-gray-400">右侧内容</div>
+                            </div>
+                            <!-- Tabbar -->
+                            <div v-if="demo.id === 'tabbar'" class="h-16 relative bg-gray-100">
+                                <van-tabbar v-model="state.activeTabbar" :fixed="false" style="position:absolute;">
+                                    <van-tabbar-item icon="home-o">首页</van-tabbar-item>
+                                    <van-tabbar-item icon="search">搜索</van-tabbar-item>
+                                </van-tabbar>
+                            </div>
+                            <!-- Radio/Checkbox -->
+                            <div v-if="demo.id === 'radio'" class="space-y-2">
+                                <van-radio-group v-model="state.radioVal" direction="horizontal"><van-radio name="1">单选1</van-radio><van-radio name="2">单选2</van-radio></van-radio-group>
+                                <van-checkbox-group v-model="state.checkVal" direction="horizontal"><van-checkbox name="a" shape="square">复选A</van-checkbox></van-checkbox-group>
+                            </div>
+                            <!-- Cascader -->
+                            <van-field v-if="demo.id === 'cascader'" v-model="state.cascaderValue" is-link readonly label="地区" placeholder="请选择" @click="state.showCascader = true" />
+                            <!-- TreeSelect -->
+                            <van-tree-select v-if="demo.id === 'tree-select'" v-model:active-id="state.treeActiveId" v-model:main-active-index="state.treeActiveIndex" :items="state.treeItems" height="150px" />
+                            <!-- Dropdown -->
+                            <van-dropdown-menu v-if="demo.id === 'dropdown'">
+                                <van-dropdown-item v-model="state.dropdownVal1" :options="state.dropdownOpt1" />
+                            </van-dropdown-menu>
+                            <!-- Keyboard -->
+                            <div v-if="demo.id === 'number-keyboard'">
+                                <van-button @click="state.showKeyboard = true">弹出键盘</van-button>
+                                <van-number-keyboard :show="state.showKeyboard" theme="custom" extra-key="." close-button-text="完成" @blur="state.showKeyboard = false" @input="onInput" @delete="onDelete" />
+                            </div>
+                            <!-- Collapse -->
+                            <van-collapse v-if="demo.id === 'collapse'" v-model="state.activeCollapse">
+                                <van-collapse-item title="标题1" name="1">内容</van-collapse-item>
+                            </van-collapse>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+        
+        <!-- 样式预览部分 (Color, Font, Icons) -->
+        <div id="color" class="mobile-section" :class="{ active: currentId === 'color' }">
+             <van-nav-bar title="色彩规范" left-arrow @click-left="onBack"></van-nav-bar>
+             <div class="p-4 grid grid-cols-2 gap-3">
+                 <div v-for="c in flatColors" :key="c.hex" class="h-20 rounded-lg flex items-center justify-center text-white text-xs flex-col shadow-sm" :style="{background: c.hex, color: c.hex.toLowerCase() === '#ffffff' ? '#333' : '#fff'}">
+                     <span class="font-bold">{{c.name}}</span>
+                     <span class="opacity-80">{{c.hex}}</span>
+                 </div>
+             </div>
+        </div>
+
+        <div id="icons-static" class="mobile-section" :class="{ active: currentId === 'icons-static' }">
+            <van-nav-bar title="图标库" left-arrow @click-left="onBack"></van-nav-bar>
+            <div class="p-4 grid grid-cols-4 gap-4 bg-white">
+                <div v-for="icon in commonIcons" :key="icon" class="flex flex-col items-center gap-2">
+                    <van-icon :name="icon" size="24" />
+                </div>
+                <div v-for="icon in customIcons" :key="icon" class="flex flex-col items-center gap-2">
+                    <van-icon class-prefix="icon" :name="icon" size="24" />
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Global Popups -->
+    <van-popup v-model:show="state.showPopup" :position="state.popupPosition" :style="{ padding: '40px', width: state.popupPosition === 'center'?'80%':'100%' }"><div class="text-center">内容区域</div></van-popup>
+    <van-calendar v-model:show="state.showCalendar" @confirm="onCalendarConfirm" />
+    <van-action-sheet v-model:show="state.showActionSheet" :actions="[{ name: '选项一' }, { name: '选项二' }]" cancel-text="取消" />
+    <van-popup v-model:show="state.showTimePicker" position="bottom"><van-time-picker v-model="state.currentTime" title="选择时间" @confirm="onTimeConfirm" @cancel="state.showTimePicker = false" /></van-popup>
+    <van-popup v-model:show="state.showDatePicker" position="bottom"><van-date-picker v-model="state.currentDate" title="选择日期" @confirm="onDateConfirm" @cancel="state.showDatePicker = false" /></van-popup>
+    <van-popup v-model:show="state.showCascader" round position="bottom"><van-cascader v-model="state.cascaderValue" title="请选择所在地区" :options="state.cascaderOptions" @close="state.showCascader = false" @finish="onCascaderFinish" /></van-popup>
+
+</div>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/components.js?v=1"></script>
+<script>
+    const { createApp, reactive, ref, computed, onMounted } = Vue;
+
+    createApp({
+        setup() {
+            const currentId = ref('welcome');
+            
+            // 数据合并
+            const components = reactive(window.RongHeComponents);
+            const colors = window.RongHeData.colors;
+            const commonIcons = window.RongHeData.commonIcons;
+            const customIcons = window.RongHeData.customIcons;
+            const ipMascots = window.RongHeData.ipMascots;
+
+            const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000' : '';
+
+            const reviveFunctions = (data) => {
+                Object.values(data).forEach(comp => {
+                    if (comp.demos) {
+                        comp.demos.forEach(demo => {
+                            if (demo.type === 'vue' && demo.setupStr && !demo.setup) {
+                                try {
+                                    let fn;
+                                    const str = demo.setupStr.trim();
+                                    if (str.startsWith('return') || str.startsWith('{')) {
+                                        fn = new Function(demo.setupStr);
+                                    } else {
+                                        fn = new Function('return ' + demo.setupStr)();
+                                    }
+                                    demo.setup = fn;
+                                } catch (e) {
+                                    console.error('Failed to revive setup function:', e);
+                                }
+                            }
+                        });
+                    }
+                });
+                return data;
+            };
+
+            const loadData = async () => {
+                try {
+                    // Revive initial data
+                    reviveFunctions(components);
+                    // Explicitly remove icons from components to prevent duplicate rendering
+                    if (components.icons) delete components.icons;
+                    
+                    const res = await fetch(`${API_BASE}/api/components`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        const revivedData = reviveFunctions(data);
+                        Object.assign(components, revivedData);
+                        // Explicitly remove icons again after merge
+                        if (components.icons) delete components.icons;
+                    }
+                } catch (e) {
+                    console.warn('Failed to load remote data', e);
+                }
+            };
+
+            onMounted(() => {
+                loadData();
+            });
+
+            // 扁平化颜色数据以便展示
+            const flatColors = computed(() => {
+                let res = [];
+                colors.forEach(g => g.list.forEach(c => res.push(c)));
+                return res;
+            });
+
+            // 交互状态 (复用 components.js 中的逻辑)
+            const state = reactive({
+                activeTab: 0, activeStep: 1, activeCollapse: ['1'],
+                dropdownVal1: 0, dropdownOpt1: [{ text: '全部商品', value: 0 }, { text: '新款商品', value: 1 }],
+                switchVal: true, radioVal: '1', checkVal: ['a'], rateVal: 3, sliderVal: 50, stepperVal: 1, pageNum: 1,
+                searchVal: '', showPopover: false, activeSidebar: 0, activeTabbar: 0,
+                showPopup: false, popupPosition: 'center', showCalendar: false, showActionSheet: false,
+                showTimePicker: false, showDatePicker: false, currentTime: ['12', '00'], currentDate: ['2023', '01', '01'],
+                showCascader: false, cascaderValue: '', cascaderOptions: [{ text: '浙江省', value: '330000', children: [{ text: '杭州市', value: '330100' }] }],
+                treeActiveId: 1, treeActiveIndex: 0, treeItems: [{ text: '分组 1', children: [{ text: '杭州', id: 1 }, { text: '温州', id: 2 }] }, { text: '分组 2', children: [{ text: '宁波', id: 3 }] }],
+                showKeyboard: false,
+                // Spacing Demo Data
+                demoActive: 0,
+                demoListData: [
+                    { title: '标题文本', value: '文本内容' },
+                    { title: '弱化文本', value: '文本内容' },
+                    { title: '标题文本', value: '中度文本长度内容中度文本...' },
+                ],
+                fileList: [
+                    { url: 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%22100%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23eeeeee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22sans-serif%22%20font-size%3D%2214%22%20fill%3D%22%23999%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3EImage%3C%2Ftext%3E%3C%2Fsvg%3E' },
+                    { url: 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%22100%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23eeeeee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22sans-serif%22%20font-size%3D%2214%22%20fill%3D%22%23999%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3EImage%3C%2Ftext%3E%3C%2Fsvg%3E', isImage: true },
+                ]
+            });
+
+            // 监听父窗口消息
+            window.addEventListener('message', (event) => {
+                if (event.data && event.data.type === 'navigate') {
+                    const targetId = event.data.id;
+                    // 如果存在该 ID 的组件演示，则切换显示
+                    if (components[targetId] || ['color', 'spacing', 'buttons', 'ip-mascot'].includes(targetId)) {
+                        currentId.value = targetId;
+                        window.scrollTo(0, 0);
+                    } else if (targetId === 'icons') {
+                        currentId.value = 'icons-static';
+                        window.scrollTo(0, 0);
+                    }
+                }
+            });
+
+            const onBack = () => {
+                currentId.value = 'welcome';
+            };
+
+            const defineDemoComponent = (demo) => {
+                return {
+                    template: demo.template,
+                    setup() {
+                        return demo.setup ? demo.setup() : {};
+                    }
+                };
+            };
+
+            // 复用 Action 逻辑
+            const triggerAction = (btn) => {
+                const { action } = btn;
+                if(action === 'dialog-alert') vant.showDialog({ title: '提示', message: '这是一个模态弹窗' });
+                if(action === 'dialog-confirm') vant.showConfirmDialog({ title: '确认', message: '是否确认删除？' });
+                if(action === 'toast-success') vant.showSuccessToast('操作成功');
+                if(action === 'toast-loading') vant.showToast({ type: 'loading', message: '加载中...', forbidClick: true });
+                if(action === 'popup-top') { state.popupPosition = 'top'; state.showPopup = true; }
+                if(action === 'popup-center') { state.popupPosition = 'center'; state.showPopup = true; }
+                if(action === 'calendar') state.showCalendar = true;
+                if(action === 'actionsheet') state.showActionSheet = true;
+                if(action === 'time-picker') state.showTimePicker = true;
+                if(action === 'date-picker') state.showDatePicker = true;
+            };
+            const onCalendarConfirm = (date) => { state.showCalendar = false; vant.showToast(`已选: ${date.getDate()}号`); };
+            const onTimeConfirm = ({ selectedValues }) => { state.showTimePicker = false; vant.showToast(`时间: ${selectedValues.join(':')}`); };
+            const onDateConfirm = ({ selectedValues }) => { state.showDatePicker = false; vant.showToast(`日期: ${selectedValues.join('-')}`); };
+            const onCascaderFinish = ({ selectedOptions }) => { state.showCascader = false; state.cascaderValue = selectedOptions.map((option) => option.text).join('/'); };
+            const onInput = (val) => vant.showToast('输入：' + val);
+            const onDelete = () => vant.showToast('删除');
+            const onSubmit = () => vant.showToast('点击提交');
+
+            return {
+                currentId, components, flatColors, commonIcons, customIcons, ipMascots,
+                state, onBack, triggerAction, defineDemoComponent,
+                onCalendarConfirm, onTimeConfirm, onDateConfirm, onCascaderFinish, onInput, onDelete, onSubmit
+            };
+        }
+    }).use(vant).mount('#app');
+</script>
+</body>
+</html>
