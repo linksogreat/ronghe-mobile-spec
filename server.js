@@ -10,7 +10,6 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' }));
-app.use(express.static(path.join(__dirname)));
 
 // Connect to MongoDB
 connectDB();
@@ -20,6 +19,9 @@ app.get('/api/components', require('./api/components/read'));
 app.post('/api/components', require('./api/components/write'));
 app.get('/api/data', require('./api/data/read'));
 app.post('/api/data', require('./api/data/write'));
+
+// Serve static files (moved after API routes to prevent conflicts with folders)
+app.use(express.static(path.join(__dirname)));
 
 // Serve index.html for root route
 app.get('/', (req, res) => {
