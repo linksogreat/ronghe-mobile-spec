@@ -18,6 +18,8 @@ connectDB();
 // API Routes
 app.get('/api/components', require('./api/components/read'));
 app.post('/api/components', require('./api/components/write'));
+app.get('/api/data', require('./api/data/read'));
+app.post('/api/data', require('./api/data/write'));
 
 // Serve index.html for root route
 app.get('/', (req, res) => {
