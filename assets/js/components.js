@@ -98,7 +98,150 @@ window.RongHeComponents = {
             '<strong>禁用态</strong>：背景色#BEBEBE，文字色#FFFFFF'
         ]
     },
-    search: { name: '3.2 搜索', demos: [{ title: '搜索栏', id: 'search', type: 'custom', code: '<van-search v-model="value" placeholder="请输入" />' }], rules: ['图片中未包含搜索组件的规范内容，待确认。'] },
+    search: {
+        name: '3.2 搜索',
+        rules: [
+            '<strong>基准设备</strong>：375pt 宽度移动端标准逻辑像素设备',
+            '<strong>搜索框核心尺寸</strong>：基础宽度 345pt，固定高度 40pt，全圆角 20pt（高度 1/2）',
+            '<strong>核心颜色</strong>：搜索框背景色 #F7F8FA，占位符 #C8C9CC，输入文字 #333333，激活态描边品牌蓝色（2pt）',
+            '<strong>基础交互</strong>：默认未激活态 → 点击激活聚焦态 → 输入内容编辑态 → 搜索提交 / 清空 / 取消',
+            '<strong>自定义样式</strong>：变体1（带前置下拉选择器）、变体2（带右侧固定搜索按钮）'
+        ],
+        demos: [
+            {
+                title: '一、基础样式搜索（纯搜索核心组件）',
+                type: 'vue',
+                setup: () => {
+                    const { ref } = Vue;
+                    const val = ref('');
+                    const focused = ref(false);
+                    const onSearch = () => vant.showToast('搜索: ' + val.value);
+                    const onCancel = () => { val.value = ''; focused.value = false; vant.showToast('已取消'); };
+                    const onClear = () => { val.value = ''; };
+                    return { val, focused, onSearch, onCancel, onClear };
+                },
+                template: `
+                    <div class="w-full flex flex-col gap-4">
+                        <div class="text-xs text-gray-400">状态演示 (点击输入框体验交互)</div>
+                        <div class="flex items-center w-[375px] overflow-hidden">
+                            <div 
+                                class="h-[40px] bg-[#F7F8FA] rounded-[20px] flex items-center px-[12px] transition-all duration-300 box-border" 
+                                :style="{ 
+                                    width: focused ? '294px' : '345px',
+                                    border: focused ? '2px solid #0088FF' : '2px solid transparent' 
+                                }"
+                            >
+                                <van-icon name="search" size="16px" :color="focused || val ? '#333' : '#C8C9CC'" />
+                                <input 
+                                    v-model="val"
+                                    @focus="focused = true"
+                                    class="flex-1 bg-transparent border-none outline-none h-full ml-[8px] text-[14px] text-[#333] placeholder-[#C8C9CC] caret-[#333]"
+                                    placeholder="搜索"
+                                    @keyup.enter="onSearch"
+                                />
+                                <van-icon v-if="val" name="clear" size="16px" color="#C8C9CC" @click="onClear" />
+                            </div>
+                            <div 
+                                class="ml-[12px] text-[14px] text-[#333] whitespace-nowrap overflow-hidden transition-all duration-300 flex items-center justify-center cursor-pointer"
+                                :style="{ width: focused ? '51px' : '0', opacity: focused ? 1 : 0 }"
+                                @click="onCancel"
+                            >
+                                取消
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: '变体 1：带前置下拉选择器的复合搜索框',
+                type: 'vue',
+                setup: () => {
+                    const { ref } = Vue;
+                    const val = ref('');
+                    const focused = ref(false);
+                    const showPopover = ref(false);
+                    const actions = [{ text: '商品' }, { text: '店铺' }, { text: '服务' }];
+                    const selectedAction = ref(actions[0]);
+                    const onSelect = (action) => { selectedAction.value = action; };
+                    return { val, focused, showPopover, actions, selectedAction, onSelect };
+                },
+                template: `
+                    <div class="w-[345px] h-[40px] bg-[#F7F8FA] rounded-[20px] flex items-center px-[12px] box-border transition-all duration-200"
+                        :style="{ border: focused ? '2px solid #0088FF' : '2px solid transparent' }"
+                    >
+                        <van-popover v-model:show="showPopover" :actions="actions" @select="onSelect" placement="bottom-start">
+                            <template #reference>
+                                <div class="flex items-center mr-[12px] h-full cursor-pointer min-w-[60px]">
+                                    <span class="text-[14px] text-[#333] mr-[4px]">{{ selectedAction.text }}</span>
+                                    <van-icon name="arrow-down" size="12px" color="#333" />
+                                </div>
+                            </template>
+                        </van-popover>
+                        
+                        <div class="flex-1 flex items-center h-full">
+                            <input 
+                                v-model="val"
+                                @focus="focused = true"
+                                @blur="focused = false"
+                                class="flex-1 bg-transparent border-none outline-none h-full text-[14px] text-[#333] placeholder-[#C8C9CC]"
+                                placeholder="搜索"
+                            />
+                            <van-icon v-if="val" name="clear" size="16px" color="#C8C9CC" @click="val = ''" />
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: '变体 2：带右侧固定搜索按钮的搜索框',
+                type: 'vue',
+                setup: () => {
+                    const { ref } = Vue;
+                    const val = ref('');
+                    const onSearch = () => vant.showToast('搜索: ' + val.value);
+                    return { val, onSearch };
+                },
+                template: `
+                    <div class="flex flex-col gap-4">
+                        <div class="flex items-center w-[345px]">
+                            <div class="flex-1 h-[40px] bg-[#F7F8FA] rounded-[20px] flex items-center px-[12px] box-border">
+                                <van-icon name="search" size="16px" color="#C8C9CC" />
+                                <input v-model="val" class="flex-1 bg-transparent border-none outline-none ml-[8px] text-[14px]" placeholder="搜索" />
+                                <van-icon v-if="val" name="clear" size="16px" color="#C8C9CC" @click="val = ''" />
+                            </div>
+                            <div class="ml-[12px] text-[14px] font-medium transition-colors cursor-pointer" 
+                                :class="val ? 'text-[#333]' : 'text-[#C8C9CC]'"
+                                @click="onSearch"
+                            >搜索</div>
+                        </div>
+
+                        <div class="flex items-center w-[345px]">
+                            <div class="flex-1 h-[40px] bg-[#F7F8FA] rounded-[20px] flex items-center px-[12px] box-border">
+                                <van-icon name="search" size="16px" color="#C8C9CC" />
+                                <input v-model="val" class="flex-1 bg-transparent border-none outline-none ml-[8px] text-[14px]" placeholder="搜索" />
+                                <van-icon v-if="val" name="clear" size="16px" color="#C8C9CC" @click="val = ''" />
+                            </div>
+                            <div class="ml-[12px] h-[40px] px-[12px] border-[2px] rounded-[8px] flex items-center justify-center text-[14px] transition-colors cursor-pointer min-w-[44px]"
+                                :class="val ? 'border-[#333] text-[#333]' : 'border-[#C8C9CC] text-[#C8C9CC]'"
+                                @click="onSearch"
+                            >搜索</div>
+                        </div>
+
+                        <div class="flex items-center w-[345px]">
+                            <div class="flex-1 h-[40px] bg-[#F7F8FA] rounded-[20px] flex items-center px-[12px] box-border">
+                                <van-icon name="search" size="16px" color="#C8C9CC" />
+                                <input v-model="val" class="flex-1 bg-transparent border-none outline-none ml-[8px] text-[14px]" placeholder="搜索" />
+                                <van-icon v-if="val" name="clear" size="16px" color="#C8C9CC" @click="val = ''" />
+                            </div>
+                            <div class="ml-[12px] h-[40px] px-[16px] bg-[#0088FF] rounded-[20px] flex items-center justify-center text-[14px] text-white transition-opacity cursor-pointer min-w-[44px]"
+                                :class="val ? 'opacity-100' : 'opacity-50'"
+                                @click="onSearch"
+                            >搜索</div>
+                        </div>
+                    </div>
+                `
+            }
+        ]
+    },
     popover: { name: '3.3 气泡弹出', demos: [{ title: '气泡', id: 'popover', type: 'custom', code: '<van-popover v-model:show="showPopover" :actions="actions">\n  <template #reference><van-button>点击</van-button></template>\n</van-popover>' }], rules: ['图片中未包含气泡弹出框的规范内容，待确认。'] },
 
     // 4. 导航
