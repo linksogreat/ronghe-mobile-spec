@@ -21,6 +21,38 @@ body {
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* 悬浮覆盖式滚动条 */
+.custom-scrollbar {
+    overflow-y: auto;
+    /* 兼容 Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+    background-color: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2); /* 默认显示浅色滚动条 */
+    border-radius: 3px;
+    transition: background-color 0.3s ease;
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar-thumb,
+.custom-scrollbar:active::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.5); /* 交互时加深 */
+}
+
+/* 优化移动端滚动体验 */
+.custom-scrollbar {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    will-change: scroll-position;
+}
+
 /* 预览卡片 */
 .demo-card {
     background: #fff;

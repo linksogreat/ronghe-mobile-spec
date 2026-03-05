@@ -14,15 +14,33 @@
     <link rel="stylesheet" href="../assets/css/style.css">
     
     <style>
-        body { background-color: #F7F8FA; }
+        body { background-color: #F7F8FA; height: 100vh; overflow: hidden; }
+        #app { height: 100%; display: flex; flex-direction: column; }
         .mobile-section {
-            min-height: 100vh;
+            min-height: 100%;
             padding-bottom: 40px;
             display: none; /* 默认隐藏所有部分，只显示当前激活的 */
         }
         .mobile-section.active {
-            display: block;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
             animation: fadeIn 0.3s ease;
+        }
+        /* 确保内容区域正确滚动 */
+        .mobile-section.active > .van-config-provider {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+        }
+        .mobile-section.active > .spec-page {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
         }
         .component-demo {
             margin-bottom: 16px;
@@ -74,7 +92,7 @@
     </div>
 
     <!-- 动态渲染组件演示区域 -->
-    <div class="pb-10">
+    <div class="h-full overflow-hidden flex flex-col flex-1">
         <!-- 默认欢迎页 -->
         <div id="welcome" class="mobile-section" :class="{ active: currentId === 'welcome' || !currentId }">
             <div class="flex flex-col items-center justify-center h-[600px] text-gray-400">
@@ -91,8 +109,8 @@
                 cellVerticalPadding: '8px',
                 cellHorizontalPadding: '16px',
                 tabLineHeight: '88px'
-            }">
-                <div class="spec-page relative h-full flex flex-col bg-[#f7f8fa] min-h-[750px]">
+            }" class="h-full flex flex-col">
+                <div class="spec-page relative flex-1 flex flex-col bg-[#f7f8fa] overflow-hidden">
                     
                     <!-- Status Bar -->
                     <header class="status-bar h-[88px] bg-white flex justify-between items-center px-4 shrink-0 relative z-10">
@@ -111,7 +129,7 @@
                     </van-tabs>
 
                     <!-- Main Content -->
-                    <main class="page-container px-4 flex-1 overflow-y-auto pb-[60px]">
+                    <main class="page-container px-4 flex-1 overflow-y-auto pb-[60px] custom-scrollbar">
                         
                         <!-- Section Title -->
                         <div class="relative">
@@ -179,10 +197,10 @@
 
         <!-- Buttons Demo (New) -->
         <div id="buttons" class="mobile-section" :class="{ active: currentId === 'buttons' }">
-             <van-nav-bar title="按钮规范" left-arrow @click-left="onBack"></van-nav-bar>
+             <van-nav-bar title="按钮规范" left-arrow @click-left="onBack" class="shrink-0"></van-nav-bar>
              
              <!-- 尺寸演示 -->
-             <div class="p-4 space-y-6">
+             <div class="p-4 space-y-6 flex-1 overflow-y-auto custom-scrollbar">
                  <div class="text-sm text-gray-500 font-bold mb-2">尺寸标准</div>
                  
                  <!-- 大按钮 (Large) -->
@@ -251,9 +269,9 @@
 
         <!-- IP Mascot Demo (New) -->
         <div id="ip-mascot" class="mobile-section" :class="{ active: currentId === 'ip-mascot' }">
-            <van-nav-bar title="IP吉祥物" left-arrow @click-left="onBack"></van-nav-bar>
+            <van-nav-bar title="IP吉祥物" left-arrow @click-left="onBack" class="shrink-0"></van-nav-bar>
             
-            <div class="p-4 grid grid-cols-2 gap-4">
+            <div class="p-4 grid grid-cols-2 gap-4 flex-1 overflow-y-auto custom-scrollbar">
                 <div v-for="mascot in ipMascots" :key="mascot.name" class="flex flex-col items-center bg-white p-2 rounded shadow-sm">
                     <div class="w-full aspect-square bg-gray-50 rounded flex items-center justify-center mb-2 overflow-hidden">
                         <img :src="'../IP-IMG/' + mascot.file" :alt="mascot.name" class="max-w-full max-h-full object-contain">
@@ -271,9 +289,10 @@
                     :title="comp.name"
                     left-arrow
                     @click-left="onBack"
+                    class="shrink-0"
                 ></van-nav-bar>
                 
-                <div class="p-4 space-y-4">
+                <div class="p-4 space-y-4 flex-1 overflow-y-auto custom-scrollbar">
                     <div v-for="(demo, dIndex) in comp.demos" :key="dIndex" class="bg-white rounded-lg p-4 shadow-sm">
                         <div class="text-xs text-gray-400 mb-3 pb-2 border-b border-gray-50">{{ demo.title }}</div>
                         
@@ -381,8 +400,8 @@
         
         <!-- 样式预览部分 (Color, Font, Icons) -->
         <div id="color" class="mobile-section" :class="{ active: currentId === 'color' }">
-             <van-nav-bar title="色彩规范" left-arrow @click-left="onBack"></van-nav-bar>
-             <div class="p-4 grid grid-cols-2 gap-3">
+             <van-nav-bar title="色彩规范" left-arrow @click-left="onBack" class="shrink-0"></van-nav-bar>
+             <div class="p-4 grid grid-cols-2 gap-3 flex-1 overflow-y-auto custom-scrollbar">
                  <div v-for="c in flatColors" :key="c.hex" class="h-20 rounded-lg flex items-center justify-center text-white text-xs flex-col shadow-sm" :style="{background: c.hex, color: c.hex.toLowerCase() === '#ffffff' ? '#333' : '#fff'}">
                      <span class="font-bold">{{c.name}}</span>
                      <span class="opacity-80">{{c.hex}}</span>
@@ -391,8 +410,8 @@
         </div>
 
         <div id="icons-static" class="mobile-section" :class="{ active: currentId === 'icons-static' }">
-            <van-nav-bar title="图标库" left-arrow @click-left="onBack"></van-nav-bar>
-            <div class="p-4 grid grid-cols-4 gap-4 bg-white">
+            <van-nav-bar title="图标库" left-arrow @click-left="onBack" class="shrink-0"></van-nav-bar>
+            <div class="p-4 grid grid-cols-4 gap-4 bg-white flex-1 overflow-y-auto custom-scrollbar">
                 <div v-for="icon in commonIcons" :key="icon" class="flex flex-col items-center gap-2">
                     <van-icon :name="icon" size="24" />
                 </div>
@@ -466,8 +485,18 @@
                     const res = await fetch(`${API_BASE}/api/components`);
                     if (res.ok) {
                         const data = await res.json();
-                        const revivedData = reviveFunctions(data);
-                        Object.assign(components, revivedData);
+                        // Only update if remote data is valid and different
+                        if (data && Object.keys(data).length > 0) {
+                             const revivedData = reviveFunctions(data);
+                             // Merge logic: only update fields that exist in remote data
+                             Object.keys(revivedData).forEach(key => {
+                                 if (components[key]) {
+                                     Object.assign(components[key], revivedData[key]);
+                                 } else {
+                                     components[key] = revivedData[key];
+                                 }
+                             });
+                        }
                         // Explicitly remove icons again after merge
                         if (components.icons) delete components.icons;
                     }
