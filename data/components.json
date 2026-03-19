@@ -273,19 +273,37 @@
         ]
     },
     "radio": {
-        "name": "5.2 选框",
+        "name": "5.2 选择框",
+        "rules": [
+            "<strong>基础视觉属性</strong>：主色 #1890FF，文本 #333333/#999999/#C2C2C2，单/复选框尺寸 16px × 16px，未选边框 #D9D9D9，禁用态背景 #F5F5F5。",
+            "<strong>卡片选择</strong>：未选灰色占位+黑字；选中浅蓝底色/蓝边框+蓝字。单选互斥。",
+            "<strong>单/复选框</strong>：单选圆形，选中蓝边框+蓝实心圆点；复选方形，选中蓝实心背景+白勾。",
+            "<strong>列表选择框</strong>：样式一（右侧打勾，文本变蓝）；样式二（左侧复选，支持说明文字）；样式三（左侧单选）。"
+        ],
         "demos": [
             {
-                "title": "单选框",
+                "title": "演示场景一：图形化类型选择（Card Selection）",
                 "type": "vue",
-                "setupStr": "return { checked: Vue.ref('1') };",
-                "template": "<van-radio-group v-model=\"checked\"><van-radio name=\"1\" style=\"margin-bottom: 8px\">单选框 1</van-radio><van-radio name=\"2\">单选框 2</van-radio></van-radio-group>"
+                "setupStr": "return { active: Vue.ref(0), cards: ['选择文本', '选择文本', '选择文本', '选择文本'] };",
+                "template": "<div class=\"flex gap-2 p-4 overflow-x-auto custom-scrollbar\"><div v-for=\"(card, index) in cards\" :key=\"index\" @click=\"active = index\" class=\"flex-shrink-0 w-20 flex flex-col items-center gap-2 cursor-pointer transition-all duration-200\"><div class=\"w-20 h-20 rounded flex items-center justify-center transition-all duration-200\" :class=\"active === index ? 'bg-[#E6F7FF] border border-[#1890FF]' : 'bg-[#F5F5F5] border border-transparent'\"><van-icon name=\"photo-o\" size=\"24\" :color=\"active === index ? '#1890FF' : '#999999'\" /></div><span class=\"text-xs transition-colors duration-200\" :class=\"active === index ? 'text-[#1890FF]' : 'text-[#333333]'\">{{ card }}</span></div></div>"
             },
             {
-                "title": "复选框",
+                "title": "演示场景二：网格表单（单/复选框）",
                 "type": "vue",
-                "setupStr": "return { checked: Vue.ref(['a', 'b']) };",
-                "template": "<van-checkbox-group v-model=\"checked\"><van-checkbox name=\"a\" style=\"margin-bottom: 8px\">复选框 a</van-checkbox><van-checkbox name=\"b\">复选框 b</van-checkbox></van-checkbox-group>"
+                "setupStr": "return { radioVal: Vue.ref('1'), checkboxVal: Vue.ref(['1']) };",
+                "template": "<div class=\"p-4 bg-white\"><div class=\"mb-4\"><div class=\"text-sm text-gray-500 mb-2\">单选区 (Radio)</div><van-radio-group v-model=\"radioVal\" direction=\"horizontal\" class=\"grid grid-cols-3 gap-y-3\"><van-radio name=\"1\" icon-size=\"16px\">选项1</van-radio><van-radio name=\"2\" icon-size=\"16px\">选项2</van-radio><van-radio name=\"3\" disabled icon-size=\"16px\">已禁用</van-radio><van-radio name=\"4\" icon-size=\"16px\">选项4</van-radio></van-radio-group></div><div><div class=\"text-sm text-gray-500 mb-2\">复选区 (Checkbox)</div><van-checkbox-group v-model=\"checkboxVal\" direction=\"horizontal\" class=\"grid grid-cols-3 gap-y-3\"><van-checkbox name=\"1\" shape=\"square\" icon-size=\"16px\">选项1</van-checkbox><van-checkbox name=\"2\" shape=\"square\" icon-size=\"16px\">选项2</van-checkbox><van-checkbox name=\"3\" disabled shape=\"square\" icon-size=\"16px\">已禁用</van-checkbox><van-checkbox name=\"4\" shape=\"square\" icon-size=\"16px\">选项4</van-checkbox></van-checkbox-group></div></div>"
+            },
+            {
+                "title": "演示场景三：纯文本列表（右侧打勾，样式一）",
+                "type": "vue",
+                "setupStr": "return { active: Vue.ref(0), items: ['可选项-未选', '可选项-已选', '可选项-未选'] };",
+                "template": "<div class=\"bg-white flex flex-col\"><div v-for=\"(item, index) in items\" :key=\"index\" @click=\"active = index\" class=\"flex items-center justify-between p-4 border-b border-[#F0F0F0] cursor-pointer active:bg-[#f5f5f5] transition-all duration-200 select-none\"><span class=\"text-[14px] transition-colors duration-200\" :class=\"active === index ? 'text-[#1890FF]' : 'text-[#333333]'\">{{ item }}</span><van-icon v-show=\"active === index\" name=\"success\" color=\"#1890FF\" size=\"16\" class=\"animate-fade-in\" /></div></div>"
+            },
+            {
+                "title": "演示场景四：带辅助信息的复杂列表（样式二）",
+                "type": "vue",
+                "setupStr": "return { checked: Vue.ref(false) };",
+                "template": "<div class=\"bg-white flex flex-col\"><div class=\"flex items-start gap-3 p-4 border-b border-[#F0F0F0] cursor-pointer active:bg-[#f5f5f5] transition-all duration-200 select-none\" @click=\"checked = !checked\"><div class=\"w-[18px] h-[18px] rounded-full border flex items-center justify-center transition-all duration-200 mt-[2px]\" :class=\"checked ? 'bg-[#1890FF] border-[#1890FF]' : 'border-[#D9D9D9] bg-white'\"><van-icon v-show=\"checked\" name=\"success\" color=\"white\" size=\"12\" /></div><div class=\"flex flex-col\"><span class=\"text-[14px] leading-[22px] transition-colors duration-200\" :class=\"checked ? 'text-[#1890FF]' : 'text-[#333333]'\">可选项-未选</span><span class=\"text-[12px] text-[#999999] leading-[18px] mt-[2px]\">这是次级说明文本内容</span></div></div><div class=\"flex items-start gap-3 p-4 border-b border-[#F0F0F0] select-none\"><div class=\"w-[18px] h-[18px] rounded-full border border-[#C2C2C2] bg-[#C2C2C2] flex items-center justify-center mt-[2px]\"><van-icon name=\"success\" color=\"white\" size=\"12\" /></div><div class=\"flex flex-col\"><span class=\"text-[14px] text-[#C2C2C2] leading-[22px]\">已选-不可修改样式</span><span class=\"text-[12px] text-[#C2C2C2] leading-[18px] mt-[2px]\">这是只读状态的说明文本</span></div></div></div>"
             }
         ]
     },
