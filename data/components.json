@@ -774,13 +774,24 @@
         ]
     },
     "uploader": {
-        "name": "5.14 文件上传",
+        "name": "5.14 文件/图片上传",
+        "rules": [
+            "<strong>全局视觉属性</strong>：主色 #1890FF，主要文本 #333333，提示文字 #999999，占位/禁用图标 #C2C2C2，背景色 #F7F8FA/#F5F5F5，必填星号 #EE0A24。",
+            "<strong>附件上传</strong>：支持 docx, xlsx, pdf, jpg 等格式，单文件 ≤ 20MB。未上传显示灰色提示与蓝色实心按钮；已上传呈块状列表，带蓝色回形针图标和灰色删除图标。",
+            "<strong>图片上传</strong>：建议 ≤ 1200px，最多 8 张，单图 ≤ 20MB，单行展示 4 张（约 80px）。支持上传中遮罩、失败重试、数量上限后隐藏上传入口。"
+        ],
         "demos": [
             {
-                "title": "文件上传",
-                "id": "uploader",
-                "type": "custom",
-                "code": "<van-uploader v-model=\"fileList\" multiple />"
+                "title": "演示场景一：附件上传 (普通文件)",
+                "type": "vue",
+                "setupStr": "return { fileList: Vue.ref([{ url: '#', name: '文件名称文本内容文件...文件名.docx' }, { url: '#', name: '文件名称文本内容文件...文件名.pdf' }]), onOversize: () => vant.showToast('文件大小不能超过 20MB'), removeFile: (index) => { fileList.value.splice(index, 1); } };",
+                "template": "<div class=\"bg-white p-4 mb-4 rounded-md\"><div class=\"font-bold text-[#333333] mb-3 relative pl-2 before:content-[''] before:absolute before:left-0 before:top-1 before:bottom-1 before:w-1 before:bg-[#1890FF]\">附件</div><div class=\"text-xs text-[#999999] mb-4\">单个文件大小不超过20MB，支持格式docx、xlsx、pdf、jpg等。</div><van-uploader v-model=\"fileList\" accept=\"*\" :max-size=\"20 * 1024 * 1024\" @oversize=\"onOversize\"><van-button type=\"primary\" size=\"small\" class=\"!bg-[#1890FF] !border-none !rounded\">点击上传</van-button></van-uploader><div v-if=\"fileList.length > 0\" class=\"mt-4 flex flex-col gap-2\"><div v-for=\"(file, index) in fileList\" :key=\"index\" class=\"flex items-center justify-between bg-[#F7F8FA] p-3 rounded-md\"><div class=\"flex items-center overflow-hidden flex-1 mr-4\"><van-icon name=\"link-o\" class=\"text-[#1890FF] text-base mr-2 flex-shrink-0\" /><span class=\"text-[#1890FF] text-sm truncate\">{{ file.name || file.url }}</span></div><van-icon name=\"cross\" class=\"text-[#C2C2C2] text-lg flex-shrink-0 cursor-pointer\" @click=\"removeFile(index)\" /></div></div></div>"
+            },
+            {
+                "title": "演示场景二：图片上传 (多图九宫格)",
+                "type": "vue",
+                "setupStr": "return { imageList: Vue.ref([{ url: 'https://fastly.jsdelivr.net/npm/@vant/assets/leaf.jpeg', status: 'done' }, { url: 'https://fastly.jsdelivr.net/npm/@vant/assets/tree.jpeg', status: 'uploading', message: '上传中' }, { url: 'https://fastly.jsdelivr.net/npm/@vant/assets/sand.jpeg', status: 'failed', message: '上传失败\\n重新上传' }]), onOversize: () => vant.showToast('文件大小不能超过 20MB') };",
+                "template": "<div class=\"bg-white p-4 rounded-md\"><div class=\"font-bold text-[#333333] mb-3 relative pl-2 before:content-[''] before:absolute before:left-0 before:top-1 before:bottom-1 before:w-1 before:bg-[#1890FF]\">其他信息</div><div class=\"flex items-center mb-1\"><span class=\"text-sm font-bold text-[#333333]\">上传图片</span><span class=\"text-[#EE0A24] ml-1\">*</span></div><div class=\"text-xs text-[#999999] mb-4\">建议宽高尺寸不超过1200px，最多8张，单个图片不超过20MB。</div><van-uploader v-model=\"imageList\" multiple :max-count=\"8\" :max-size=\"20 * 1024 * 1024\" upload-text=\"上传图片\" upload-icon=\"photograph\" :preview-size=\"'calc((100vw - 32px - 24px) / 4)'\" @oversize=\"onOversize\" /></div>"
             }
         ]
     },

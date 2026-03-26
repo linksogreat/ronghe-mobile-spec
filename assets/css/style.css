@@ -53,6 +53,20 @@ body {
     will-change: scroll-position;
 }
 
+/* Uploader Component Custom Styles */
+.van-uploader__preview,
+.van-uploader__upload {
+    margin: 0 8px 8px 0 !important;
+    border-radius: 4px !important;
+    background-color: #F7F8FA !important;
+}
+.van-uploader__upload-text {
+    color: #C2C2C2 !important;
+}
+.van-uploader__upload-icon {
+    color: #C2C2C2 !important;
+}
+
 /* 预览卡片 */
 .demo-card {
     background: #fff;
