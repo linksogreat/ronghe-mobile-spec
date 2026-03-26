@@ -54,17 +54,43 @@ body {
 }
 
 /* Uploader Component Custom Styles */
-.van-uploader__preview,
-.van-uploader__upload {
+.custom-image-uploader {
+    --van-uploader-size: calc((100vw - 32px - 24px) / 4);
+    --van-uploader-upload-background: #F7F8FA;
+    --van-uploader-mask-background: rgba(0, 0, 0, 0.6);
+    width: 100%;
+}
+
+.upload-placeholder {
+    width: var(--van-uploader-size);
+    height: var(--van-uploader-size);
+}
+
+.custom-image-uploader .van-uploader__preview,
+.custom-image-uploader .van-uploader__upload {
     margin: 0 8px 8px 0 !important;
     border-radius: 4px !important;
     background-color: #F7F8FA !important;
 }
-.van-uploader__upload-text {
-    color: #C2C2C2 !important;
+
+.custom-image-uploader .van-uploader__preview:nth-child(4n),
+.custom-image-uploader .van-uploader__upload:nth-child(4n) {
+    margin-right: 0 !important;
 }
-.van-uploader__upload-icon {
-    color: #C2C2C2 !important;
+
+.custom-image-uploader .van-uploader__preview-delete {
+    width: 16px !important;
+    height: 16px !important;
+    border-radius: 0 4px 0 100% !important;
+    background-color: rgba(0, 0, 0, 0.3) !important;
+}
+
+.custom-image-uploader .van-uploader__mask-message {
+    white-space: pre-wrap !important;
+    text-align: center !important;
+    line-height: 1.4 !important;
+    margin-top: 4px !important;
+    font-size: 11px !important;
 }
 
 /* 预览卡片 */

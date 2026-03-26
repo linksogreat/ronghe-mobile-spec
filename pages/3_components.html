@@ -231,17 +231,31 @@
             // Data Persistence
             const loadData = async () => {
                 try {
-                    // First ensure initial data has strings
+                    // Revive initial data
                     reviveFunctions(componentsData);
+                    // Explicitly remove icons from components to prevent duplicate rendering
+                    if (componentsData.icons) delete componentsData.icons;
                     
                     const res = await fetch(`${API_BASE}/api/components`);
                     if (res.ok) {
                         const data = await res.json();
-                        const revivedData = reviveFunctions(data);
-                        Object.assign(componentsData, revivedData);
+                        // Only update if remote data is valid and different
+                        if (data && Object.keys(data).length > 0) {
+                            const revivedData = reviveFunctions(data);
+                            // Merge logic: only update fields that exist in remote data
+                            Object.keys(revivedData).forEach(key => {
+                                if (componentsData[key]) {
+                                    Object.assign(componentsData[key], revivedData[key]);
+                                } else {
+                                    componentsData[key] = revivedData[key];
+                                }
+                            });
+                        }
+                        // Explicitly remove icons again after merge
+                        if (componentsData.icons) delete componentsData.icons;
                     }
                 } catch (e) {
-                    console.warn('Failed to load remote data, using local defaults', e);
+                    console.warn('Failed to load remote data', e);
                 }
             };
 
