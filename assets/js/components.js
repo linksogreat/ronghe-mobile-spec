@@ -333,19 +333,373 @@ window.RongHeComponents = {
     datetime: { 
         name: '5.5 时间选择器', 
         demos: [
-            { title: '时间选择', type: 'vue', setupStr: "const currentTime = Vue.ref(['12', '00']); return { currentTime };", template: "<div class=\"bg-white rounded-md overflow-hidden\"><van-time-picker v-model=\"currentTime\" title=\"选择时间\" /></div>" },
-            { title: '日期选择', type: 'vue', setupStr: "const currentDate = Vue.ref(['2023', '01', '01']); return { currentDate };", template: "<div class=\"bg-white rounded-md overflow-hidden\"><van-date-picker v-model=\"currentDate\" title=\"选择日期\" /></div>" }
+            {
+                title: '输入框唤起与回填',
+                type: 'vue',
+                setup: () => {
+                    const { ref } = Vue;
+                    const showTime = ref(false);
+                    const showDate = ref(false);
+                    const timePickerValue = ref(['12', '00']);
+                    const datePickerValue = ref(['2026', '04', '01']);
+                    const timeValue = ref('12:00');
+                    const dateValue = ref('2026-04-01');
+
+                    const onConfirmTime = ({ selectedValues }) => {
+                        timePickerValue.value = selectedValues;
+                        timeValue.value = selectedValues.join(':');
+                        showTime.value = false;
+                    };
+
+                    const onConfirmDate = ({ selectedValues }) => {
+                        datePickerValue.value = selectedValues;
+                        dateValue.value = selectedValues.join('-');
+                        showDate.value = false;
+                    };
+
+                    return {
+                        showTime,
+                        showDate,
+                        timePickerValue,
+                        datePickerValue,
+                        timeValue,
+                        dateValue,
+                        onConfirmTime,
+                        onConfirmDate
+                    };
+                },
+                template: `
+                    <div class="w-full">
+                        <van-cell-group inset>
+                            <van-field
+                                v-model="timeValue"
+                                label="时间"
+                                placeholder="请选择时间"
+                                readonly
+                                is-link
+                                @click="showTime = true"
+                            ></van-field>
+                            <van-field
+                                v-model="dateValue"
+                                label="日期"
+                                placeholder="请选择日期"
+                                readonly
+                                is-link
+                                @click="showDate = true"
+                            ></van-field>
+                            <van-field label="禁用态" model-value="不可选择" readonly disabled></van-field>
+                        </van-cell-group>
+
+                        <van-popup v-model:show="showTime" position="bottom">
+                            <van-time-picker
+                                v-model="timePickerValue"
+                                title="选择时间"
+                                @confirm="onConfirmTime"
+                                @cancel="showTime = false"
+                            ></van-time-picker>
+                        </van-popup>
+
+                        <van-popup v-model:show="showDate" position="bottom">
+                            <van-date-picker
+                                v-model="datePickerValue"
+                                title="选择日期"
+                                @confirm="onConfirmDate"
+                                @cancel="showDate = false"
+                            ></van-date-picker>
+                        </van-popup>
+                    </div>
+                `
+            }
         ],
-        rules: ['支持年月日、年月、时间、日期时间、日期区间选择。']
+        rules: [
+            '展示形态建议使用输入框/表单项作为触发器，点击后从底部弹出选择器。',
+            '选择完成后需回填到触发输入框中，形成可见的结果态。',
+            '支持年月日、年月、时间、日期时间、日期区间选择。'
+        ]
     },
     calendar: { 
         name: '5.6 日历选择器', 
         demos: [
-            { title: '单选日期', type: 'vue', setupStr: "const show = Vue.ref(false); const date = Vue.ref(''); const formatDate = (d) => `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`; const onConfirm = (value) => { show.value = false; date.value = formatDate(value); }; return { show, date, onConfirm };", template: "<div class=\"bg-white rounded-md overflow-hidden\"><van-cell title=\"选择单个日期\" :value=\"date || '请选择日期'\" is-link @click=\"show = true\" /><van-calendar v-model:show=\"show\" @confirm=\"onConfirm\" /></div>" },
-            { title: '区间日期选择', type: 'vue', setupStr: "const show = Vue.ref(false); const date = Vue.ref(''); const formatDate = (d) => `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`; const onConfirm = (values) => { const [start, end] = values; show.value = false; date.value = `${formatDate(start)} - ${formatDate(end)}`; }; return { show, date, onConfirm };", template: "<div class=\"bg-white rounded-md overflow-hidden\"><van-cell title=\"选择日期区间\" :value=\"date || '请选择日期区间'\" is-link @click=\"show = true\" /><van-calendar v-model:show=\"show\" type=\"range\" @confirm=\"onConfirm\" /></div>" },
-            { title: '日期与时间段范围选择', type: 'vue', setupStr: "const show = Vue.ref(false); const dateTime = Vue.ref(''); const onConfirm = () => { show.value = false; dateTime.value = '10/01 10:00 - 10/05 18:00'; }; return { show, dateTime, onConfirm };", template: "<div class=\"bg-white rounded-md overflow-hidden\"><van-cell title=\"选择日期与时间\" :value=\"dateTime || '请选择日期与时间'\" is-link @click=\"show = true\" /><van-popup v-model:show=\"show\" position=\"bottom\" round><div class=\"p-4\"><div class=\"flex justify-between items-center mb-4\"><span class=\"text-[#999999] text-sm cursor-pointer\" @click=\"show = false\">取消</span><span class=\"font-bold text-[#333333]\">选择时间区间</span><span class=\"text-[#1890FF] text-sm cursor-pointer\" @click=\"onConfirm\">确认</span></div><div class=\"flex items-center justify-between bg-[#F7F8FA] p-3 rounded-md mb-6\"><div class=\"flex flex-col items-center flex-1\"><span class=\"text-xs text-[#999999]\">开始时间</span><span class=\"text-sm font-bold text-[#333333] mt-1\">10月01日 10:00</span></div><span class=\"text-[#C2C2C2] px-2\">至</span><div class=\"flex flex-col items-center flex-1\"><span class=\"text-xs text-[#999999]\">结束时间</span><span class=\"text-sm font-bold text-[#333333] mt-1\">10月05日 18:00</span></div></div><div class=\"text-center text-xs text-[#999999] mb-8\">（自定义日期时间选择面板样式示意）</div></div></van-popup></div>" }
+            {
+                title: '单选日期回显（输入框触发）',
+                type: 'vue',
+                setup: () => {
+                    const { ref } = Vue;
+                    const show = ref(false);
+                    const dateValue = ref('');
+
+                    const formatDate = (d) => {
+                        const y = d.getFullYear();
+                        const m = String(d.getMonth() + 1).padStart(2, '0');
+                        const day = String(d.getDate()).padStart(2, '0');
+                        return `${y}-${m}-${day}`;
+                    };
+
+                    const onConfirm = (val) => {
+                        dateValue.value = formatDate(val);
+                        show.value = false;
+                    };
+
+                    const formatter = (day) => {
+                        const d = day.date;
+                        const t = new Date();
+                        if (d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate()) {
+                            day.bottomInfo = '今天';
+                        }
+                        return day;
+                    };
+
+                    return { show, dateValue, onConfirm, formatter };
+                },
+                template: `
+                    <div class="w-full">
+                        <van-cell-group inset>
+                            <van-field
+                                v-model="dateValue"
+                                label="日期"
+                                placeholder="请选择日期"
+                                readonly
+                                is-link
+                                @click="show = true"
+                            ></van-field>
+                            <van-field label="禁用态" model-value="不可选择" readonly disabled></van-field>
+                        </van-cell-group>
+
+                        <van-calendar
+                            v-model:show="show"
+                            color="#1890FF"
+                            show-mark
+                            :formatter="formatter"
+                            @confirm="onConfirm"
+                        ></van-calendar>
+                    </div>
+                `
+            },
+            {
+                title: '日期区间回显（开始/结束联动）',
+                type: 'vue',
+                setup: () => {
+                    const { ref } = Vue;
+                    const show = ref(false);
+                    const startValue = ref('');
+                    const endValue = ref('');
+
+                    const formatDate = (d) => {
+                        const y = d.getFullYear();
+                        const m = String(d.getMonth() + 1).padStart(2, '0');
+                        const day = String(d.getDate()).padStart(2, '0');
+                        return `${y}-${m}-${day}`;
+                    };
+
+                    const defaultDate = (() => {
+                        const start = new Date();
+                        const end = new Date(Date.now() + 24 * 60 * 60 * 1000);
+                        return [start, end];
+                    })();
+
+                    const onConfirm = (values) => {
+                        const [start, end] = values;
+                        startValue.value = formatDate(start);
+                        endValue.value = formatDate(end);
+                        show.value = false;
+                    };
+
+                    const formatter = (day) => {
+                        const d = day.date;
+                        const t = new Date();
+                        if (d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate()) {
+                            day.bottomInfo = '今天';
+                        }
+                        return day;
+                    };
+
+                    return { show, startValue, endValue, defaultDate, onConfirm, formatter };
+                },
+                template: `
+                    <div class="w-full">
+                        <van-cell-group inset>
+                            <van-field
+                                v-model="startValue"
+                                label="开始日期"
+                                placeholder="请选择开始日期"
+                                readonly
+                                is-link
+                                @click="show = true"
+                            ></van-field>
+                            <van-field
+                                v-model="endValue"
+                                label="结束日期"
+                                placeholder="请选择结束日期"
+                                readonly
+                                is-link
+                                @click="show = true"
+                            ></van-field>
+                            <van-field label="禁用态" model-value="不可选择" readonly disabled></van-field>
+                        </van-cell-group>
+
+                        <van-calendar
+                            v-model:show="show"
+                            type="range"
+                            allow-same-day
+                            color="#1890FF"
+                            show-mark
+                            :default-date="defaultDate"
+                            :formatter="formatter"
+                            @confirm="onConfirm"
+                        ></van-calendar>
+                    </div>
+                `
+            },
+            {
+                title: '日期区间 + 时间段（复合筛选）',
+                type: 'vue',
+                setup: () => {
+                    const { ref, computed } = Vue;
+                    const showCalendar = ref(false);
+                    const showStartTime = ref(false);
+                    const showEndTime = ref(false);
+
+                    const startDateValue = ref('');
+                    const endDateValue = ref('');
+                    const startTimeValue = ref('08:00');
+                    const endTimeValue = ref('18:00');
+
+                    const startTimePicker = ref(['08', '00']);
+                    const endTimePicker = ref(['18', '00']);
+
+                    const formatDate = (d) => {
+                        const y = d.getFullYear();
+                        const m = String(d.getMonth() + 1).padStart(2, '0');
+                        const day = String(d.getDate()).padStart(2, '0');
+                        return `${y}-${m}-${day}`;
+                    };
+
+                    const onConfirmRange = (values) => {
+                        const [start, end] = values;
+                        startDateValue.value = formatDate(start);
+                        endDateValue.value = formatDate(end);
+                        showCalendar.value = false;
+                    };
+
+                    const onConfirmStartTime = ({ selectedValues }) => {
+                        startTimePicker.value = selectedValues;
+                        startTimeValue.value = selectedValues.join(':');
+                        showStartTime.value = false;
+                    };
+
+                    const onConfirmEndTime = ({ selectedValues }) => {
+                        endTimePicker.value = selectedValues;
+                        endTimeValue.value = selectedValues.join(':');
+                        showEndTime.value = false;
+                    };
+
+                    const result = computed(() => {
+                        if (!startDateValue.value || !endDateValue.value) return '';
+                        return `${startDateValue.value} 至 ${endDateValue.value} ${startTimeValue.value}-${endTimeValue.value}`;
+                    });
+
+                    const formatter = (day) => {
+                        const d = day.date;
+                        const t = new Date();
+                        if (d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate()) {
+                            day.bottomInfo = '今天';
+                        }
+                        return day;
+                    };
+
+                    return {
+                        showCalendar,
+                        showStartTime,
+                        showEndTime,
+                        startDateValue,
+                        endDateValue,
+                        startTimeValue,
+                        endTimeValue,
+                        startTimePicker,
+                        endTimePicker,
+                        onConfirmRange,
+                        onConfirmStartTime,
+                        onConfirmEndTime,
+                        result,
+                        formatter
+                    };
+                },
+                template: `
+                    <div class="w-full">
+                        <van-cell-group inset>
+                            <van-field
+                                v-model="startDateValue"
+                                label="开始日期"
+                                placeholder="请选择开始日期"
+                                readonly
+                                is-link
+                                @click="showCalendar = true"
+                            ></van-field>
+                            <van-field
+                                v-model="endDateValue"
+                                label="结束日期"
+                                placeholder="请选择结束日期"
+                                readonly
+                                is-link
+                                @click="showCalendar = true"
+                            ></van-field>
+                            <van-field
+                                v-model="startTimeValue"
+                                label="开始时间"
+                                placeholder="请选择开始时间"
+                                readonly
+                                is-link
+                                @click="showStartTime = true"
+                            ></van-field>
+                            <van-field
+                                v-model="endTimeValue"
+                                label="结束时间"
+                                placeholder="请选择结束时间"
+                                readonly
+                                is-link
+                                @click="showEndTime = true"
+                            ></van-field>
+                            <van-field label="结果回显" :model-value="result || '未完成选择'" readonly></van-field>
+                            <van-field label="禁用态" model-value="不可选择" readonly disabled></van-field>
+                        </van-cell-group>
+
+                        <van-calendar
+                            v-model:show="showCalendar"
+                            type="range"
+                            allow-same-day
+                            color="#1890FF"
+                            show-mark
+                            :formatter="formatter"
+                            @confirm="onConfirmRange"
+                        ></van-calendar>
+
+                        <van-popup v-model:show="showStartTime" position="bottom">
+                            <van-time-picker
+                                v-model="startTimePicker"
+                                title="选择开始时间"
+                                @confirm="onConfirmStartTime"
+                                @cancel="showStartTime = false"
+                            ></van-time-picker>
+                        </van-popup>
+
+                        <van-popup v-model:show="showEndTime" position="bottom">
+                            <van-time-picker
+                                v-model="endTimePicker"
+                                title="选择结束时间"
+                                @confirm="onConfirmEndTime"
+                                @cancel="showEndTime = false"
+                            ></van-time-picker>
+                        </van-popup>
+                    </div>
+                `
+            }
         ],
-        rules: ['<strong>基础样式</strong>：日期不可选时，字体颜色置灰。', '<strong>日期区间</strong>：弹层弹出后，默认选择最近的两天。'] 
+        rules: [
+            '<strong>单选回显</strong>：使用输入框触发日历，选择后回填到输入框中。',
+            '<strong>区间选择</strong>：支持开始/结束日期联动选择，选择后分别回填到起始与结束输入框。',
+            '<strong>复合筛选</strong>：支持日期区间 + 时间段双重筛选，结果需形成可见回显态。',
+            '<strong>状态与反馈</strong>：需包含今日标记、选中高亮、禁用灰显、禁用态输入框展示。'
+        ] 
     },
     treeselect: { name: '5.7 分类选择', demos: [{ title: '分类选择', id: 'tree-select', type: 'custom', code: '<van-tree-select v-model:active-id="activeId" :items="items" />' }] },
     actionsheet: { 

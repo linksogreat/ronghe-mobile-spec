@@ -330,6 +330,7 @@
 
                 const handleNavClick = (item) => {
                     currentId.value = item.id;
+                    currentUrl.value = item.url;
                     
                     // 1. Update Content Frame
                     const contentFrame = document.getElementById('content-frame');

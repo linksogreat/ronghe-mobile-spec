@@ -425,11 +425,11 @@
 
     <!-- Global Popups -->
     <van-popup v-model:show="state.showPopup" :position="state.popupPosition" :style="{ padding: '40px', width: state.popupPosition === 'center'?'80%':'100%' }"><div class="text-center">内容区域</div></van-popup>
-    <van-calendar v-model:show="state.showCalendar" @confirm="onCalendarConfirm" />
-    <van-action-sheet v-model:show="state.showActionSheet" :actions="[{ name: '选项一' }, { name: '选项二' }]" cancel-text="取消" />
-    <van-popup v-model:show="state.showTimePicker" position="bottom"><van-time-picker v-model="state.currentTime" title="选择时间" @confirm="onTimeConfirm" @cancel="state.showTimePicker = false" /></van-popup>
-    <van-popup v-model:show="state.showDatePicker" position="bottom"><van-date-picker v-model="state.currentDate" title="选择日期" @confirm="onDateConfirm" @cancel="state.showDatePicker = false" /></van-popup>
-    <van-popup v-model:show="state.showCascader" round position="bottom"><van-cascader v-model="state.cascaderValue" title="请选择所在地区" :options="state.cascaderOptions" @close="state.showCascader = false" @finish="onCascaderFinish" /></van-popup>
+    <van-calendar v-model:show="state.showCalendar" @confirm="onCalendarConfirm"></van-calendar>
+    <van-action-sheet v-model:show="state.showActionSheet" :actions="[{ name: '选项一' }, { name: '选项二' }]" cancel-text="取消"></van-action-sheet>
+    <van-popup v-model:show="state.showTimePicker" position="bottom"><van-time-picker v-model="state.currentTime" title="选择时间" @confirm="onTimeConfirm" @cancel="state.showTimePicker = false"></van-time-picker></van-popup>
+    <van-popup v-model:show="state.showDatePicker" position="bottom"><van-date-picker v-model="state.currentDate" title="选择日期" @confirm="onDateConfirm" @cancel="state.showDatePicker = false"></van-date-picker></van-popup>
+    <van-popup v-model:show="state.showCascader" round position="bottom"><van-cascader v-model="state.cascaderValue" title="请选择所在地区" :options="state.cascaderOptions" @close="state.showCascader = false" @finish="onCascaderFinish"></van-cascader></van-popup>
 
 </div>
 
