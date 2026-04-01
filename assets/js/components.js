@@ -709,8 +709,89 @@ window.RongHeComponents = {
     },
     dropdown: { 
         name: '5.9 下拉菜单', 
-        demos: [{ title: '下拉菜单', id: 'dropdown', type: 'custom', code: '<van-dropdown-menu>\n  <van-dropdown-item v-model="value1" :options="option1" />\n</van-dropdown-menu>' }],
-        rules: ['菜单栏最好不超过4个选项。', '可自定义字体颜色、字体大小、cell高度等内容。']
+        demos: [
+            {
+                title: '基础用法',
+                type: 'vue',
+                setup: () => {
+                    const value1 = Vue.ref(0);
+                    const value2 = Vue.ref('a');
+                    const option1 = [
+                        { text: '全部商品', value: 0 },
+                        { text: '新款商品', value: 1 },
+                        { text: '活动商品', value: 2 },
+                    ];
+                    const option2 = [
+                        { text: '默认排序', value: 'a' },
+                        { text: '好评排序', value: 'b' },
+                        { text: '销量排序', value: 'c' },
+                    ];
+                    return { value1, value2, option1, option2 };
+                },
+                template: '<div class="w-full"><van-dropdown-menu><van-dropdown-item v-model="value1" :options="option1" /><van-dropdown-item v-model="value2" :options="option2" /></van-dropdown-menu></div>'
+            },
+            {
+                title: '自定义内容',
+                type: 'vue',
+                setup: () => {
+                    const value = Vue.ref(0);
+                    const switch1 = Vue.ref(true);
+                    const switch2 = Vue.ref(false);
+                    const option = [
+                        { text: '全部商品', value: 0 },
+                        { text: '新款商品', value: 1 },
+                        { text: '活动商品', value: 2 },
+                    ];
+                    const itemRef = Vue.ref(null);
+                    const onConfirm = () => {
+                        if(itemRef.value) itemRef.value.toggle();
+                    };
+                    return { value, switch1, switch2, option, itemRef, onConfirm };
+                },
+                template: '<div class="w-full"><van-dropdown-menu><van-dropdown-item v-model="value" :options="option" /><van-dropdown-item title="筛选" ref="itemRef"><van-cell center title="包邮"><template #right-icon><van-switch v-model="switch1" size="24" active-color="#1890FF" /></template></van-cell><van-cell center title="团购"><template #right-icon><van-switch v-model="switch2" size="24" active-color="#1890FF" /></template></van-cell><div style="padding: 5px 16px;"><van-button type="primary" block round color="#1890FF" @click="onConfirm">确认</van-button></div></van-dropdown-item></van-dropdown-menu></div>'
+            },
+            {
+                title: '自定义选中态颜色',
+                type: 'vue',
+                setup: () => {
+                    const value1 = Vue.ref(0);
+                    const value2 = Vue.ref('a');
+                    const option1 = [
+                        { text: '全部商品', value: 0 },
+                        { text: '新款商品', value: 1 },
+                        { text: '活动商品', value: 2 },
+                    ];
+                    const option2 = [
+                        { text: '默认排序', value: 'a' },
+                        { text: '好评排序', value: 'b' },
+                        { text: '销量排序', value: 'c' },
+                    ];
+                    return { value1, value2, option1, option2 };
+                },
+                template: '<div class="w-full"><van-dropdown-menu active-color="#1890FF"><van-dropdown-item v-model="value1" :options="option1" /><van-dropdown-item v-model="value2" :options="option2" /></van-dropdown-menu></div>'
+            },
+            {
+                title: '向上展开',
+                type: 'vue',
+                setup: () => {
+                    const value1 = Vue.ref(0);
+                    const value2 = Vue.ref('a');
+                    const option1 = [
+                        { text: '全部商品', value: 0 },
+                        { text: '新款商品', value: 1 },
+                        { text: '活动商品', value: 2 },
+                    ];
+                    const option2 = [
+                        { text: '默认排序', value: 'a' },
+                        { text: '好评排序', value: 'b' },
+                        { text: '销量排序', value: 'c' },
+                    ];
+                    return { value1, value2, option1, option2 };
+                },
+                template: '<div class="w-full"><van-dropdown-menu direction="up"><van-dropdown-item v-model="value1" :options="option1" /><van-dropdown-item v-model="value2" :options="option2" /></van-dropdown-menu></div>'
+            }
+        ],
+        rules: ['菜单栏最好不超过4个选项。', '可自定义字体颜色、字体大小、cell高度等内容。', '支持自定义下拉面板中的内容，如加入开关、按钮等进行复杂筛选。']
     },
     stepper: { 
         name: '5.10 步进器', 
