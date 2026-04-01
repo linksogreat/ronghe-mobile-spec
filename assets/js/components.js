@@ -332,7 +332,10 @@ window.RongHeComponents = {
     },
     datetime: { 
         name: '5.5 时间选择器', 
-        demos: [{ title: '时间选择', type: 'action', actions: [{text:'选择时间', action:'time-picker'}, {text:'选择日期', action:'date-picker'}], code: '<van-time-picker v-model="currentTime" />\n<van-date-picker v-model="currentDate" />' }],
+        demos: [
+            { title: '时间选择', type: 'vue', setupStr: "const currentTime = Vue.ref(['12', '00']); return { currentTime };", template: "<div class=\"bg-white rounded-md overflow-hidden\"><van-time-picker v-model=\"currentTime\" title=\"选择时间\" /></div>" },
+            { title: '日期选择', type: 'vue', setupStr: "const currentDate = Vue.ref(['2023', '01', '01']); return { currentDate };", template: "<div class=\"bg-white rounded-md overflow-hidden\"><van-date-picker v-model=\"currentDate\" title=\"选择日期\" /></div>" }
+        ],
         rules: ['支持年月日、年月、时间、日期时间、日期区间选择。']
     },
     calendar: { 
