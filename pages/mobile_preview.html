@@ -292,8 +292,8 @@
                     class="shrink-0"
                 ></van-nav-bar>
                 
-                <div class="p-4 space-y-4 flex-1 overflow-y-auto custom-scrollbar">
-                    <div v-for="(demo, dIndex) in comp.demos" :key="dIndex" class="bg-white rounded-lg p-4 shadow-sm">
+                <div class="px-0 py-4 space-y-4 flex-1 overflow-y-auto custom-scrollbar">
+                    <div v-for="(demo, dIndex) in comp.demos" :key="dIndex" class="w-full bg-white rounded-none px-4 py-4 shadow-none border-b border-gray-100">
                         <div class="text-xs text-gray-400 mb-3 pb-2 border-b border-gray-50">{{ demo.title }}</div>
                         
                         <!-- 复用组件渲染逻辑 -->
@@ -449,7 +449,9 @@
             const customIcons = window.RongHeData.customIcons;
             const ipMascots = window.RongHeData.ipMascots;
 
-            const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000' : '';
+            const searchParams = new URLSearchParams(window.location.search);
+            const apiBaseRaw = searchParams.get('apiBase');
+            const API_BASE = apiBaseRaw ? apiBaseRaw.replace(/\/+$/, '') : (window.location.protocol === 'file:' ? 'http://localhost:3000' : '');
 
             const reviveFunctions = (data) => {
                 Object.values(data).forEach(comp => {
