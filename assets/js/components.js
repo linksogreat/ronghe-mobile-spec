@@ -247,7 +247,122 @@ window.RongHeComponents = {
     // 4. 导航
     tab: { 
         name: '4.1 标签页', 
-        demos: [{ title: '基础用法', id: 'tabs', type: 'custom', code: '<van-tabs v-model:active="active">...</van-tabs>' }], 
+        demos: [
+            {
+                title: '基础样式 - 固定数目',
+                type: 'vue',
+                setupStr: 'return { active2: Vue.ref(0), active3: Vue.ref(0), active4: Vue.ref(0), active5: Vue.ref(0) };',
+                template: `<div class="-mx-4 -mb-4">
+                    <div class="bg-white">
+                        <div class="px-4 pt-3 pb-2 text-xs text-[#969799]">2 个标签</div>
+                        <van-tabs v-model:active="active2" color="#1890FF" line-width="20" line-height="3" animated>
+                            <van-tab title="选中项目"><div class="py-6 text-center text-sm text-[#666]">内容 1</div></van-tab>
+                            <van-tab title="未选中"><div class="py-6 text-center text-sm text-[#666]">内容 2</div></van-tab>
+                        </van-tabs>
+                        <div class="h-2 bg-[#f7f8fa]"></div>
+
+                        <div class="px-4 pt-3 pb-2 text-xs text-[#969799]">3 个标签</div>
+                        <van-tabs v-model:active="active3" color="#1890FF" line-width="20" line-height="3" animated>
+                            <van-tab title="选中项目"><div class="py-6 text-center text-sm text-[#666]">内容 1</div></van-tab>
+                            <van-tab title="未选中"><div class="py-6 text-center text-sm text-[#666]">内容 2</div></van-tab>
+                            <van-tab title="未选中"><div class="py-6 text-center text-sm text-[#666]">内容 3</div></van-tab>
+                        </van-tabs>
+                        <div class="h-2 bg-[#f7f8fa]"></div>
+
+                        <div class="px-4 pt-3 pb-2 text-xs text-[#969799]">4 个标签</div>
+                        <van-tabs v-model:active="active4" color="#1890FF" line-width="20" line-height="3" animated>
+                            <van-tab title="选中项目"><div class="py-6 text-center text-sm text-[#666]">内容 1</div></van-tab>
+                            <van-tab title="未选中"><div class="py-6 text-center text-sm text-[#666]">内容 2</div></van-tab>
+                            <van-tab title="未选中"><div class="py-6 text-center text-sm text-[#666]">内容 3</div></van-tab>
+                            <van-tab title="未选中"><div class="py-6 text-center text-sm text-[#666]">内容 4</div></van-tab>
+                        </van-tabs>
+                        <div class="h-2 bg-[#f7f8fa]"></div>
+
+                        <div class="px-4 pt-3 pb-2 text-xs text-[#969799]">5 个标签</div>
+                        <van-tabs v-model:active="active5" color="#1890FF" line-width="20" line-height="3" animated>
+                            <van-tab title="选中项目"><div class="py-6 text-center text-sm text-[#666]">内容 1</div></van-tab>
+                            <van-tab title="未选中"><div class="py-6 text-center text-sm text-[#666]">内容 2</div></van-tab>
+                            <van-tab title="未选中"><div class="py-6 text-center text-sm text-[#666]">内容 3</div></van-tab>
+                            <van-tab title="未选中"><div class="py-6 text-center text-sm text-[#666]">内容 4</div></van-tab>
+                            <van-tab title="未选中"><div class="py-6 text-center text-sm text-[#666]">内容 5</div></van-tab>
+                        </van-tabs>
+                    </div>
+                </div>`
+            },
+            {
+                title: '标题栏滚动',
+                type: 'vue',
+                setupStr: 'return { active: Vue.ref(0) };',
+                template: `<div class="-mx-4 -mb-4">
+                    <van-tabs v-model:active="active" color="#1890FF" line-width="20" line-height="3" animated swipeable :swipe-threshold="4">
+                        <van-tab v-for="index in 8" :title="'标签 ' + index" :key="index">
+                            <div class="bg-[#f7f8fa] py-3">
+                                <van-cell-group>
+                                    <van-cell title="列表项" :value="'内容 ' + index" />
+                                    <van-cell title="状态" value="可切换" />
+                                </van-cell-group>
+                            </div>
+                        </van-tab>
+                    </van-tabs>
+                </div>`
+            },
+            {
+                title: '锚点Tab',
+                type: 'vue',
+                setupStr: 'return { active: Vue.ref(0) };',
+                template: `<div class="-mx-4 -mb-4">
+                    <van-tabs v-model:active="active" scrollspy :sticky="false" color="#1890FF" line-width="20" line-height="3">
+                        <van-tab v-for="index in 4" :title="'模块 ' + index" :key="index">
+                            <div class="bg-[#f7f8fa]">
+                                <div class="px-4 py-3 text-sm font-medium text-[#333]">内容区 {{ index }}</div>
+                                <van-cell-group>
+                                    <van-cell v-for="i in 3" :key="i" :title="'列表项 ' + i" value="说明文本" />
+                                </van-cell-group>
+                                <div class="h-2"></div>
+                            </div>
+                        </van-tab>
+                    </van-tabs>
+                </div>`
+            },
+            {
+                title: '下拉选择',
+                type: 'vue',
+                setupStr: "return { active: Vue.ref(0), showPopover: Vue.ref(false), actions: [{ text: '选项一' }, { text: '选项二' }, { text: '选项三' }], onSelect: (action) => vant.showToast(action.text) };",
+                template: `<div class="-mx-4 -mb-4">
+                    <van-tabs v-model:active="active" color="#1890FF" line-width="20" line-height="3" animated>
+                        <van-tab title="标签 1"><div class="py-6 text-center text-sm text-[#666]">内容 1</div></van-tab>
+                        <van-tab>
+                            <template #title>
+                                <van-popover v-model:show="showPopover" :actions="actions" placement="bottom" @select="onSelect">
+                                    <template #reference>
+                                        <span class="inline-flex items-center gap-1 select-none">下拉筛选<van-icon name="arrow-down" /></span>
+                                    </template>
+                                </van-popover>
+                            </template>
+                            <div class="bg-[#f7f8fa] py-3">
+                                <van-cell-group>
+                                    <van-cell title="当前选项" value="点击标题下拉" />
+                                    <van-cell title="提示" value="选择后 Toast" />
+                                </van-cell-group>
+                            </div>
+                        </van-tab>
+                        <van-tab title="标签 3"><div class="py-6 text-center text-sm text-[#666]">内容 3</div></van-tab>
+                    </van-tabs>
+                </div>`
+            },
+            {
+                title: '胶囊Tab',
+                type: 'vue',
+                setupStr: 'return { active: Vue.ref(0) };',
+                template: `<div class="-mx-4 -mb-4 bg-[#f7f8fa] p-4">
+                    <van-tabs v-model:active="active" type="card" color="#1890FF">
+                        <van-tab title="标签名称"><div class="bg-white rounded-md p-4 text-sm text-[#666]">内容 1</div></van-tab>
+                        <van-tab title="标签名称"><div class="bg-white rounded-md p-4 text-sm text-[#666]">内容 2</div></van-tab>
+                        <van-tab title="标签名称"><div class="bg-white rounded-md p-4 text-sm text-[#666]">内容 3</div></van-tab>
+                    </van-tabs>
+                </div>`
+            }
+        ],
         rules: [
             '<strong>基础样式</strong>：建议固定标签栏最多5个，选中态底部显示蓝色下划线，未选中态文字为灰色。',
             '<strong>标题栏滚动</strong>：标题栏可左右滑动；每个标题之间固定间距24px，两端固定间距20px。',
@@ -267,18 +382,144 @@ window.RongHeComponents = {
     pagination: { name: '4.4 分页', demos: [{ title: '分页', type: 'input', component: 'van-pagination', model: 'pageNum', props: { totalItems: 24, itemsPerPage: 5 }, code: '<van-pagination v-model="currentPage" :total-items="24" :items-per-page="5" />' }] },
     sidebar: { 
         name: '4.5 侧边导航', 
-        demos: [{ title: '侧边导航', id: 'sidebar', type: 'custom', code: '<van-sidebar v-model="active">...</van-sidebar>' }], 
+        demos: [
+            {
+                title: '基础用法',
+                type: 'vue',
+                setupStr: 'return { active: Vue.ref(0) };',
+                template: `<div class="h-full min-h-0 bg-white flex overflow-hidden" style="--van-sidebar-width: 112px; --van-sidebar-font-size: 14px; --van-sidebar-selected-text-color: #1890FF; --van-sidebar-selected-border-color: #1890FF; --van-sidebar-selected-background: #F5F7FF;">
+                        <van-sidebar v-model="active" class="shrink-0 h-full">
+                            <van-sidebar-item title="选项一"></van-sidebar-item>
+                            <van-sidebar-item title="选项二" dot></van-sidebar-item>
+                            <van-sidebar-item title="选项三" badge="5"></van-sidebar-item>
+                            <van-sidebar-item title="禁用项" disabled></van-sidebar-item>
+                        </van-sidebar>
+                        <div class="flex-1 min-w-0 min-h-0 flex flex-col bg-[#f7f8fa]">
+                            <div class="px-4 py-3 text-sm font-medium text-[#333] bg-white border-b border-[#f2f3f5]">内容区</div>
+                            <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+                                <van-cell-group>
+                                    <van-cell title="当前分类" :value="'选项 ' + (active + 1)"></van-cell>
+                                    <van-cell title="说明" value="点击左侧切换"></van-cell>
+                                    <van-cell title="示例信息" value="更贴近真实页面"></van-cell>
+                                </van-cell-group>
+                                <div class="px-4 py-4">
+                                    <van-button type="primary" block color="#1890FF">主要操作</van-button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            }
+        ], 
         rules: ['<strong>选中态</strong>：背景色为浅灰色（#F8F8F8），文字色为品牌色（#0088FF）。', '<strong>默认态</strong>：背景色为白色，文字色为深灰色（#333333）。'] 
     },
-    tabbar: { name: '4.6 标签栏', demos: [{ title: '底部标签', id: 'tabbar', type: 'custom', code: '<van-tabbar v-model="active">...</van-tabbar>' }] },
+    tabbar: { 
+        name: '4.6 标签栏', 
+        demos: [
+            {
+                title: '页面级示例（对标 Vant4）',
+                type: 'vue',
+                setupStr: "return (() => { const active = Vue.ref(0); const tabs = [{ text: '首页', icon: 'home-o' }, { text: '搜索', icon: 'search' }, { text: '消息', icon: 'friends-o', badge: 5 }, { text: '设置', icon: 'setting-o', dot: true }]; const current = Vue.computed(() => tabs[active.value]?.text || ''); return { active, tabs, current }; })();",
+                template: `<div class="h-full min-h-0 bg-[#f7f8fa] flex flex-col overflow-hidden">
+                    <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+                        <div class="p-4 space-y-3">
+                            <div class="text-sm font-medium text-[#333]">当前 Tab：{{ current }}</div>
+                            <van-cell-group inset>
+                                <van-cell title="提示" value="对标 Vant4 页面级示例"></van-cell>
+                                <van-cell title="交互" value="点击底部切换"></van-cell>
+                            </van-cell-group>
+                            <van-cell-group inset>
+                                <van-cell v-for="i in 10" :key="i" :title="'列表项 ' + i" value="内容"></van-cell>
+                            </van-cell-group>
+                        </div>
+                    </div>
+                    <van-tabbar
+                        v-model="active"
+                        fixed
+                        placeholder
+                        safe-area-inset-bottom
+                        active-color="#1890FF"
+                        inactive-color="#969799"
+                    >
+                        <van-tabbar-item
+                            v-for="(t, i) in tabs"
+                            :key="t.text"
+                            :icon="t.icon"
+                            :badge="t.badge"
+                            :dot="t.dot"
+                        >
+                            {{ t.text }}
+                        </van-tabbar-item>
+                    </van-tabbar>
+                </div>`
+            }
+        ] 
+    },
     'grid-nav': {
         name: '4.7 宫格',
-        demos: [{ title: '宫格', type: 'static', html: '<div class="van-grid van-hairline--top"><div class="van-grid-item" style="flex-basis: 25%;"><div class="van-grid-item__content van-grid-item__content--center"><i class="van-icon van-icon-photo-o" style="font-size: 28px;"></i><span class="van-grid-item__text">文字</span></div></div><div class="van-grid-item" style="flex-basis: 25%;"><div class="van-grid-item__content van-grid-item__content--center"><i class="van-icon van-icon-photo-o" style="font-size: 28px;"></i><span class="van-grid-item__text">文字</span></div></div></div>', code: '<van-grid :column-num="4">...</van-grid>' }],
+        demos: [
+            {
+                title: '基础用法',
+                type: 'vue',
+                setupStr: "return { items: [{ icon: 'home-o', text: '首页' }, { icon: 'points', text: '积分' }, { icon: 'gift-o', text: '礼包' }, { icon: 'photo-o', text: '相册' }, { icon: 'location-o', text: '位置' }, { icon: 'service-o', text: '客服' }, { icon: 'todo-list-o', text: '待办' }, { icon: 'setting-o', text: '设置' }], onClick: (item) => vant.showToast(item.text) };",
+                template: `<div class="-mx-4 -mb-4 bg-[#f7f8fa] p-4">
+                    <van-grid :column-num="4" :gutter="8" square clickable>
+                        <van-grid-item v-for="item in items" :key="item.text" :icon="item.icon" :text="item.text" @click="onClick(item)" />
+                    </van-grid>
+                </div>`
+            },
+            {
+                title: '内容横向滚动',
+                type: 'vue',
+                setupStr: "return { items: Array.from({ length: 10 }).map((_, i) => ({ icon: 'photo-o', text: '功能 ' + (i + 1) })), onClick: (item) => vant.showToast(item.text) };",
+                template: `<div class="-mx-4 -mb-4 bg-[#f7f8fa] p-4">
+                    <div class="bg-white rounded-md overflow-hidden border border-[#ebedf0]">
+                        <div class="px-4 pt-3 pb-2 text-xs text-[#969799]">左右滑动查看更多</div>
+                        <van-grid direction="horizontal" :column-num="3" :gutter="8" clickable>
+                            <van-grid-item v-for="item in items" :key="item.text" :icon="item.icon" :text="item.text" @click="onClick(item)" />
+                        </van-grid>
+                    </div>
+                </div>`
+            }
+        ],
         rules: ['宫格项支持2列/3列/4列/5列布局，宫格项间距 8px。']
     },
     steps: { 
         name: '4.8 步骤条', 
-        demos: [{ title: '步骤条', id: 'steps', type: 'custom', code: '<van-steps :active="active">\n  <van-step>买家下单</van-step>\n  <van-step>商家接单</van-step>\n</van-steps>' }], 
+        demos: [
+            {
+                title: '基础用法',
+                type: 'vue',
+                setupStr: 'return { active: Vue.ref(1) };',
+                template: `<div class="-mx-4 -mb-4 bg-[#f7f8fa] p-4">
+                    <div class="bg-white rounded-md p-4 border border-[#ebedf0]">
+                        <van-steps :active="active" active-color="#1890FF" inactive-color="#C8C9CC">
+                            <van-step>买家下单</van-step>
+                            <van-step>商家接单</van-step>
+                            <van-step>买家提货</van-step>
+                            <van-step>交易完成</van-step>
+                        </van-steps>
+                        <div class="mt-4">
+                            <van-button type="primary" size="small" block color="#1890FF" @click="active = (active + 1) % 4">下一步</van-button>
+                        </div>
+                    </div>
+                </div>`
+            },
+            {
+                title: '竖向步骤条',
+                type: 'vue',
+                setupStr: 'return { active: Vue.ref(0) };',
+                template: `<div class="-mx-4 -mb-4 bg-[#f7f8fa] p-4">
+                    <div class="bg-white rounded-md p-4 border border-[#ebedf0]">
+                        <van-steps direction="vertical" :active="active" active-color="#1890FF" inactive-color="#C8C9CC">
+                            <van-step><h3 class="text-sm font-medium text-[#333]">【杭州】已揽件</h3><p class="text-xs text-[#969799]">2026-05-18 10:00</p></van-step>
+                            <van-step><h3 class="text-sm font-medium text-[#333]">【宁波】运输中</h3><p class="text-xs text-[#969799]">2026-05-18 12:30</p></van-step>
+                            <van-step><h3 class="text-sm font-medium text-[#333]">【上海】派送中</h3><p class="text-xs text-[#969799]">2026-05-18 15:10</p></van-step>
+                        </van-steps>
+                    </div>
+                </div>`
+            }
+        ], 
         rules: [
             '<strong>已完成态</strong>：步骤点背景色#0088FF，显示对勾图标。',
             '<strong>进行中态</strong>：步骤点背景色#0088FF，显示数字。',

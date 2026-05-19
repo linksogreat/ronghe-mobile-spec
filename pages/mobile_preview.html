@@ -21,6 +21,9 @@
             padding-bottom: 40px;
             display: none; /* 默认隐藏所有部分，只显示当前激活的 */
         }
+        .mobile-section--fullscreen {
+            padding-bottom: 0;
+        }
         .mobile-section.active {
             display: flex;
             flex-direction: column;
@@ -283,7 +286,11 @@
 
         <!-- 遍历所有组件配置进行渲染 -->
         <template v-for="(comp, key) in components" :key="key">
-            <div :id="key" class="mobile-section" :class="{ active: currentId === key }">
+            <div
+                :id="key"
+                class="mobile-section"
+                :class="{ active: currentId === key, 'mobile-section--fullscreen': key === 'sidebar' || key === 'tabbar' }"
+            >
                 <!-- 模拟导航栏 -->
                 <van-nav-bar
                     :title="comp.name"
@@ -291,8 +298,14 @@
                     @click-left="onBack"
                     class="shrink-0"
                 ></van-nav-bar>
+                <div
+                    v-if="(key === 'sidebar' || key === 'tabbar') && comp.demos && comp.demos.length && comp.demos[0].type === 'vue'"
+                    class="flex-1 overflow-hidden min-h-0"
+                >
+                    <component :is="defineDemoComponent(comp.demos[0])" class="h-full min-h-0"></component>
+                </div>
                 
-                <div class="px-0 py-4 space-y-4 flex-1 overflow-y-auto custom-scrollbar">
+                <div v-else class="px-0 py-4 space-y-4 flex-1 overflow-y-auto custom-scrollbar">
                     <div v-for="(demo, dIndex) in comp.demos" :key="dIndex" class="w-full bg-white rounded-none px-4 py-4 shadow-none border-b border-gray-100">
                         <div class="text-xs text-gray-400 mb-3 pb-2 border-b border-gray-50">{{ demo.title }}</div>
                         
@@ -346,29 +359,107 @@
                                 </van-popover>
                             </div>
                             <!-- Tabs -->
-                            <van-tabs v-if="demo.id === 'tabs'" v-model:active="state.activeTab">
-                                <van-tab title="标签 1"><div class="p-4 text-center text-gray-400">内容 1</div></van-tab>
-                                <van-tab title="标签 2"><div class="p-4 text-center text-gray-400">内容 2</div></van-tab>
-                            </van-tabs>
+                            <div v-if="demo.id === 'tabs'" class="-mx-4 -mb-4">
+                                <van-tabs
+                                    v-model:active="state.activeTab"
+                                    color="#1890FF"
+                                    line-width="20"
+                                    line-height="3"
+                                    animated
+                                    swipeable
+                                    :swipe-threshold="4"
+                                >
+                                    <van-tab title="推荐">
+                                        <div class="bg-[#f7f8fa] py-3">
+                                            <van-cell-group>
+                                                <van-cell title="列表项" value="文本内容"></van-cell>
+                                                <van-cell title="列表项" value="文本内容"></van-cell>
+                                            </van-cell-group>
+                                        </div>
+                                    </van-tab>
+                                    <van-tab title="关注">
+                                        <div class="bg-[#f7f8fa] py-3">
+                                            <van-cell-group>
+                                                <van-cell title="列表项" value="文本内容"></van-cell>
+                                                <van-cell title="列表项" value="文本内容"></van-cell>
+                                            </van-cell-group>
+                                        </div>
+                                    </van-tab>
+                                    <van-tab title="消息">
+                                        <div class="bg-[#f7f8fa] py-3">
+                                            <van-cell-group>
+                                                <van-cell title="列表项" value="文本内容"></van-cell>
+                                                <van-cell title="列表项" value="文本内容"></van-cell>
+                                            </van-cell-group>
+                                        </div>
+                                    </van-tab>
+                                    <van-tab title="我的">
+                                        <div class="bg-[#f7f8fa] py-3">
+                                            <van-cell-group>
+                                                <van-cell title="列表项" value="文本内容"></van-cell>
+                                                <van-cell title="列表项" value="文本内容"></van-cell>
+                                            </van-cell-group>
+                                        </div>
+                                    </van-tab>
+                                </van-tabs>
+                            </div>
                             <!-- Steps -->
-                            <van-steps v-if="demo.id === 'steps'" :active="state.activeStep">
-                                <van-step>买家下单</van-step>
-                                <van-step>商家接单</van-step>
-                            </van-steps>
+                            <div v-if="demo.id === 'steps'" class="-mx-4 -mb-4 bg-[#f7f8fa] p-4">
+                                <div class="bg-white rounded-md p-4 border border-[#ebedf0]">
+                                    <van-steps :active="state.activeStep" active-color="#1890FF" inactive-color="#C8C9CC">
+                                        <van-step>买家下单</van-step>
+                                        <van-step>商家接单</van-step>
+                                        <van-step>买家提货</van-step>
+                                        <van-step>交易完成</van-step>
+                                    </van-steps>
+                                    <div class="mt-4">
+                                        <van-button type="primary" size="small" block color="#1890FF" @click="state.activeStep = (state.activeStep + 1) % 4">下一步</van-button>
+                                    </div>
+                                </div>
+                            </div>
                             <!-- Sidebar -->
-                            <div v-if="demo.id === 'sidebar'" class="flex h-32 border border-gray-100">
-                                <van-sidebar v-model="state.activeSidebar">
-                                    <van-sidebar-item title="标签名" />
-                                    <van-sidebar-item title="标签名" />
-                                </van-sidebar>
-                                <div class="p-4 text-sm text-gray-400">右侧内容</div>
+                            <div v-if="demo.id === 'sidebar'" class="-mx-4 -mb-4 bg-[#f7f8fa] p-4">
+                                <div class="flex bg-white" style="height:calc(100vh - 260px);min-height:420px;--van-sidebar-width: 112px; --van-sidebar-font-size: 14px; --van-sidebar-selected-text-color: #1890FF; --van-sidebar-selected-border-color: #1890FF; --van-sidebar-selected-background: #F5F7FF;">
+                                    <van-sidebar v-model="state.activeSidebar" class="shrink-0">
+                                        <van-sidebar-item title="选项一"></van-sidebar-item>
+                                        <van-sidebar-item title="选项二" dot></van-sidebar-item>
+                                        <van-sidebar-item title="选项三" badge="5"></van-sidebar-item>
+                                        <van-sidebar-item title="禁用项" disabled></van-sidebar-item>
+                                    </van-sidebar>
+                                    <div class="flex-1 min-w-0 flex flex-col bg-[#f7f8fa]">
+                                        <div class="px-4 py-3 text-sm font-medium text-[#333] bg-white border-b border-[#f2f3f5]">内容区</div>
+                                        <div class="flex-1 overflow-y-auto custom-scrollbar">
+                                            <van-cell-group>
+                                                <van-cell title="当前分类" :value="'选项 ' + (state.activeSidebar + 1)"></van-cell>
+                                                <van-cell title="说明" value="点击左侧切换"></van-cell>
+                                                <van-cell title="示例信息" value="更贴近真实页面"></van-cell>
+                                            </van-cell-group>
+                                            <div class="px-4 py-4">
+                                                <van-button type="primary" block color="#1890FF">主要操作</van-button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <!-- Tabbar -->
-                            <div v-if="demo.id === 'tabbar'" class="h-16 relative bg-gray-100">
-                                <van-tabbar v-model="state.activeTabbar" :fixed="false" style="position:absolute;">
-                                    <van-tabbar-item icon="home-o">首页</van-tabbar-item>
-                                    <van-tabbar-item icon="search">搜索</van-tabbar-item>
-                                </van-tabbar>
+                            <div v-if="demo.id === 'tabbar'" class="-mx-4 -mb-4 bg-[#f7f8fa]">
+                                <div class="relative h-[320px] bg-white">
+                                    <div class="px-4 pt-4 pb-16">
+                                        <div class="text-sm font-medium text-[#333] mb-2">页面内容区域</div>
+                                        <van-cell-group inset>
+                                            <van-cell title="当前 Tab" :value="['首页','搜索','消息','设置'][state.activeTabbar]"></van-cell>
+                                            <van-cell title="提示" value="底部固定标签栏"></van-cell>
+                                        </van-cell-group>
+                                    </div>
+                                    <div class="absolute left-0 right-0 bottom-0 border-t border-[#f2f3f5]">
+                                        <van-tabbar v-model="state.activeTabbar" :fixed="false" active-color="#1890FF" inactive-color="#969799">
+                                            <van-tabbar-item icon="home-o">首页</van-tabbar-item>
+                                            <van-tabbar-item icon="search">搜索</van-tabbar-item>
+                                            <van-tabbar-item icon="friends-o" badge="5">消息</van-tabbar-item>
+                                            <van-tabbar-item icon="setting-o" dot>设置</van-tabbar-item>
+                                        </van-tabbar>
+                                    </div>
+                                </div>
                             </div>
                             <!-- Radio/Checkbox -->
                             <div v-if="demo.id === 'radio'" class="space-y-2">
@@ -452,6 +543,14 @@
             const searchParams = new URLSearchParams(window.location.search);
             const apiBaseRaw = searchParams.get('apiBase');
             const API_BASE = apiBaseRaw ? apiBaseRaw.replace(/\/+$/, '') : (window.location.protocol === 'file:' ? 'http://localhost:3000' : '');
+            const initialComponent = searchParams.get('component');
+            if (initialComponent) {
+                if (initialComponent === 'icons') {
+                    currentId.value = 'icons-static';
+                } else if (components[initialComponent] || ['color', 'spacing', 'buttons', 'ip-mascot'].includes(initialComponent)) {
+                    currentId.value = initialComponent;
+                }
+            }
 
             const reviveFunctions = (data) => {
                 Object.values(data).forEach(comp => {
@@ -565,6 +664,20 @@
                 return {
                     template: demo.template,
                     setup() {
+                        if (!demo.setup && demo.type === 'vue' && demo.setupStr) {
+                            try {
+                                let fn;
+                                const str = demo.setupStr.trim();
+                                if (str.startsWith('return') || str.startsWith('{')) {
+                                    fn = new Function(demo.setupStr);
+                                } else {
+                                    fn = new Function('return ' + demo.setupStr)();
+                                }
+                                demo.setup = fn;
+                            } catch (e) {
+                                console.error('Failed to init demo setup:', e);
+                            }
+                        }
                         return demo.setup ? demo.setup() : {};
                     }
                 };
