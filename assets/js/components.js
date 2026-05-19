@@ -1053,47 +1053,64 @@ window.RongHeComponents = {
             {
                 title: '完整演示',
                 type: 'vue',
+                setupStr: "return { onClick: (text) => vant.showToast(text) };",
                 template: `
-                    <div>
-                        <div class="van-doc-demo-block__title">基础用法</div>
-                        <van-cell-group>
-                            <van-cell title="单元格" value="内容" />
-                            <van-cell title="单元格" value="内容" label="描述信息" />
-                        </van-cell-group>
+                    <div class="h-full min-h-0 bg-[#f7f8fa] flex flex-col overflow-hidden">
+                        <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar py-3">
+                            <div class="px-4 text-xs text-[#969799] mb-2">基础用法</div>
+                            <van-cell-group :border="false">
+                                <van-cell title="单元格" value="内容" clickable @click="onClick('点击：基础单元格')" />
+                                <van-cell title="展示箭头" is-link clickable @click="onClick('点击：箭头单元格')" />
+                            </van-cell-group>
 
-                        <div class="van-doc-demo-block__title">卡片风格</div>
-                        <van-cell-group inset>
-                            <van-cell title="单元格" value="内容" />
-                            <van-cell title="单元格" value="内容" label="描述信息" />
-                        </van-cell-group>
+                            <div class="px-4 py-3">
+                                <div class="h-px bg-[#ebedf0]"></div>
+                            </div>
 
-                        <div class="van-doc-demo-block__title">单元格大小</div>
-                        <van-cell title="单元格" value="内容" size="large" />
-                        <van-cell title="单元格" value="内容" size="large" label="描述信息" />
+                            <div class="px-4 text-xs text-[#969799] mb-2">个人资料（页面级示例）</div>
+                            <van-cell-group inset :border="false">
+                                <van-cell is-link size="large" clickable @click="onClick('点击：个人资料')">
+                                    <template #title>
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-full bg-[#eef2ff] flex items-center justify-center shrink-0">
+                                                <van-icon name="user-o" color="#1890FF" size="22" />
+                                            </div>
+                                            <div class="min-w-0">
+                                                <div class="text-sm font-medium text-[#333] leading-5">张三</div>
+                                                <div class="text-xs text-[#969799] leading-4">ID：RH-1024</div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <template #value>
+                                        <span class="text-xs text-[#969799]">未认证</span>
+                                    </template>
+                                </van-cell>
+                                <van-cell title="昵称" value="张三" is-link clickable @click="onClick('点击：修改昵称')" />
+                            </van-cell-group>
 
-                        <div class="van-doc-demo-block__title">展示图标</div>
-                        <van-cell title="单元格" value="内容" icon="location-o" />
+                            <div class="px-4 py-3">
+                                <div class="h-px bg-[#ebedf0]"></div>
+                            </div>
 
-                        <div class="van-doc-demo-block__title">展示箭头</div>
-                        <van-cell title="单元格" is-link />
-                        <van-cell title="单元格" is-link value="内容" />
-                        <van-cell title="单元格" is-link arrow-direction="down" value="内容" />
-                        
-                        <div class="van-doc-demo-block__title">分组标题</div>
-                        <van-cell-group title="分组 1">
-                            <van-cell title="单元格" value="内容" />
-                        </van-cell-group>
-                        <van-cell-group title="分组 2">
-                            <van-cell title="单元格" value="内容" />
-                        </van-cell-group>
-                        
-                        <div class="van-doc-demo-block__title">使用插槽</div>
-                        <van-cell value="内容" is-link>
-                            <template #title>
-                                <span class="custom-title" style="margin-right: 4px; vertical-align: middle;">单元格</span>
-                                <van-tag type="primary">标签</van-tag>
-                            </template>
-                        </van-cell>
+                            <div class="px-4 text-xs text-[#969799] mb-2">联系方式（图标 + 右侧内容）</div>
+                            <van-cell-group inset :border="false">
+                                <van-cell title="手机号" value="138****8000" icon="phone-o" is-link clickable @click="onClick('点击：手机号')" />
+                                <van-cell title="邮箱" value="zhangsan@ronghe.com" icon="envelop-o" is-link clickable @click="onClick('点击：邮箱')" />
+                                <van-cell title="地址" value="浙江省 杭州市" icon="location-o" is-link arrow-direction="down" clickable @click="onClick('点击：地址')" />
+                            </van-cell-group>
+
+                            <div class="px-4 py-3">
+                                <div class="h-px bg-[#ebedf0]"></div>
+                            </div>
+
+                            <van-cell-group inset :border="false">
+                                <van-cell center clickable @click="onClick('点击：退出登录')">
+                                    <template #title>
+                                        <div class="w-full text-center text-[#ee0a24] font-medium">退出登录</div>
+                                    </template>
+                                </van-cell>
+                            </van-cell-group>
+                        </div>
                     </div>
                 `
             }

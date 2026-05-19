@@ -289,7 +289,7 @@
             <div
                 :id="key"
                 class="mobile-section"
-                :class="{ active: currentId === key, 'mobile-section--fullscreen': key === 'sidebar' || key === 'tabbar' }"
+                :class="{ active: currentId === key, 'mobile-section--fullscreen': key === 'sidebar' || key === 'tabbar' || key === 'cell' }"
             >
                 <!-- 模拟导航栏 -->
                 <van-nav-bar
@@ -299,7 +299,7 @@
                     class="shrink-0"
                 ></van-nav-bar>
                 <div
-                    v-if="(key === 'sidebar' || key === 'tabbar') && comp.demos && comp.demos.length && comp.demos[0].type === 'vue'"
+                    v-if="(key === 'sidebar' || key === 'tabbar' || key === 'cell') && comp.demos && comp.demos.length && comp.demos[0].type === 'vue'"
                     class="flex-1 overflow-hidden min-h-0"
                 >
                     <component :is="defineDemoComponent(comp.demos[0])" class="h-full min-h-0"></component>
