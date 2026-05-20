@@ -729,6 +729,84 @@ window.RongHeComponents = {
                         </div>
                     </div>
                 `
+            },
+            {
+                title: '网格表单（单/复选框）',
+                type: 'vue',
+                setup: () => {
+                    const { ref } = Vue;
+                    return { radioVal: ref('1'), checkboxVal: ref(['1']) };
+                },
+                template: `
+                    <div class="p-4">
+                        <div class="text-xs text-[#969799] mb-2">单选区</div>
+                        <van-radio-group v-model="radioVal" direction="horizontal" class="grid grid-cols-3 gap-y-3">
+                            <van-radio name="1" icon-size="16px">选项1</van-radio>
+                            <van-radio name="2" icon-size="16px">选项2</van-radio>
+                            <van-radio name="3" disabled icon-size="16px">已禁用</van-radio>
+                            <van-radio name="4" icon-size="16px">选项4</van-radio>
+                        </van-radio-group>
+
+                        <div class="mt-4 text-xs text-[#969799] mb-2">复选区</div>
+                        <van-checkbox-group v-model="checkboxVal" direction="horizontal" class="grid grid-cols-3 gap-y-3">
+                            <van-checkbox name="1" shape="square" icon-size="16px">选项1</van-checkbox>
+                            <van-checkbox name="2" shape="square" icon-size="16px">选项2</van-checkbox>
+                            <van-checkbox name="3" disabled shape="square" icon-size="16px">已禁用</van-checkbox>
+                            <van-checkbox name="4" shape="square" icon-size="16px">选项4</van-checkbox>
+                        </van-checkbox-group>
+                    </div>
+                `
+            },
+            {
+                title: '纯文本列表（右侧打勾）',
+                type: 'vue',
+                setup: () => {
+                    const { ref } = Vue;
+                    return { active: ref(0), items: ['可选项-未选', '可选项-已选', '可选项-未选'] };
+                },
+                template: `
+                    <div class="flex flex-col">
+                        <div
+                            v-for="(item, index) in items"
+                            :key="index"
+                            @click="active = index"
+                            class="flex items-center justify-between px-4 py-3 border-b border-[#f2f3f5] cursor-pointer active:bg-[#f5f5f5] select-none"
+                        >
+                            <span class="text-[14px]" :class="active === index ? 'text-[#1890FF]' : 'text-[#333333]'">{{ item }}</span>
+                            <van-icon v-show="active === index" name="success" color="#1890FF" size="16" />
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: '带辅助信息列表（样式二）',
+                type: 'vue',
+                setup: () => {
+                    const { ref } = Vue;
+                    return { checked: ref(false) };
+                },
+                template: `
+                    <div class="flex flex-col">
+                        <div class="flex items-start gap-3 px-4 py-3 border-b border-[#f2f3f5] cursor-pointer active:bg-[#f5f5f5] select-none" @click="checked = !checked">
+                            <div class="w-[18px] h-[18px] rounded-full border flex items-center justify-center transition-all duration-200 mt-[2px]" :class="checked ? 'bg-[#1890FF] border-[#1890FF]' : 'border-[#D9D9D9] bg-white'">
+                                <van-icon v-show="checked" name="success" color="white" size="12" />
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-[14px] leading-[22px]" :class="checked ? 'text-[#1890FF]' : 'text-[#333333]'">可选项-未选</span>
+                                <span class="text-[12px] text-[#999999] leading-[18px] mt-[2px]">这是次级说明文本内容</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 px-4 py-3 border-b border-[#f2f3f5] select-none opacity-60">
+                            <div class="w-[18px] h-[18px] rounded-full border border-[#C2C2C2] bg-[#C2C2C2] flex items-center justify-center mt-[2px]">
+                                <van-icon name="success" color="white" size="12" />
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-[14px] text-[#C2C2C2] leading-[22px]">已选-不可修改样式</span>
+                                <span class="text-[12px] text-[#C2C2C2] leading-[18px] mt-[2px]">这是只读状态的说明文本</span>
+                            </div>
+                        </div>
+                    </div>
+                `
             }
         ]
     },
