@@ -1579,7 +1579,101 @@ window.RongHeComponents = {
         ]
     },
     image: { name: '6.16 图片', demos: [{ title: '基础用法', type: 'simple', component: 'van-image', props: { width: '100', height: '100', src: 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%22100%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23eeeeee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22sans-serif%22%20font-size%3D%2214%22%20fill%3D%22%23999%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3EImage%3C%2Ftext%3E%3C%2Fsvg%3E' }, code: '<van-image width="100" height="100" src="..." />' }] },
-    uploader: { name: '5.14 文件上传', demos: [{ title: '文件上传', id: 'uploader', type: 'custom', code: '<van-uploader v-model="fileList" multiple />' }] },
+    uploader: {
+        name: '5.14 文件/图片上传',
+        rules: [
+            '<strong>全局视觉属性</strong>：主色 #1890FF，主要文本 #333333，提示文字 #999999，占位/禁用图标 #C2C2C2，背景色 #F7F8FA/#F5F5F5，必填星号 #EE0A24。',
+            '<strong>附件上传</strong>：支持 docx, xlsx, pdf, jpg 等格式，单文件 ≤ 20MB。未上传显示灰色提示与蓝色实心按钮；已上传呈块状列表，带蓝色回形针图标和灰色删除图标。',
+            '<strong>图片上传</strong>：建议 ≤ 1200px，最多 8 张，单图 ≤ 20MB，单行展示 4 张（约 80px）。支持上传中遮罩、失败重试、数量上限后隐藏上传入口。'
+        ],
+        demos: [
+            {
+                title: '附件上传（排版优化）',
+                type: 'vue',
+                setup: () => {
+                    const { ref } = Vue;
+                    const fileList = ref([
+                        { url: '#', name: '文件名称文本内容文件...文件名.docx' },
+                        { url: '#', name: '文件名称文本内容文件...文件名.pdf' }
+                    ]);
+                    const onOversize = () => vant.showToast('文件大小不能超过 20MB');
+                    const removeFile = (index) => { fileList.value.splice(index, 1); };
+                    return { fileList, onOversize, removeFile };
+                },
+                template: `
+                    <div class="-mx-4 -my-4 bg-[#f7f8fa] p-4">
+                        <div class="text-xs text-[#969799] mb-2">附件上传</div>
+                        <div class="bg-white rounded-xl border border-[#ebedf0] p-4">
+                            <div class="text-[13px] text-[#646566] leading-5">
+                                单个文件大小不超过 20MB，支持格式 docx、xlsx、pdf、jpg 等。
+                            </div>
+                            <div class="mt-3">
+                                <van-uploader v-model="fileList" accept="*" :max-size="20 * 1024 * 1024" @oversize="onOversize">
+                                    <van-button type="primary" size="small" class="!bg-[#1890FF] !border-none !rounded-lg">点击上传</van-button>
+                                </van-uploader>
+                            </div>
+                        </div>
+
+                        <div v-if="fileList.length > 0" class="mt-4 bg-white rounded-xl border border-[#ebedf0] overflow-hidden">
+                            <div
+                                v-for="(file, index) in fileList"
+                                :key="index"
+                                class="flex items-center justify-between px-4 py-3"
+                                :class="index ? 'border-t border-[#f2f3f5]' : ''"
+                            >
+                                <div class="flex items-center gap-2 overflow-hidden flex-1 mr-4">
+                                    <van-icon name="link-o" class="text-[#1890FF] text-base flex-shrink-0" />
+                                    <span class="text-[#1890FF] text-sm truncate">{{ file.name || file.url }}</span>
+                                </div>
+                                <van-icon name="cross" class="text-[#c8c9cc] text-lg flex-shrink-0 cursor-pointer" @click="removeFile(index)" />
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: '图片上传（排版优化）',
+                type: 'vue',
+                setup: () => {
+                    const { ref } = Vue;
+                    const imageList = ref([
+                        { url: 'https://fastly.jsdelivr.net/npm/@vant/assets/leaf.jpeg', status: 'done' },
+                        { url: 'https://fastly.jsdelivr.net/npm/@vant/assets/tree.jpeg', status: 'uploading', message: '上传中' },
+                        { url: 'https://fastly.jsdelivr.net/npm/@vant/assets/sand.jpeg', status: 'failed', message: '上传失败\n重新上传' }
+                    ]);
+                    const onOversize = () => vant.showToast('文件大小不能超过 20MB');
+                    return { imageList, onOversize };
+                },
+                template: `
+                    <div class="-mx-4 -my-4 bg-[#f7f8fa] p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-1">
+                                <div class="text-xs text-[#969799]">上传图片</div>
+                                <span class="text-[#EE0A24]">*</span>
+                            </div>
+                            <div class="text-xs text-[#969799]">最多 8 张</div>
+                        </div>
+
+                        <div class="bg-white rounded-xl border border-[#ebedf0] p-4">
+                            <div class="text-[13px] text-[#646566] leading-5 mb-3">
+                                建议宽高尺寸不超过 1200px，单个图片不超过 20MB。
+                            </div>
+                            <van-uploader
+                                v-model="imageList"
+                                multiple
+                                :max-count="8"
+                                :max-size="20 * 1024 * 1024"
+                                upload-text="上传图片"
+                                upload-icon="photograph"
+                                :preview-size="'calc((100vw - 32px - 24px) / 4)'"
+                                @oversize="onOversize"
+                            />
+                        </div>
+                    </div>
+                `
+            }
+        ]
+    },
     badge: { name: '6.17 徽标', demos: [{ title: '徽标', type: 'static', html: '<div style="margin-top:10px;margin-left:20px;"><div class="van-badge__wrapper"><div class="van-icon van-icon-child" style="font-size:20px"></div><div class="van-badge van-badge--top-right van-badge--fixed">5</div></div></div>', code: '<van-badge :content="5">...</van-badge>' }] },
     swipe: { name: '6.18 轮播', demos: [{ title: '基础轮播', id: 'swipe', type: 'custom', code: '<van-swipe class="my-swipe" :autoplay="3000" indicator-color="white">...</van-swipe>' }] },
     progress: { name: '6.19 进度条', demos: [{ title: '进度条', type: 'simple', component: 'van-progress', props: { percentage: 50 }, code: '<van-progress :percentage="50" />' }] },
