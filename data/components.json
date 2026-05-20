@@ -524,14 +524,19 @@
         "name": "5.12 数字键盘",
         "demos": [
             {
-                "title": "数字键盘",
-                "id": "number-keyboard",
-                "type": "custom",
-                "code": "<van-number-keyboard :show=\"show\" />"
+                "title": "页面级示例",
+                "type": "vue",
+                "setupStr": "return (() => { const active = Vue.ref(0); const show = Vue.ref(false); const codeVal = Vue.ref(''); const amountVal = Vue.ref(''); const codeDisplay = Vue.computed(() => codeVal.value ? codeVal.value.replace(/./g, '•') : ''); const onOpenBasic = () => { show.value = true; }; const onOpenCustom = () => { show.value = true; }; const onBasicInput = (key) => { if (codeVal.value.length >= 6) return; codeVal.value += String(key); if (codeVal.value.length >= 6) show.value = false; }; const onBasicDelete = () => { codeVal.value = codeVal.value.slice(0, -1); }; const onCustomInput = (key) => { const k = String(key); if (k === '.' && amountVal.value.includes('.')) return; if (amountVal.value.includes('.')) { const parts = amountVal.value.split('.'); if (parts[1] && parts[1].length >= 2) return; } amountVal.value += k; }; const onCustomDelete = () => { amountVal.value = amountVal.value.slice(0, -1); }; const onSubmit = () => vant.showToast('已完成输入'); Vue.watch(active, () => { show.value = false; }); return { active, show, codeVal, amountVal, codeDisplay, onOpenBasic, onOpenCustom, onBasicInput, onBasicDelete, onCustomInput, onCustomDelete, onSubmit }; })();",
+                "template": "<div class=\"h-full min-h-0 bg-[#f7f8fa] flex flex-col overflow-hidden\"><van-tabs v-model:active=\"active\" class=\"shrink-0\" color=\"#1890FF\"><van-tab title=\"基础\"></van-tab><van-tab title=\"自定义\"></van-tab></van-tabs><div class=\"flex-1 min-h-0 overflow-y-auto custom-scrollbar py-3\"><div v-if=\"active === 0\"><div class=\"px-4 text-xs text-[#969799] mb-2\">验证码输入（6 位）</div><van-cell-group inset :border=\"false\"><van-field label=\"验证码\" readonly clickable :model-value=\"codeDisplay\" placeholder=\"点击输入\" @click=\"onOpenBasic\" @touchstart.stop=\"onOpenBasic\"></van-field></van-cell-group><div class=\"px-4 py-3\"><div class=\"h-px bg-[#ebedf0]\"></div></div><div class=\"px-4 text-xs text-[#969799] mb-2\">说明</div><van-cell-group inset :border=\"false\"><van-cell title=\"交互\" value=\"点击输入框唤起，失焦自动收起\" /><van-cell title=\"场景\" value=\"验证码/密码等纯数字输入\" /></van-cell-group></div><div v-else><div class=\"px-4 text-xs text-[#969799] mb-2\">金额输入（带小数点 + 完成键）</div><van-cell-group inset :border=\"false\"><van-field label=\"金额\" readonly clickable :model-value=\"amountVal\" placeholder=\"0.00\" @click=\"onOpenCustom\" @touchstart.stop=\"onOpenCustom\"><template #right-icon><span class=\"text-xs text-[#969799]\">元</span></template></van-field></van-cell-group><div class=\"px-4 py-3\"><div class=\"h-px bg-[#ebedf0]\"></div></div><div class=\"px-4 text-xs text-[#969799] mb-2\">操作</div><div class=\"px-4\"><van-button type=\"primary\" block color=\"#1890FF\" @click=\"onSubmit\">提交</van-button></div></div></div><van-number-keyboard v-if=\"active === 0\" :show=\"show\" :maxlength=\"6\" @blur=\"show = false\" @input=\"onBasicInput\" @delete=\"onBasicDelete\" /><van-number-keyboard v-else :show=\"show\" theme=\"custom\" extra-key=\".\" close-button-text=\"完成\" @blur=\"show = false\" @input=\"onCustomInput\" @delete=\"onCustomDelete\" /></div>",
+                "code": "<van-field readonly clickable :model-value=\"value\" @click=\"show = true\" />\n<van-number-keyboard :show=\"show\" @input=\"onInput\" @delete=\"onDelete\" @blur=\"show = false\" />\n\n<van-number-keyboard\n  :show=\"show\"\n  theme=\"custom\"\n  extra-key=\".\"\n  close-button-text=\"完成\"\n  @input=\"onInput\"\n  @delete=\"onDelete\"\n  @blur=\"show = false\"\n/>"
             }
         ],
         "rules": [
-            "<strong>自定义键盘</strong>：支持带小数点+清空键+完成键；完成键为蓝色主按钮。"
+            "<strong>唤起方式</strong>：通过输入框点击触发；输入框建议只读（readonly）避免系统键盘与数字键盘冲突。",
+            "<strong>收起方式</strong>：失焦自动收起；自定义键盘可提供“完成”关闭按钮。",
+            "<strong>键盘类型</strong>：基础模式适用于验证码/纯数字；自定义模式支持 extra-key（如小数点）与 close-button-text。",
+            "<strong>视觉</strong>：页面背景 #F7F8FA；输入区域建议使用 CellGroup inset；主要按钮色 #1890FF。",
+            "<strong>长度限制</strong>：验证码类建议 maxlength=6；金额输入建议结合业务做小数位校验与格式化。"
         ]
     },
     "form": {

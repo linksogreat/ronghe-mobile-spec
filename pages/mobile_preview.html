@@ -289,7 +289,7 @@
             <div
                 :id="key"
                 class="mobile-section"
-                :class="{ active: currentId === key, 'mobile-section--fullscreen': key === 'sidebar' || key === 'tabbar' || key === 'cell' || key === 'search' || key === 'radio' }"
+                :class="{ active: currentId === key, 'mobile-section--fullscreen': key === 'sidebar' || key === 'tabbar' || key === 'cell' || key === 'search' || key === 'radio' || key === 'keyboard' }"
             >
                 <!-- 模拟导航栏 -->
                 <van-nav-bar
@@ -303,7 +303,7 @@
                 </div>
                 <template v-else>
                     <div
-                        v-if="(key === 'sidebar' || key === 'tabbar' || key === 'cell' || key === 'search' || key === 'radio') && comp.demos && comp.demos.length && comp.demos[0].type === 'vue'"
+                        v-if="(key === 'sidebar' || key === 'tabbar' || key === 'cell' || key === 'search' || key === 'radio' || key === 'keyboard') && comp.demos && comp.demos.length && comp.demos[0].type === 'vue'"
                         class="flex-1 overflow-hidden min-h-0"
                     >
                         <div v-if="key === 'radio'" class="h-full min-h-0 flex flex-col overflow-hidden">
