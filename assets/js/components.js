@@ -109,133 +109,187 @@ window.RongHeComponents = {
         ],
         demos: [
             {
-                title: '一、基础样式搜索（纯搜索核心组件）',
+                title: '页面级示例',
+                type: 'vue',
+                setup: () => {
+                    const { ref, computed } = Vue;
+                    const value = ref('');
+                    const hotTags = ref(['西湖', '灵隐寺', '西溪湿地', '龙井', '运维中心']);
+                    const history = ref(['杭州', '巡检', '报修', '联系人']);
+                    const baseResults = ref(['杭州', '杭州东站', '杭州西站', '西湖风景区', '灵隐寺', '西溪湿地', '运维中心', '工单列表', '报修进度']);
+                    const results = computed(() => {
+                        const v = value.value.trim();
+                        if (!v) return [];
+                        return baseResults.value.filter((x) => x.includes(v)).slice(0, 8);
+                    });
+                    const onSearch = (val) => vant.showToast('搜索：' + (val || value.value));
+                    const onCancel = () => { value.value = ''; vant.showToast('已取消'); };
+                    const onTag = (tag) => { value.value = tag; };
+                    const onSelect = (text) => { value.value = text; vant.showToast('选择：' + text); };
+                    return { value, hotTags, history, results, onSearch, onCancel, onTag, onSelect };
+                },
+                template: `
+                    <div class="h-full min-h-0 bg-[#f7f8fa] flex flex-col overflow-hidden">
+                        <div class="bg-white">
+                            <van-search
+                                v-model="value"
+                                show-action
+                                placeholder="请输入搜索关键词"
+                                @search="onSearch"
+                            >
+                                <template #action>
+                                    <div @click="onCancel">取消</div>
+                                </template>
+                            </van-search>
+                        </div>
+                        <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar py-3">
+                            <div class="px-4 text-xs text-[#969799] mb-2">搜索发现</div>
+                            <div class="px-4 flex flex-wrap gap-2">
+                                <van-tag v-for="tag in hotTags" :key="tag" plain type="primary" @click="onTag(tag)">{{ tag }}</van-tag>
+                            </div>
+                            <div class="px-4 py-3">
+                                <div class="h-px bg-[#ebedf0]"></div>
+                            </div>
+
+                            <div class="px-4 text-xs text-[#969799] mb-2">搜索历史</div>
+                            <van-cell-group inset :border="false">
+                                <van-cell v-for="item in history" :key="item" :title="item" is-link clickable @click="onTag(item)"></van-cell>
+                            </van-cell-group>
+
+                            <div class="px-4 py-3">
+                                <div class="h-px bg-[#ebedf0]"></div>
+                            </div>
+
+                            <div v-if="value" class="px-4 text-xs text-[#969799] mb-2">搜索结果</div>
+                            <div v-if="value && results.length" class="px-4">
+                                <van-cell-group inset :border="false">
+                                    <van-cell v-for="r in results" :key="r" :title="r" clickable @click="onSelect(r)"></van-cell>
+                                </van-cell-group>
+                            </div>
+                            <div v-if="value && !results.length" class="px-4">
+                                <van-empty description="暂无结果"></van-empty>
+                            </div>
+                        </div>
+                    </div>
+                `
+            }
+            ,
+            {
+                title: '原交互示例：卡片选择（横向）',
                 type: 'vue',
                 setup: () => {
                     const { ref } = Vue;
-                    const val = ref('');
-                    const focused = ref(false);
-                    const onSearch = () => vant.showToast('搜索: ' + val.value);
-                    const onCancel = () => { val.value = ''; focused.value = false; vant.showToast('已取消'); };
-                    const onClear = () => { val.value = ''; };
-                    return { val, focused, onSearch, onCancel, onClear };
+                    const active = ref(0);
+                    const cards = ['选择文本', '选择文本', '选择文本', '选择文本'];
+                    return { active, cards };
                 },
                 template: `
-                    <div class="w-full flex flex-col gap-4">
-                        <div class="text-xs text-gray-400">状态演示 (点击输入框体验交互)</div>
-                        <div class="flex items-center w-[375px] overflow-hidden">
-                            <div 
-                                class="h-[40px] bg-[#F7F8FA] rounded-[20px] flex items-center px-[12px] transition-all duration-300 box-border" 
-                                :style="{ 
-                                    width: focused ? '294px' : '345px',
-                                    border: focused ? '2px solid #0088FF' : '2px solid transparent' 
-                                }"
+                    <div class="flex gap-2 p-4 overflow-x-auto custom-scrollbar">
+                        <div
+                            v-for="(card, index) in cards"
+                            :key="index"
+                            @click="active = index"
+                            class="flex-shrink-0 w-20 flex flex-col items-center gap-2 cursor-pointer transition-all duration-200"
+                        >
+                            <div
+                                class="w-20 h-20 rounded flex items-center justify-center transition-all duration-200"
+                                :class="active === index ? 'bg-[#E6F7FF] border border-[#1890FF]' : 'bg-[#F5F5F5] border border-transparent'"
                             >
-                                <van-icon name="search" size="16px" :color="focused || val ? '#333' : '#C8C9CC'" />
-                                <input 
-                                    v-model="val"
-                                    @focus="focused = true"
-                                    class="flex-1 bg-transparent border-none outline-none h-full ml-[8px] text-[14px] text-[#333] placeholder-[#C8C9CC] caret-[#333]"
-                                    placeholder="搜索"
-                                    @keyup.enter="onSearch"
-                                />
-                                <van-icon v-if="val" name="clear" size="16px" color="#C8C9CC" @click="onClear" />
+                                <van-icon name="photo-o" size="24" :color="active === index ? '#1890FF' : '#999999'"></van-icon>
                             </div>
-                            <div 
-                                class="ml-[12px] text-[14px] text-[#333] whitespace-nowrap overflow-hidden transition-all duration-300 flex items-center justify-center cursor-pointer"
-                                :style="{ width: focused ? '51px' : '0', opacity: focused ? 1 : 0 }"
-                                @click="onCancel"
-                            >
-                                取消
-                            </div>
+                            <span class="text-xs transition-colors duration-200" :class="active === index ? 'text-[#1890FF]' : 'text-[#333333]'">{{ card }}</span>
                         </div>
                     </div>
                 `
             },
             {
-                title: '变体 1：带前置下拉选择器的复合搜索框',
+                title: '原交互示例：网格表单（单/复选）',
                 type: 'vue',
                 setup: () => {
                     const { ref } = Vue;
-                    const val = ref('');
-                    const focused = ref(false);
-                    const showPopover = ref(false);
-                    const actions = [{ text: '商品' }, { text: '店铺' }, { text: '服务' }];
-                    const selectedAction = ref(actions[0]);
-                    const onSelect = (action) => { selectedAction.value = action; };
-                    return { val, focused, showPopover, actions, selectedAction, onSelect };
+                    const radioVal = ref('1');
+                    const checkboxVal = ref(['1']);
+                    return { radioVal, checkboxVal };
                 },
                 template: `
-                    <div class="w-[345px] h-[40px] bg-[#F7F8FA] rounded-[20px] flex items-center px-[12px] box-border transition-all duration-200"
-                        :style="{ border: focused ? '2px solid #0088FF' : '2px solid transparent' }"
-                    >
-                        <van-popover v-model:show="showPopover" :actions="actions" @select="onSelect" placement="bottom-start">
-                            <template #reference>
-                                <div class="flex items-center mr-[12px] h-full cursor-pointer min-w-[60px]">
-                                    <span class="text-[14px] text-[#333] mr-[4px]">{{ selectedAction.text }}</span>
-                                    <van-icon name="arrow-down" size="12px" color="#333" />
-                                </div>
-                            </template>
-                        </van-popover>
-                        
-                        <div class="flex-1 flex items-center h-full">
-                            <input 
-                                v-model="val"
-                                @focus="focused = true"
-                                @blur="focused = false"
-                                class="flex-1 bg-transparent border-none outline-none h-full text-[14px] text-[#333] placeholder-[#C8C9CC]"
-                                placeholder="搜索"
-                            />
-                            <van-icon v-if="val" name="clear" size="16px" color="#C8C9CC" @click="val = ''" />
+                    <div class="p-4 bg-white">
+                        <div class="mb-4">
+                            <div class="text-sm text-gray-500 mb-2">单选区 (Radio)</div>
+                            <van-radio-group v-model="radioVal" direction="horizontal" class="grid grid-cols-3 gap-y-3">
+                                <van-radio name="1" icon-size="16px">选项1</van-radio>
+                                <van-radio name="2" icon-size="16px">选项2</van-radio>
+                                <van-radio name="3" disabled icon-size="16px">已禁用</van-radio>
+                                <van-radio name="4" icon-size="16px">选项4</van-radio>
+                            </van-radio-group>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-500 mb-2">复选区 (Checkbox)</div>
+                            <van-checkbox-group v-model="checkboxVal" direction="horizontal" class="grid grid-cols-3 gap-y-3">
+                                <van-checkbox name="1" shape="square" icon-size="16px">选项1</van-checkbox>
+                                <van-checkbox name="2" shape="square" icon-size="16px">选项2</van-checkbox>
+                                <van-checkbox name="3" disabled shape="square" icon-size="16px">已禁用</van-checkbox>
+                                <van-checkbox name="4" shape="square" icon-size="16px">选项4</van-checkbox>
+                            </van-checkbox-group>
                         </div>
                     </div>
                 `
             },
             {
-                title: '变体 2：带右侧固定搜索按钮的搜索框',
+                title: '原交互示例：纯文本列表（右侧打勾）',
                 type: 'vue',
                 setup: () => {
                     const { ref } = Vue;
-                    const val = ref('');
-                    const onSearch = () => vant.showToast('搜索: ' + val.value);
-                    return { val, onSearch };
+                    const active = ref(0);
+                    const items = ['可选项-未选', '可选项-已选', '可选项-未选'];
+                    return { active, items };
                 },
                 template: `
-                    <div class="flex flex-col gap-4">
-                        <div class="flex items-center w-[345px]">
-                            <div class="flex-1 h-[40px] bg-[#F7F8FA] rounded-[20px] flex items-center px-[12px] box-border">
-                                <van-icon name="search" size="16px" color="#C8C9CC" />
-                                <input v-model="val" class="flex-1 bg-transparent border-none outline-none ml-[8px] text-[14px]" placeholder="搜索" />
-                                <van-icon v-if="val" name="clear" size="16px" color="#C8C9CC" @click="val = ''" />
-                            </div>
-                            <div class="ml-[12px] text-[14px] font-medium transition-colors cursor-pointer" 
-                                :class="val ? 'text-[#333]' : 'text-[#C8C9CC]'"
-                                @click="onSearch"
-                            >搜索</div>
+                    <div class="bg-white flex flex-col">
+                        <div
+                            v-for="(item, index) in items"
+                            :key="index"
+                            @click="active = index"
+                            class="flex items-center justify-between p-4 border-b border-[#F0F0F0] cursor-pointer active:bg-[#f5f5f5] transition-all duration-200 select-none"
+                        >
+                            <span class="text-[14px] transition-colors duration-200" :class="active === index ? 'text-[#1890FF]' : 'text-[#333333]'">{{ item }}</span>
+                            <van-icon v-show="active === index" name="success" color="#1890FF" size="16"></van-icon>
                         </div>
-
-                        <div class="flex items-center w-[345px]">
-                            <div class="flex-1 h-[40px] bg-[#F7F8FA] rounded-[20px] flex items-center px-[12px] box-border">
-                                <van-icon name="search" size="16px" color="#C8C9CC" />
-                                <input v-model="val" class="flex-1 bg-transparent border-none outline-none ml-[8px] text-[14px]" placeholder="搜索" />
-                                <van-icon v-if="val" name="clear" size="16px" color="#C8C9CC" @click="val = ''" />
+                    </div>
+                `
+            },
+            {
+                title: '原交互示例：带辅助信息的列表',
+                type: 'vue',
+                setup: () => {
+                    const { ref } = Vue;
+                    const checked = ref(false);
+                    return { checked };
+                },
+                template: `
+                    <div class="bg-white flex flex-col">
+                        <div
+                            class="flex items-start gap-3 p-4 border-b border-[#F0F0F0] cursor-pointer active:bg-[#f5f5f5] transition-all duration-200 select-none"
+                            @click="checked = !checked"
+                        >
+                            <div
+                                class="w-[18px] h-[18px] rounded-full border flex items-center justify-center transition-all duration-200 mt-[2px]"
+                                :class="checked ? 'bg-[#1890FF] border-[#1890FF]' : 'border-[#D9D9D9] bg-white'"
+                            >
+                                <van-icon v-show="checked" name="success" color="white" size="12"></van-icon>
                             </div>
-                            <div class="ml-[12px] h-[40px] px-[12px] border-[2px] rounded-[8px] flex items-center justify-center text-[14px] transition-colors cursor-pointer min-w-[44px]"
-                                :class="val ? 'border-[#333] text-[#333]' : 'border-[#C8C9CC] text-[#C8C9CC]'"
-                                @click="onSearch"
-                            >搜索</div>
+                            <div class="flex flex-col">
+                                <span class="text-[14px] leading-[22px] transition-colors duration-200" :class="checked ? 'text-[#1890FF]' : 'text-[#333333]'">可选项-未选</span>
+                                <span class="text-[12px] text-[#999999] leading-[18px] mt-[2px]">这是次级说明文本内容</span>
+                            </div>
                         </div>
-
-                        <div class="flex items-center w-[345px]">
-                            <div class="flex-1 h-[40px] bg-[#F7F8FA] rounded-[20px] flex items-center px-[12px] box-border">
-                                <van-icon name="search" size="16px" color="#C8C9CC" />
-                                <input v-model="val" class="flex-1 bg-transparent border-none outline-none ml-[8px] text-[14px]" placeholder="搜索" />
-                                <van-icon v-if="val" name="clear" size="16px" color="#C8C9CC" @click="val = ''" />
+                        <div class="flex items-start gap-3 p-4 border-b border-[#F0F0F0] select-none opacity-50">
+                            <div class="w-[18px] h-[18px] rounded-full border border-[#C2C2C2] bg-[#C2C2C2] flex items-center justify-center mt-[2px]">
+                                <van-icon name="success" color="white" size="12"></van-icon>
                             </div>
-                            <div class="ml-[12px] h-[40px] px-[16px] bg-[#0088FF] rounded-[20px] flex items-center justify-center text-[14px] text-white transition-opacity cursor-pointer min-w-[44px]"
-                                :class="val ? 'opacity-100' : 'opacity-50'"
-                                @click="onSearch"
-                            >搜索</div>
+                            <div class="flex flex-col">
+                                <span class="text-[14px] text-[#C2C2C2] leading-[22px]">已选-不可修改样式</span>
+                                <span class="text-[12px] text-[#C2C2C2] leading-[18px] mt-[2px]">这是只读状态的说明文本</span>
+                            </div>
                         </div>
                     </div>
                 `
@@ -564,7 +618,120 @@ window.RongHeComponents = {
             }
         ] 
     },
-    radio: { name: '5.2 选框', demos: [{ title: '单选与多选', id: 'radio', type: 'custom', code: '<van-radio-group v-model="checked">...</van-radio-group>' }] },
+    radio: {
+        name: '5.2 选择框',
+        demos: [
+            {
+                title: '页面级示例',
+                type: 'vue',
+                setup: () => {
+                    const { ref } = Vue;
+                    const cardVal = ref('a');
+                    const listVal = ref('wechat');
+                    const checkVal = ref(['push']);
+                    const toggleCheck = (name) => {
+                        checkVal.value = checkVal.value.includes(name)
+                            ? checkVal.value.filter((x) => x !== name)
+                            : checkVal.value.concat(name);
+                    };
+                    const onSubmit = () => vant.showToast('已保存');
+                    return { cardVal, listVal, checkVal, toggleCheck, onSubmit };
+                },
+                template: `
+                    <div class="h-full min-h-0 bg-[#f7f8fa] flex flex-col overflow-hidden">
+                        <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar py-3">
+                            <div class="px-4 text-xs text-[#969799] mb-2">卡片选择</div>
+                            <div class="px-4">
+                                <van-radio-group v-model="cardVal" class="grid grid-cols-2 gap-3">
+                                    <van-radio name="a" class="w-full">
+                                        <template #default>
+                                            <div class="w-full rounded-xl border px-3 py-3 bg-white" :class="cardVal === 'a' ? 'border-[#1890FF]' : 'border-[#ebedf0]'">
+                                                <div class="text-sm font-medium text-[#333]">方案 A</div>
+                                                <div class="text-xs text-[#969799] mt-1">推荐配置</div>
+                                            </div>
+                                        </template>
+                                    </van-radio>
+                                    <van-radio name="b" class="w-full">
+                                        <template #default>
+                                            <div class="w-full rounded-xl border px-3 py-3 bg-white" :class="cardVal === 'b' ? 'border-[#1890FF]' : 'border-[#ebedf0]'">
+                                                <div class="text-sm font-medium text-[#333]">方案 B</div>
+                                                <div class="text-xs text-[#969799] mt-1">标准配置</div>
+                                            </div>
+                                        </template>
+                                    </van-radio>
+                                    <van-radio name="c" class="w-full">
+                                        <template #default>
+                                            <div class="w-full rounded-xl border px-3 py-3 bg-white" :class="cardVal === 'c' ? 'border-[#1890FF]' : 'border-[#ebedf0]'">
+                                                <div class="text-sm font-medium text-[#333]">方案 C</div>
+                                                <div class="text-xs text-[#969799] mt-1">自定义</div>
+                                            </div>
+                                        </template>
+                                    </van-radio>
+                                    <van-radio name="d" class="w-full">
+                                        <template #default>
+                                            <div class="w-full rounded-xl border px-3 py-3 bg-white opacity-40" :class="cardVal === 'd' ? 'border-[#1890FF]' : 'border-[#ebedf0]'">
+                                                <div class="text-sm font-medium text-[#333]">方案 D</div>
+                                                <div class="text-xs text-[#969799] mt-1">禁用态</div>
+                                            </div>
+                                        </template>
+                                    </van-radio>
+                                </van-radio-group>
+                            </div>
+
+                            <div class="px-4 py-3">
+                                <div class="h-px bg-[#ebedf0]"></div>
+                            </div>
+
+                            <div class="px-4 text-xs text-[#969799] mb-2">列表选择（Cell + Radio）</div>
+                            <van-radio-group v-model="listVal">
+                                <van-cell-group inset :border="false">
+                                    <van-cell title="微信支付" clickable @click="listVal = 'wechat'">
+                                        <template #right-icon>
+                                            <van-radio name="wechat"></van-radio>
+                                        </template>
+                                    </van-cell>
+                                    <van-cell title="支付宝" clickable @click="listVal = 'alipay'">
+                                        <template #right-icon>
+                                            <van-radio name="alipay"></van-radio>
+                                        </template>
+                                    </van-cell>
+                                    <van-cell title="银行卡" clickable @click="listVal = 'bank'">
+                                        <template #right-icon>
+                                            <van-radio name="bank"></van-radio>
+                                        </template>
+                                    </van-cell>
+                                </van-cell-group>
+                            </van-radio-group>
+
+                            <div class="px-4 py-3">
+                                <div class="h-px bg-[#ebedf0]"></div>
+                            </div>
+
+                            <div class="px-4 text-xs text-[#969799] mb-2">多选（Checkbox）</div>
+                            <van-checkbox-group v-model="checkVal">
+                                <van-cell-group inset :border="false">
+                                    <van-cell title="消息推送" clickable @click="toggleCheck('push')">
+                                        <template #right-icon>
+                                            <van-checkbox name="push"></van-checkbox>
+                                        </template>
+                                    </van-cell>
+                                    <van-cell title="系统更新" clickable @click="toggleCheck('update')">
+                                        <template #right-icon>
+                                            <van-checkbox name="update"></van-checkbox>
+                                        </template>
+                                    </van-cell>
+                                </van-cell-group>
+                            </van-checkbox-group>
+                        </div>
+
+                        <div class="p-3 bg-white border-t border-[#ebedf0]">
+                            <van-button type="primary" block color="#1890FF" @click="onSubmit">保存</van-button>
+                        </div>
+                    </div>
+                `
+            }
+        ]
+    },
     picker: { name: '5.3 选择器', demos: [{ title: '选择器', type: 'static', html: '<div class="van-picker"><div class="van-picker__toolbar"><button class="van-picker__cancel">取消</button><button class="van-picker__confirm" style="color:#0088FF">确认</button></div><div class="van-picker__columns" style="height:150px"><div class="van-picker-column"><ul style="transform:translate3d(0, 50px, 0)"><li class="van-picker-column__item van-picker-column__item--selected">杭州</li><li>宁波</li></ul></div></div></div>', code: '<van-picker :columns="columns" />' }] },
     cascader: { 
         name: '5.4 级联选择器', 

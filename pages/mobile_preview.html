@@ -289,7 +289,7 @@
             <div
                 :id="key"
                 class="mobile-section"
-                :class="{ active: currentId === key, 'mobile-section--fullscreen': key === 'sidebar' || key === 'tabbar' || key === 'cell' }"
+                :class="{ active: currentId === key, 'mobile-section--fullscreen': key === 'sidebar' || key === 'tabbar' || key === 'cell' || key === 'search' || key === 'radio' }"
             >
                 <!-- 模拟导航栏 -->
                 <van-nav-bar
@@ -298,16 +298,20 @@
                     @click-left="onBack"
                     class="shrink-0"
                 ></van-nav-bar>
-                <div
-                    v-if="(key === 'sidebar' || key === 'tabbar' || key === 'cell') && comp.demos && comp.demos.length && comp.demos[0].type === 'vue'"
-                    class="flex-1 overflow-hidden min-h-0"
-                >
-                    <component :is="defineDemoComponent(comp.demos[0])" class="h-full min-h-0"></component>
+                <div v-if="currentId === key && !ready" class="flex-1 min-h-0 flex items-center justify-center text-xs text-gray-400 bg-white">
+                    加载中...
                 </div>
-                
-                <div v-else class="px-0 py-4 space-y-4 flex-1 overflow-y-auto custom-scrollbar">
-                    <div v-for="(demo, dIndex) in comp.demos" :key="dIndex" class="w-full bg-white rounded-none px-4 py-4 shadow-none border-b border-gray-100">
-                        <div class="text-xs text-gray-400 mb-3 pb-2 border-b border-gray-50">{{ demo.title }}</div>
+                <template v-else>
+                    <div
+                        v-if="(key === 'sidebar' || key === 'tabbar' || key === 'cell' || key === 'search' || key === 'radio') && comp.demos && comp.demos.length && comp.demos[0].type === 'vue'"
+                        class="flex-1 overflow-hidden min-h-0"
+                    >
+                        <component :is="defineDemoComponent(comp.demos[0])" class="h-full min-h-0"></component>
+                    </div>
+                    
+                    <div v-else class="px-0 py-4 space-y-4 flex-1 overflow-y-auto custom-scrollbar">
+                        <div v-for="(demo, dIndex) in comp.demos" :key="dIndex" class="w-full bg-white rounded-none px-4 py-4 shadow-none border-b border-gray-100">
+                            <div class="text-xs text-gray-400 mb-3 pb-2 border-b border-gray-50">{{ demo.title }}</div>
                         
                         <!-- 复用组件渲染逻辑 -->
                         <!-- Action Buttons -->
@@ -483,9 +487,11 @@
                             <van-collapse v-if="demo.id === 'collapse'" v-model="state.activeCollapse">
                                 <van-collapse-item title="标题1" name="1">内容</van-collapse-item>
                             </van-collapse>
+                            </div>
                         </div>
                     </div>
                 </div>
+                </template>
             </div>
         </template>
         
@@ -543,6 +549,7 @@
             const searchParams = new URLSearchParams(window.location.search);
             const apiBaseRaw = searchParams.get('apiBase');
             const API_BASE = apiBaseRaw ? apiBaseRaw.replace(/\/+$/, '') : (window.location.protocol === 'file:' ? 'http://localhost:3000' : '');
+            const ready = ref(window.location.protocol === 'file:' && !apiBaseRaw);
             const initialComponent = searchParams.get('component');
             if (initialComponent) {
                 if (initialComponent === 'icons') {
@@ -603,11 +610,15 @@
                     }
                 } catch (e) {
                     console.warn('Failed to load remote data', e);
+                } finally {
+                    ready.value = true;
                 }
             };
 
             onMounted(() => {
-                loadData();
+                if (!(window.location.protocol === 'file:' && !apiBaseRaw)) {
+                    loadData();
+                }
             });
 
             // 扁平化颜色数据以便展示
@@ -706,7 +717,7 @@
             const onSubmit = () => vant.showToast('点击提交');
 
             return {
-                currentId, components, flatColors, commonIcons, customIcons, ipMascots,
+                currentId, components, flatColors, commonIcons, customIcons, ipMascots, ready,
                 state, onBack, triggerAction, defineDemoComponent,
                 onCalendarConfirm, onTimeConfirm, onDateConfirm, onCascaderFinish, onInput, onDelete, onSubmit
             };
