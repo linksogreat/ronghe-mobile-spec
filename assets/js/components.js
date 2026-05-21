@@ -597,217 +597,251 @@ window.RongHeComponents = {
                 type: 'vue',
                 setup: () => {
                     const { ref, computed } = Vue;
-                    const username = ref('');
-                    const company = ref('');
-                    const phone = ref('');
-                    const sms = ref('');
-                    const longLabelVal = ref('');
+
+                    const nameVal = ref('');
+                    const phoneVal = ref('');
+                    const idVal = ref('');
+
+                    const remarkVal = ref('');
+                    const remarkCount = computed(() => String(remarkVal.value || '').length);
+
+                    const customTitleVal = ref('');
                     const twoLineVal = ref('');
-                    const bioVal = ref('');
-                    const emailVal = ref('');
-                    const digit = ref('');
-                    const amount = ref('');
-                    const password = ref('');
-                    const remark = ref('');
-                    const readonlyVal = ref('只读内容');
-                    const disabledVal = ref('禁用内容');
+                    const longTextVal = ref(
+                        '这是一段很长的内容示例，用于展示“填入文本最多 4 行，超出折行 + 展开查看全部”的交互表现。你可以继续输入更多内容来观察换行与展开/收起。'
+                    );
+                    const longTextExpanded = ref(false);
 
-                    const usernameError = ref('');
-                    const phoneError = ref('');
-                    const smsError = ref('');
-                    const bioError = ref('');
-                    const emailError = ref('');
+                    const pickerVal = ref('请选择');
+                    const switchVal = ref(true);
+                    const stepVal = ref(1);
+                    const amountVal = ref('');
 
-                    const phoneDisplay = computed(() => phone.value);
-                    const bioCount = computed(() => String(bioVal.value || '').length);
+                    const emptyVal = ref('');
+                    const emptyTouched = ref(false);
+                    const emptyError = computed(() => (emptyTouched.value && !String(emptyVal.value || '').trim() ? '请输入姓名' : ''));
 
-                    const formatPhone = (val) => {
-                        const digits = String(val || '').replace(/\D/g, '').slice(0, 11);
-                        const p1 = digits.slice(0, 3);
-                        const p2 = digits.slice(3, 7);
-                        const p3 = digits.slice(7, 11);
-                        return [p1, p2, p3].filter(Boolean).join(' ');
+                    const limitVal = ref('');
+                    const limit = 500;
+                    const limitCount = computed(() => String(limitVal.value || '').length);
+                    const limitError = computed(() => (limitCount.value > limit ? `最多可输入 ${limit} 字` : ''));
+
+                    const clampLabelStyle = {
+                        display: '-webkit-box',
+                        '-webkit-line-clamp': 2,
+                        '-webkit-box-orient': 'vertical',
+                        overflow: 'hidden'
                     };
 
-                    const onUsernameBlur = () => {
-                        usernameError.value = username.value ? '' : '请输入用户名';
-                    };
+                    const clampValueStyle = computed(() =>
+                        longTextExpanded.value
+                            ? {}
+                            : {
+                                  display: '-webkit-box',
+                                  '-webkit-line-clamp': 4,
+                                  '-webkit-box-orient': 'vertical',
+                                  overflow: 'hidden'
+                              }
+                    );
 
-                    const onPhoneInput = (val) => {
-                        phone.value = formatPhone(val);
-                        if (phoneError.value) phoneError.value = '';
-                    };
-
-                    const onPhoneBlur = () => {
-                        const digits = phone.value.replace(/\s/g, '');
-                        phoneError.value = digits && digits.length !== 11 ? '请输入 11 位手机号' : '';
-                    };
-
-                    const onSmsBlur = () => {
-                        smsError.value = sms.value && sms.value.length !== 6 ? '请输入 6 位验证码' : '';
-                    };
-
-                    const onBioInput = (val) => {
-                        bioVal.value = String(val || '');
-                        bioError.value = bioCount.value > 100 ? '最多 100 字' : '';
-                    };
-
-                    const onEmailBlur = () => {
-                        if (!emailVal.value) {
-                            emailError.value = '';
-                            return;
-                        }
-                        const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(emailVal.value));
-                        emailError.value = ok ? '' : '邮箱格式不正确';
+                    const autoResize = (e) => {
+                        const el = e && e.target;
+                        if (!el) return;
+                        el.style.height = 'auto';
+                        const max = 20 * 4;
+                        el.style.height = `${Math.min(el.scrollHeight, max)}px`;
+                        el.style.overflowY = el.scrollHeight > max ? 'auto' : 'hidden';
                     };
 
                     const onSubmit = () => {
-                        onUsernameBlur();
-                        onPhoneBlur();
-                        onSmsBlur();
-                        onBioInput(bioVal.value);
-                        onEmailBlur();
-                        if (usernameError.value || phoneError.value || smsError.value || bioError.value || emailError.value) {
+                        emptyTouched.value = true;
+                        if (emptyError.value || limitError.value) {
                             vant.showToast('请完善输入');
                             return;
                         }
                         vant.showToast('提交成功');
                     };
 
+                    const onEmptyBlur = () => {
+                        emptyTouched.value = true;
+                    };
+
+                    const clearAmount = () => {
+                        amountVal.value = '';
+                    };
+
                     return {
-                        username,
-                        company,
-                        phone,
-                        phoneDisplay,
-                        sms,
-                        longLabelVal,
+                        nameVal,
+                        phoneVal,
+                        idVal,
+                        remarkVal,
+                        remarkCount,
+                        customTitleVal,
                         twoLineVal,
-                        bioVal,
-                        bioCount,
-                        emailVal,
-                        digit,
-                        amount,
-                        password,
-                        remark,
-                        readonlyVal,
-                        disabledVal,
-                        usernameError,
-                        phoneError,
-                        smsError,
-                        bioError,
-                        emailError,
-                        onUsernameBlur,
-                        onPhoneInput,
-                        onPhoneBlur,
-                        onSmsBlur,
-                        onBioInput,
-                        onEmailBlur,
-                        onSubmit
+                        longTextVal,
+                        longTextExpanded,
+                        pickerVal,
+                        switchVal,
+                        stepVal,
+                        amountVal,
+                        emptyVal,
+                        emptyError,
+                        limitVal,
+                        limit,
+                        limitCount,
+                        limitError,
+                        clampLabelStyle,
+                        clampValueStyle,
+                        autoResize,
+                        onSubmit,
+                        onEmptyBlur,
+                        clearAmount
                     };
                 },
                 template: `
-                    <div class="h-full min-h-0 bg-[#f7f8fa] flex flex-col overflow-hidden">
-                        <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar py-3">
-                            <div class="px-4 text-xs text-[#969799] mb-2">基础用法</div>
-                            <van-cell-group inset :border="false">
-                                <van-field v-model="username" label="用户名" required placeholder="请输入" clearable :error-message="usernameError" @blur="onUsernameBlur" />
-                                <van-field v-model="company" placeholder="请输入公司名称" clearable>
-                                    <template #label>
-                                        <span>公司名称</span>
-                                        <span class="text-xs text-[#969799] ml-1">选填</span>
-                                    </template>
-                                </van-field>
-                                <van-field
-                                    label="手机号"
-                                    type="tel"
-                                    :model-value="phoneDisplay"
-                                    placeholder="请输入 11 位手机号"
-                                    clearable
-                                    :error-message="phoneError"
-                                    @update:model-value="onPhoneInput"
-                                    @blur="onPhoneBlur"
-                                />
-                                <van-field
-                                    v-model="sms"
-                                    label="验证码"
-                                    placeholder="6 位数字"
-                                    maxlength="6"
-                                    clearable
-                                    :error-message="smsError"
-                                    @blur="onSmsBlur"
-                                >
-                                    <template #button>
-                                        <van-button size="small" type="primary" class="!bg-[#1890FF] !border-none">获取验证码</van-button>
-                                    </template>
-                                </van-field>
-                            </van-cell-group>
-
-                            <div class="px-4 py-3">
-                                <div class="h-px bg-[#ebedf0]"></div>
+                    <div class="h-full min-h-0 flex flex-col overflow-hidden bg-[#f7f8fa] text-[14px]">
+                        <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar bg-white">
+                            <div class="px-4 py-3 text-[#999999]">常规单行文本输入框（基础通用场景）</div>
+                            <div class="px-4">
+                                <div class="border-b border-[#F7F7F7] py-2">
+                                    <div class="flex gap-[20px] items-center">
+                                        <div class="w-[84px] text-[#999999] leading-[20px]" :style="clampLabelStyle">
+                                            姓名<span class="text-[#ee0a24] ml-[2px]">*</span>
+                                        </div>
+                                        <div class="flex-1 min-w-0 max-w-[250px]">
+                                            <input v-model="nameVal" class="w-full bg-transparent outline-none text-[#101010] leading-[20px] placeholder:text-[#999999]" placeholder="请输入姓名" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="border-b border-[#F7F7F7] py-2">
+                                    <div class="flex gap-[20px] items-center">
+                                        <div class="w-[84px] text-[#999999] leading-[20px]" :style="clampLabelStyle">手机号</div>
+                                        <div class="flex-1 min-w-0 max-w-[250px]">
+                                            <input v-model="phoneVal" class="w-full bg-transparent outline-none text-[#101010] leading-[20px] placeholder:text-[#999999]" placeholder="请输入手机号" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="border-b border-[#F7F7F7] py-2">
+                                    <div class="flex gap-[20px] items-center">
+                                        <div class="w-[84px] text-[#999999] leading-[20px]" :style="clampLabelStyle">身份证号</div>
+                                        <div class="flex-1 min-w-0 max-w-[250px]">
+                                            <input v-model="idVal" class="w-full bg-transparent outline-none text-[#101010] leading-[20px] placeholder:text-[#999999]" placeholder="请输入身份证号" />
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="px-4 text-xs text-[#969799] mb-2">样式与校验</div>
-                            <van-cell-group inset :border="false">
-                                <van-field v-model="longLabelVal" label-width="3em" placeholder="标题换行展示" clearable>
-                                    <template #label>
-                                        <div class="whitespace-normal break-words leading-[18px]">标题文本超过三个字</div>
-                                    </template>
-                                </van-field>
-                                <van-field v-model="twoLineVal" label="输入内容两行" label-width="3em" label-align="top" type="textarea" rows="2" placeholder="内容区域固定两行" />
-                                <van-field
-                                    label="长文本字段"
-                                    label-width="3em"
-                                    label-align="top"
-                                    type="textarea"
-                                    :model-value="bioVal"
-                                    rows="2"
-                                    :autosize="{ maxHeight: 120 }"
-                                    placeholder="最多 100 字"
-                                    :error-message="bioError"
-                                    @update:model-value="onBioInput"
-                                >
-                                    <template #right-icon>
-                                        <span class="text-xs" :class="bioCount > 100 ? 'text-[#ee0a24]' : 'text-[#969799]'">{{ bioCount }}/100</span>
-                                    </template>
-                                </van-field>
-                                <van-field v-model="emailVal" label="邮箱" type="text" placeholder="填错会报错" clearable :error-message="emailError" @blur="onEmailBlur" />
-                            </van-cell-group>
-
-                            <div class="px-4 py-3">
-                                <div class="h-px bg-[#ebedf0]"></div>
+                            <div class="px-4 py-3 text-[#999999]">多行文本输入框（含独立备注栏）</div>
+                            <div class="px-4">
+                                <div class="border-b border-[#F7F7F7] py-2">
+                                    <div class="flex gap-[20px] items-start">
+                                        <div class="w-[84px] text-[#999999] leading-[20px]" :style="clampLabelStyle">备注</div>
+                                        <div class="flex-1 min-w-0 max-w-[250px]">
+                                            <textarea v-model="remarkVal" rows="2" class="w-full resize-none bg-transparent outline-none text-[#101010] leading-[20px] placeholder:text-[#999999]" placeholder="请输入" @input="autoResize"></textarea>
+                                            <div class="mt-1 text-right text-[12px]" :class="remarkCount > limit ? 'text-[#ee0a24]' : 'text-[#999999]'">{{ remarkCount }}/{{ limit }}</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="px-4 text-xs text-[#969799] mb-2">类型与能力</div>
-                            <van-cell-group inset :border="false">
-                                <van-field v-model="digit" label="整数" type="digit" placeholder="仅数字" clearable />
-                                <van-field v-model="amount" label="金额" type="number" placeholder="支持小数" clearable>
-                                    <template #right-icon><span class="text-xs text-[#969799]">元</span></template>
-                                </van-field>
-                                <van-field v-model="password" label="密码" type="password" placeholder="请输入密码" clearable />
-                                <van-field
-                                    v-model="remark"
-                                    label="备注"
-                                    type="textarea"
-                                    rows="2"
-                                    autosize
-                                    maxlength="50"
-                                    show-word-limit
-                                    placeholder="请输入备注（最多 50 字）"
-                                />
-                            </van-cell-group>
-
-                            <div class="px-4 py-3">
-                                <div class="h-px bg-[#ebedf0]"></div>
+                            <div class="px-4 py-3 text-[#999999]">自定义扩展输入框（全业务场景适配）</div>
+                            <div class="px-4">
+                                <div class="border-b border-[#F7F7F7] py-2">
+                                    <div class="flex gap-[20px] items-start">
+                                        <div class="w-[84px] text-[#999999] leading-[20px]" :style="clampLabelStyle">
+                                            标题文本超过三个字<span class="text-[#ee0a24] ml-[2px]">*</span>
+                                        </div>
+                                        <div class="flex-1 min-w-0 max-w-[250px]">
+                                            <input v-model="customTitleVal" class="w-full bg-transparent outline-none text-[#101010] leading-[20px] placeholder:text-[#999999]" placeholder="请输入内容" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="border-b border-[#F7F7F7] py-2">
+                                    <div class="flex gap-[20px] items-start">
+                                        <div class="w-[84px] text-[#999999] leading-[20px]" :style="clampLabelStyle">输入内容两行</div>
+                                        <div class="flex-1 min-w-0 max-w-[250px]">
+                                            <textarea v-model="twoLineVal" rows="2" class="w-full resize-none bg-transparent outline-none text-[#101010] leading-[20px] placeholder:text-[#999999]" placeholder="请输入内容"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="border-b border-[#F7F7F7] py-2">
+                                    <div class="flex gap-[20px] items-start">
+                                        <div class="w-[84px] text-[#999999] leading-[20px]" :style="clampLabelStyle">长文本字段</div>
+                                        <div class="flex-1 min-w-0 max-w-[250px]">
+                                            <div class="whitespace-normal break-words text-[#101010] leading-[20px]" :style="clampValueStyle">{{ longTextVal }}</div>
+                                            <div class="mt-1 flex justify-end">
+                                                <span class="text-[#1890FF] leading-[20px]" @click="longTextExpanded = !longTextExpanded">{{ longTextExpanded ? '收起' : '展开' }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="border-b border-[#F7F7F7] py-2">
+                                    <div class="flex gap-[20px] items-center">
+                                        <div class="w-[84px] text-[#999999] leading-[20px]" :style="clampLabelStyle">下拉选择器</div>
+                                        <div class="flex-1 min-w-0 max-w-[250px] flex items-center justify-between">
+                                            <span class="text-[#101010] whitespace-normal break-words leading-[20px]">{{ pickerVal }}</span>
+                                            <van-icon name="arrow" color="#999999" size="14" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="border-b border-[#F7F7F7] py-2">
+                                    <div class="flex gap-[20px] items-center">
+                                        <div class="w-[84px] text-[#999999] leading-[20px]" :style="clampLabelStyle">开关组件</div>
+                                        <div class="flex-1 min-w-0 max-w-[250px] flex justify-end">
+                                            <van-switch v-model="switchVal" size="20" active-color="#1890FF" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="border-b border-[#F7F7F7] py-2">
+                                    <div class="flex gap-[20px] items-center">
+                                        <div class="w-[84px] text-[#999999] leading-[20px]" :style="clampLabelStyle">步进器</div>
+                                        <div class="flex-1 min-w-0 max-w-[250px] flex justify-end">
+                                            <van-stepper v-model="stepVal" min="1" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="border-b border-[#F7F7F7] py-2">
+                                    <div class="flex gap-[20px] items-center">
+                                        <div class="w-[84px] text-[#999999] leading-[20px]" :style="clampLabelStyle">金额</div>
+                                        <div class="flex-1 min-w-0 max-w-[250px] flex items-center gap-2">
+                                            <input v-model="amountVal" class="flex-1 min-w-0 bg-transparent outline-none text-[#101010] leading-[20px] placeholder:text-[#999999]" placeholder="请输入金额" />
+                                            <span class="text-[#999999] leading-[20px]">元</span>
+                                            <van-icon v-if="amountVal" name="clear" color="#999999" size="14" @click="clearAmount" />
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="px-4 text-xs text-[#969799] mb-2">状态</div>
-                            <van-cell-group inset :border="false">
-                                <van-field v-model="readonlyVal" label="只读" readonly />
-                                <van-field v-model="disabledVal" label="禁用" disabled />
-                            </van-cell-group>
+                            <div class="px-4 py-3 text-[#999999]">输入框报错状态（空提示 + 字数超限提示）</div>
+                            <div class="px-4 pb-3">
+                                <div class="border-b py-2" :class="emptyError ? 'border-[#ee0a24]' : 'border-[#F7F7F7]'">
+                                    <div class="flex gap-[20px] items-center">
+                                        <div class="w-[84px] text-[#999999] leading-[20px]" :style="clampLabelStyle">
+                                            活动名称<span class="text-[#ee0a24] ml-[2px]">*</span>
+                                        </div>
+                                        <div class="flex-1 min-w-0 max-w-[250px]">
+                                            <input v-model="emptyVal" class="w-full bg-transparent outline-none text-[#101010] leading-[20px] placeholder:text-[#999999]" placeholder="请输入活动名称" @blur="onEmptyBlur" />
+                                        </div>
+                                    </div>
+                                    <div v-if="emptyError" class="mt-1 pl-[104px] text-[12px] text-[#ee0a24] leading-[18px]">{{ emptyError }}</div>
+                                </div>
+
+                                <div class="border-b py-2" :class="limitError ? 'border-[#ee0a24]' : 'border-[#F7F7F7]'">
+                                    <div class="flex gap-[20px] items-start">
+                                        <div class="w-[84px] text-[#999999] leading-[20px]" :style="clampLabelStyle">内容描述</div>
+                                        <div class="flex-1 min-w-0 max-w-[250px]">
+                                            <textarea v-model="limitVal" rows="2" class="w-full resize-none bg-transparent outline-none text-[#101010] leading-[20px] placeholder:text-[#999999]" placeholder="请输入（最多 500 字）" @input="autoResize"></textarea>
+                                            <div class="mt-1 flex items-start justify-between gap-2">
+                                                <div class="text-[12px] text-[#ee0a24] leading-[18px] min-h-[18px]">{{ limitError }}</div>
+                                                <div class="text-[12px] leading-[18px]" :class="limitError ? 'text-[#ee0a24]' : 'text-[#999999]'">{{ limitCount }}/{{ limit }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="p-3 bg-white border-t border-[#ebedf0]">
+                        <div class="p-3 bg-white border-t border-[#F7F7F7]">
                             <van-button type="primary" block color="#1890FF" @click="onSubmit">提交</van-button>
                         </div>
                     </div>
