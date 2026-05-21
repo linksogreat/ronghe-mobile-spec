@@ -588,7 +588,8 @@ window.RongHeComponents = {
             '<strong>排版</strong>：页面背景 #F7F8FA；推荐使用 CellGroup inset 形成卡片分组；区块标题使用灰色小字号并与卡片保持 8px 间距。',
             '<strong>输入类型</strong>：支持文本、手机号、验证码、整数/数字、密码、多行文本等；按场景选择 type 与键盘。',
             '<strong>状态</strong>：禁用 disabled、只读 readonly、可清空 clearable、错误提示 error-message、字数统计 show-word-limit。',
-            '<strong>交互</strong>：表单类建议在 blur 或提交时校验；错误信息就近展示；提交按钮使用主色 #1890FF。'
+            '<strong>标题与必填</strong>：标题超过 3 字时允许换行；必填用 required 显示红色 *；选填可在 label 右侧用灰色“选填”提示。',
+            '<strong>交互</strong>：表单类建议在 blur 或提交时校验；长文本建议提供字数计数与超限报错；提交按钮使用主色 #1890FF。'
         ],
         demos: [
             {
@@ -597,8 +598,13 @@ window.RongHeComponents = {
                 setup: () => {
                     const { ref, computed } = Vue;
                     const username = ref('');
+                    const company = ref('');
                     const phone = ref('');
                     const sms = ref('');
+                    const longLabelVal = ref('');
+                    const twoLineVal = ref('');
+                    const bioVal = ref('');
+                    const emailVal = ref('');
                     const digit = ref('');
                     const amount = ref('');
                     const password = ref('');
@@ -606,10 +612,14 @@ window.RongHeComponents = {
                     const readonlyVal = ref('只读内容');
                     const disabledVal = ref('禁用内容');
 
+                    const usernameError = ref('');
                     const phoneError = ref('');
                     const smsError = ref('');
+                    const bioError = ref('');
+                    const emailError = ref('');
 
                     const phoneDisplay = computed(() => phone.value);
+                    const bioCount = computed(() => String(bioVal.value || '').length);
 
                     const formatPhone = (val) => {
                         const digits = String(val || '').replace(/\D/g, '').slice(0, 11);
@@ -617,6 +627,10 @@ window.RongHeComponents = {
                         const p2 = digits.slice(3, 7);
                         const p3 = digits.slice(7, 11);
                         return [p1, p2, p3].filter(Boolean).join(' ');
+                    };
+
+                    const onUsernameBlur = () => {
+                        usernameError.value = username.value ? '' : '请输入用户名';
                     };
 
                     const onPhoneInput = (val) => {
@@ -633,10 +647,27 @@ window.RongHeComponents = {
                         smsError.value = sms.value && sms.value.length !== 6 ? '请输入 6 位验证码' : '';
                     };
 
+                    const onBioInput = (val) => {
+                        bioVal.value = String(val || '');
+                        bioError.value = bioCount.value > 100 ? '最多 100 字' : '';
+                    };
+
+                    const onEmailBlur = () => {
+                        if (!emailVal.value) {
+                            emailError.value = '';
+                            return;
+                        }
+                        const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(emailVal.value));
+                        emailError.value = ok ? '' : '邮箱格式不正确';
+                    };
+
                     const onSubmit = () => {
+                        onUsernameBlur();
                         onPhoneBlur();
                         onSmsBlur();
-                        if (phoneError.value || smsError.value) {
+                        onBioInput(bioVal.value);
+                        onEmailBlur();
+                        if (usernameError.value || phoneError.value || smsError.value || bioError.value || emailError.value) {
                             vant.showToast('请完善输入');
                             return;
                         }
@@ -645,20 +676,32 @@ window.RongHeComponents = {
 
                     return {
                         username,
+                        company,
                         phone,
                         phoneDisplay,
                         sms,
+                        longLabelVal,
+                        twoLineVal,
+                        bioVal,
+                        bioCount,
+                        emailVal,
                         digit,
                         amount,
                         password,
                         remark,
                         readonlyVal,
                         disabledVal,
+                        usernameError,
                         phoneError,
                         smsError,
+                        bioError,
+                        emailError,
+                        onUsernameBlur,
                         onPhoneInput,
                         onPhoneBlur,
                         onSmsBlur,
+                        onBioInput,
+                        onEmailBlur,
                         onSubmit
                     };
                 },
@@ -667,7 +710,13 @@ window.RongHeComponents = {
                         <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar py-3">
                             <div class="px-4 text-xs text-[#969799] mb-2">基础用法</div>
                             <van-cell-group inset :border="false">
-                                <van-field v-model="username" label="用户名" placeholder="请输入" clearable />
+                                <van-field v-model="username" label="用户名" required placeholder="请输入" clearable :error-message="usernameError" @blur="onUsernameBlur" />
+                                <van-field v-model="company" placeholder="请输入公司名称" clearable>
+                                    <template #label>
+                                        <span>公司名称</span>
+                                        <span class="text-xs text-[#969799] ml-1">选填</span>
+                                    </template>
+                                </van-field>
                                 <van-field
                                     label="手机号"
                                     type="tel"
@@ -691,6 +740,33 @@ window.RongHeComponents = {
                                         <van-button size="small" type="primary" class="!bg-[#1890FF] !border-none">获取验证码</van-button>
                                     </template>
                                 </van-field>
+                            </van-cell-group>
+
+                            <div class="px-4 py-3">
+                                <div class="h-px bg-[#ebedf0]"></div>
+                            </div>
+
+                            <div class="px-4 text-xs text-[#969799] mb-2">样式与校验</div>
+                            <van-cell-group inset :border="false">
+                                <van-field v-model="longLabelVal" label="标题文本超过三个字" label-width="3em" label-align="top" placeholder="标题换行展示" clearable />
+                                <van-field v-model="twoLineVal" label="输入内容两行" label-width="3em" label-align="top" type="textarea" rows="2" placeholder="内容区域固定两行" />
+                                <van-field
+                                    label="长文本字段"
+                                    label-width="3em"
+                                    label-align="top"
+                                    type="textarea"
+                                    :model-value="bioVal"
+                                    rows="2"
+                                    :autosize="{ maxHeight: 120 }"
+                                    placeholder="最多 100 字"
+                                    :error-message="bioError"
+                                    @update:model-value="onBioInput"
+                                >
+                                    <template #right-icon>
+                                        <span class="text-xs" :class="bioCount > 100 ? 'text-[#ee0a24]' : 'text-[#969799]'">{{ bioCount }}/100</span>
+                                    </template>
+                                </van-field>
+                                <van-field v-model="emailVal" label="邮箱" type="text" placeholder="填错会报错" clearable :error-message="emailError" @blur="onEmailBlur" />
                             </van-cell-group>
 
                             <div class="px-4 py-3">
