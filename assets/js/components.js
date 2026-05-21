@@ -748,7 +748,11 @@ window.RongHeComponents = {
 
                             <div class="px-4 text-xs text-[#969799] mb-2">样式与校验</div>
                             <van-cell-group inset :border="false">
-                                <van-field v-model="longLabelVal" label="标题文本超过三个字" label-width="3em" label-align="top" placeholder="标题换行展示" clearable />
+                                <van-field v-model="longLabelVal" label-width="3em" placeholder="标题换行展示" clearable>
+                                    <template #label>
+                                        <div class="whitespace-normal break-words leading-[18px]">标题文本超过三个字</div>
+                                    </template>
+                                </van-field>
                                 <van-field v-model="twoLineVal" label="输入内容两行" label-width="3em" label-align="top" type="textarea" rows="2" placeholder="内容区域固定两行" />
                                 <van-field
                                     label="长文本字段"
