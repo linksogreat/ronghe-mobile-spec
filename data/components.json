@@ -204,9 +204,44 @@
             {
                 "title": "页面级示例（对标 Vant4）",
                 "type": "vue",
-                "setupStr": "return (() => { const active = Vue.ref(0); const tabs = [{ text: '首页', icon: 'home-o' }, { text: '搜索', icon: 'search' }, { text: '消息', icon: 'friends-o', badge: 5 }, { text: '设置', icon: 'setting-o', dot: true }]; const current = Vue.computed(() => tabs[active.value]?.text || ''); return { active, tabs, current }; })();",
-                "template": "<div class=\"h-full min-h-0 bg-[#f7f8fa] flex flex-col overflow-hidden\"><div class=\"flex-1 min-h-0 overflow-y-auto custom-scrollbar\"><div class=\"p-4 space-y-3\"><div class=\"text-sm font-medium text-[#333]\">当前 Tab：{{ current }}</div><van-cell-group inset><van-cell title=\"提示\" value=\"对标 Vant4 页面级示例\"></van-cell><van-cell title=\"交互\" value=\"点击底部切换\"></van-cell></van-cell-group><van-cell-group inset><van-cell v-for=\"i in 10\" :key=\"i\" :title=\"'列表项 ' + i\" value=\"内容\"></van-cell></van-cell-group></div></div><van-tabbar v-model=\"active\" fixed placeholder safe-area-inset-bottom active-color=\"#1890FF\" inactive-color=\"#969799\"><van-tabbar-item v-for=\"(t, i) in tabs\" :key=\"t.text\" :icon=\"t.icon\" :badge=\"t.badge\" :dot=\"t.dot\">{{ t.text }}</van-tabbar-item></van-tabbar></div>"
+                "setupStr": "return (() => { const { ref, computed, watch } = Vue; const style = ref('basic'); const active = ref(0); const schemes = [ { key: 'basic', label: '常规', activeColor: '#1890FF', inactiveColor: '#969799', styleVars: {}, items: [{ text: '首页', icon: 'home-o' }, { text: '分类', icon: 'apps-o' }, { text: '购物车', icon: 'cart-o' }, { text: '我的', icon: 'user-o' }] }, { key: 'badge', label: '徽标', activeColor: '#1890FF', inactiveColor: '#969799', styleVars: {}, items: [{ text: '首页', icon: 'home-o' }, { text: '消息', icon: 'chat-o', badge: 9 }, { text: '待办', icon: 'todo-list-o', dot: true }, { text: '设置', icon: 'setting-o' }] }, { key: 'text', label: '纯文字', activeColor: '#1890FF', inactiveColor: '#969799', styleVars: {}, items: [{ text: '首页' }, { text: '发现' }, { text: '消息', badge: 5 }, { text: '我的' }] }, { key: 'center', label: '中间按钮', activeColor: '#1890FF', inactiveColor: '#969799', styleVars: {}, items: [{ text: '首页', icon: 'home-o' }, { text: '订单', icon: 'notes-o' }, { text: '发布', type: 'center' }, { text: '消息', icon: 'chat-o', dot: true }, { text: '我的', icon: 'user-o' }] }, { key: 'dark', label: '深色', activeColor: '#22c55e', inactiveColor: '#94a3b8', styleVars: { '--van-tabbar-background': '#0b1220' }, items: [{ text: '首页', icon: 'home-o' }, { text: '行情', icon: 'points' }, { text: '消息', icon: 'chat-o', badge: 2 }, { text: '我的', icon: 'user-o' }] } ]; const currentScheme = computed(() => schemes.find(s => s.key === style.value) || schemes[0]); const currentText = computed(() => currentScheme.value.items[active.value]?.text || ''); const onCenterClick = () => vant.showToast('发布'); watch(style, () => { active.value = 0; }); return { style, active, schemes, currentScheme, currentText, onCenterClick }; })();",
+                "template": "<div class=\"h-full min-h-0 bg-[#f7f8fa] flex flex-col overflow-hidden\"><div class=\"bg-white\"><van-tabs v-model:active=\"style\" color=\"#1890FF\" swipeable><van-tab v-for=\"s in schemes\" :key=\"s.key\" :name=\"s.key\" :title=\"s.label\"></van-tab></van-tabs></div><div class=\"flex-1 min-h-0 flex items-center justify-center\"><div class=\"text-center px-6\"><div class=\"text-[26px] font-semibold text-[#323233] leading-8\">{{ currentText }}</div><div class=\"text-xs text-[#969799] mt-2\">点击底部标签切换（无中间列表内容）</div></div></div><div class=\"relative\"><van-tabbar v-model=\"active\" fixed placeholder safe-area-inset-bottom :active-color=\"currentScheme.activeColor\" :inactive-color=\"currentScheme.inactiveColor\" :style=\"currentScheme.styleVars\"><template v-for=\"(t, i) in currentScheme.items\" :key=\"t.text + i\"><van-tabbar-item v-if=\"t.type !== 'center'\" :icon=\"t.icon\" :badge=\"t.badge\" :dot=\"t.dot\">{{ t.text }}</van-tabbar-item><van-tabbar-item v-else @click=\"onCenterClick\"><template #icon><div class=\"w-12 h-12 rounded-full bg-[#1890FF] flex items-center justify-center -mt-6 shadow-[0_6px_18px_rgba(0,0,0,0.12)]\"><van-icon name=\"plus\" color=\"white\" size=\"22\"></van-icon></div></template><span class=\"opacity-0\">发布</span></van-tabbar-item></template></van-tabbar></div></div>",
+                "code": "<van-tabbar v-model=\"active\" active-color=\"#1890FF\" inactive-color=\"#969799\">\n  <van-tabbar-item icon=\"home-o\">首页</van-tabbar-item>\n  <van-tabbar-item icon=\"chat-o\" badge=\"9\">消息</van-tabbar-item>\n  <van-tabbar-item icon=\"setting-o\" dot>设置</van-tabbar-item>\n</van-tabbar>"
+            },
+            {
+                "title": "常规（图标+文字）",
+                "type": "vue",
+                "setupStr": "return { active: Vue.ref(0) };",
+                "template": "<div class=\"bg-white\"><van-tabbar v-model=\"active\" active-color=\"#1890FF\" inactive-color=\"#969799\"><van-tabbar-item icon=\"home-o\">首页</van-tabbar-item><van-tabbar-item icon=\"apps-o\">分类</van-tabbar-item><van-tabbar-item icon=\"cart-o\">购物车</van-tabbar-item><van-tabbar-item icon=\"user-o\">我的</van-tabbar-item></van-tabbar></div>",
+                "code": "<van-tabbar v-model=\"active\">\n  <van-tabbar-item icon=\"home-o\">首页</van-tabbar-item>\n</van-tabbar>"
+            },
+            {
+                "title": "徽标（badge/dot）",
+                "type": "vue",
+                "setupStr": "return { active: Vue.ref(1) };",
+                "template": "<div class=\"bg-white\"><van-tabbar v-model=\"active\" active-color=\"#1890FF\" inactive-color=\"#969799\"><van-tabbar-item icon=\"home-o\">首页</van-tabbar-item><van-tabbar-item icon=\"chat-o\" badge=\"9\">消息</van-tabbar-item><van-tabbar-item icon=\"todo-list-o\" dot>待办</van-tabbar-item><van-tabbar-item icon=\"setting-o\">设置</van-tabbar-item></van-tabbar></div>",
+                "code": "<van-tabbar-item icon=\"chat-o\" badge=\"9\">消息</van-tabbar-item>\n<van-tabbar-item icon=\"todo-list-o\" dot>待办</van-tabbar-item>"
+            },
+            {
+                "title": "纯文字（无 icon）",
+                "type": "vue",
+                "setupStr": "return { active: Vue.ref(0) };",
+                "template": "<div class=\"bg-white\"><van-tabbar v-model=\"active\" active-color=\"#1890FF\" inactive-color=\"#969799\"><van-tabbar-item>首页</van-tabbar-item><van-tabbar-item>发现</van-tabbar-item><van-tabbar-item badge=\"5\">消息</van-tabbar-item><van-tabbar-item>我的</van-tabbar-item></van-tabbar></div>",
+                "code": "<van-tabbar>\n  <van-tabbar-item>首页</van-tabbar-item>\n</van-tabbar>"
+            },
+            {
+                "title": "深色主题（自定义背景/颜色）",
+                "type": "vue",
+                "setupStr": "return { active: Vue.ref(0) };",
+                "template": "<div class=\"bg-white\"><van-tabbar v-model=\"active\" :style=\"{ '--van-tabbar-background': '#0b1220' }\" active-color=\"#22c55e\" inactive-color=\"#94a3b8\"><van-tabbar-item icon=\"home-o\">首页</van-tabbar-item><van-tabbar-item icon=\"points\">行情</van-tabbar-item><van-tabbar-item icon=\"chat-o\" badge=\"2\">消息</van-tabbar-item><van-tabbar-item icon=\"user-o\">我的</van-tabbar-item></van-tabbar></div>",
+                "code": "<van-tabbar :style=\"{ '--van-tabbar-background': '#0b1220' }\" active-color=\"#22c55e\" inactive-color=\"#94a3b8\">...</van-tabbar>"
             }
+        ],
+        "rules": [
+            "<strong>基础结构</strong>：固定在页面底部，建议配合 placeholder + safe-area-inset-bottom；点击切换对应页面或内容区。",
+            "<strong>类型</strong>：常规（图标+文字）、徽标（badge/dot）、纯文字、带中间操作按钮、深色主题等；同一产品内建议统一 Tab 数量与图标风格。",
+            "<strong>颜色</strong>：active-color 用品牌主色；inactive-color 用中性灰；主题化时同时控制背景色（--van-tabbar-background）。",
+            "<strong>徽标</strong>：badge 用于数字提醒，dot 用于轻提示；避免在所有 Tab 同时展示徽标造成噪音。"
         ]
     },
     "grid-nav": {
