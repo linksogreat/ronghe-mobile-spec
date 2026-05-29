@@ -1012,28 +1012,28 @@
             {
                 "title": "页面级示例",
                 "type": "vue",
-                "setupStr": "return (() => { const images = ['https://fastly.jsdelivr.net/npm/@vant/assets/apple-1.jpeg', 'https://fastly.jsdelivr.net/npm/@vant/assets/apple-2.jpeg', 'https://fastly.jsdelivr.net/npm/@vant/assets/apple-3.jpeg', 'https://fastly.jsdelivr.net/npm/@vant/assets/apple-4.jpeg']; const openAt = (index) => { vant.showImagePreview({ images, startPosition: index, closeable: true, onClose: () => vant.showToast('关闭') }); }; const openSingle = () => { vant.showImagePreview(['https://fastly.jsdelivr.net/npm/@vant/assets/apple-1.jpeg']); }; const openNoIndex = () => { vant.showImagePreview({ images, showIndex: false, closeable: true }); }; return { images, openAt, openSingle, openNoIndex }; })();",
+                "setupStr": "return (() => { const images = ['https://fastly.jsdelivr.net/npm/@vant/assets/apple-1.jpeg', 'https://fastly.jsdelivr.net/npm/@vant/assets/apple-2.jpeg', 'https://fastly.jsdelivr.net/npm/@vant/assets/apple-3.jpeg', 'https://fastly.jsdelivr.net/npm/@vant/assets/apple-4.jpeg']; const openAt = (index) => { vant.showImagePreview({ images, startPosition: index, closeable: true, closeOnClickOverlay: true, onClose: () => vant.showToast('关闭') }); }; const openSingle = () => { vant.showImagePreview({ images: ['https://fastly.jsdelivr.net/npm/@vant/assets/apple-1.jpeg'], closeable: true, closeOnClickOverlay: true }); }; const openNoIndex = () => { vant.showImagePreview({ images, showIndex: false, closeable: true, closeOnClickOverlay: true }); }; return { images, openAt, openSingle, openNoIndex }; })();",
                 "template": "<div class=\"h-full min-h-0 bg-[#f7f8fa] flex flex-col overflow-hidden\"><div class=\"flex-1 min-h-0 overflow-y-auto custom-scrollbar py-3\"><div class=\"px-4 text-xs text-[#969799] mb-2\">触发入口（页面级示例）</div><van-cell-group inset :border=\"false\"><van-cell title=\"单张预览\" value=\"函数调用\" is-link clickable @click=\"openSingle\" /><van-cell title=\"多图预览\" value=\"从第 2 张开始\" is-link clickable @click=\"openAt(1)\" /><van-cell title=\"隐藏索引\" value=\"showIndex=false\" is-link clickable @click=\"openNoIndex\" /></van-cell-group><div class=\"px-4 py-3\"><div class=\"h-px bg-[#ebedf0]\"></div></div><div class=\"px-4 text-xs text-[#969799] mb-2\">图片网格（点击预览）</div><div class=\"px-4 grid grid-cols-4 gap-2\"><div v-for=\"(img, index) in images\" :key=\"img\" class=\"rounded-lg overflow-hidden bg-white border border-[#ebedf0]\" @click=\"openAt(index)\"><van-image :src=\"img\" width=\"100%\" height=\"80\" fit=\"cover\"></van-image></div></div></div></div>",
                 "code": "vant.showImagePreview({\\n  images,\\n  startPosition: 1,\\n  closeable: true,\\n});"
             },
             {
                 "title": "演示场景一：基础用法",
                 "type": "vue",
-                "setupStr": "return { onClick: () => vant.showImagePreview(['https://fastly.jsdelivr.net/npm/@vant/assets/apple-1.jpeg','https://fastly.jsdelivr.net/npm/@vant/assets/apple-2.jpeg']) };",
+                "setupStr": "return { onClick: () => vant.showImagePreview({ images: ['https://fastly.jsdelivr.net/npm/@vant/assets/apple-1.jpeg','https://fastly.jsdelivr.net/npm/@vant/assets/apple-2.jpeg'], closeable: true, closeOnClickOverlay: true }) };",
                 "template": "<van-button type=\"primary\" color=\"#1890FF\" block @click=\"onClick\">打开图片预览</van-button>",
-                "code": "vant.showImagePreview([\\n  'https://fastly.jsdelivr.net/npm/@vant/assets/apple-1.jpeg',\\n  'https://fastly.jsdelivr.net/npm/@vant/assets/apple-2.jpeg',\\n]);"
+                "code": "vant.showImagePreview({\\n  images: [\\n    'https://fastly.jsdelivr.net/npm/@vant/assets/apple-1.jpeg',\\n    'https://fastly.jsdelivr.net/npm/@vant/assets/apple-2.jpeg',\\n  ],\\n  closeable: true,\\n});"
             },
             {
                 "title": "演示场景二：指定初始位置",
                 "type": "vue",
-                "setupStr": "return { onClick: () => vant.showImagePreview({ images: ['https://fastly.jsdelivr.net/npm/@vant/assets/apple-1.jpeg','https://fastly.jsdelivr.net/npm/@vant/assets/apple-2.jpeg'], startPosition: 1 }) };",
+                "setupStr": "return { onClick: () => vant.showImagePreview({ images: ['https://fastly.jsdelivr.net/npm/@vant/assets/apple-1.jpeg','https://fastly.jsdelivr.net/npm/@vant/assets/apple-2.jpeg'], startPosition: 1, closeable: true, closeOnClickOverlay: true }) };",
                 "template": "<van-button plain type=\"primary\" color=\"#1890FF\" block @click=\"onClick\">从第 2 张开始预览</van-button>",
-                "code": "vant.showImagePreview({ images, startPosition: 1 });"
+                "code": "vant.showImagePreview({ images, startPosition: 1, closeable: true });"
             },
             {
                 "title": "演示场景三：展示关闭按钮 + 关闭回调",
                 "type": "vue",
-                "setupStr": "return { onClick: () => vant.showImagePreview({ images: ['https://fastly.jsdelivr.net/npm/@vant/assets/apple-1.jpeg','https://fastly.jsdelivr.net/npm/@vant/assets/apple-2.jpeg'], closeable: true, onClose: () => vant.showToast('关闭') }) };",
+                "setupStr": "return { onClick: () => vant.showImagePreview({ images: ['https://fastly.jsdelivr.net/npm/@vant/assets/apple-1.jpeg','https://fastly.jsdelivr.net/npm/@vant/assets/apple-2.jpeg'], closeable: true, closeOnClickOverlay: true, onClose: () => vant.showToast('关闭') }) };",
                 "template": "<van-button plain type=\"primary\" color=\"#1890FF\" block @click=\"onClick\">带关闭按钮</van-button>",
                 "code": "vant.showImagePreview({ images, closeable: true, onClose() {} });"
             }
