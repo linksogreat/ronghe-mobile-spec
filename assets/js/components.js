@@ -960,6 +960,8 @@ window.RongHeComponents = {
                         </div>
                     </div>
                 `
+                ,
+                code: `<van-radio-group v-model="value">\n  <van-radio name="a">选项 A</van-radio>\n  <van-radio name="b">选项 B</van-radio>\n</van-radio-group>\n\n<van-checkbox-group v-model="list">\n  <van-checkbox name="a">多选 A</van-checkbox>\n</van-checkbox-group>`
             },
             {
                 title: '网格表单（单/复选框）',
@@ -987,6 +989,8 @@ window.RongHeComponents = {
                         </van-checkbox-group>
                     </div>
                 `
+                ,
+                code: `<van-radio-group v-model="radioVal" direction="horizontal">\n  <van-radio name="1">选项1</van-radio>\n</van-radio-group>\n\n<van-checkbox-group v-model="checkboxVal">\n  <van-checkbox name="1" shape="square">选项1</van-checkbox>\n</van-checkbox-group>`
             },
             {
                 title: '纯文本列表（右侧打勾）',
@@ -1008,6 +1012,8 @@ window.RongHeComponents = {
                         </div>
                     </div>
                 `
+                ,
+                code: `<div v-for="(item, index) in items" @click="active = index">\n  <span>{{ item }}</span>\n  <van-icon v-show="active === index" name="success" />\n</div>`
             },
             {
                 title: '带辅助信息列表（样式二）',
@@ -1038,14 +1044,196 @@ window.RongHeComponents = {
                         </div>
                     </div>
                 `
+                ,
+                code: `<van-cell clickable>\n  <template #right-icon>\n    <van-checkbox v-model="checked" />\n  </template>\n</van-cell>`
             }
+        ],
+        rules: [
+            '<strong>基础视觉属性</strong>：主色 #1890FF，文本 #333333/#999999/#C2C2C2，单/复选框尺寸 16px × 16px，未选边框 #D9D9D9，禁用态弱化（降低不透明度）。',
+            '<strong>卡片选择</strong>：未选白底灰边；选中浅色底+蓝边；单选互斥且点击区域应覆盖整个卡片。',
+            '<strong>列表选择</strong>：建议用 Cell 扩大可点击区域；单选用 Radio，复选用 Checkbox；必要时提供次级说明与禁用态。'
         ]
     },
-    picker: { name: '5.3 选择器', demos: [{ title: '选择器', type: 'static', html: '<div class="van-picker"><div class="van-picker__toolbar"><button class="van-picker__cancel">取消</button><button class="van-picker__confirm" style="color:#0088FF">确认</button></div><div class="van-picker__columns" style="height:150px"><div class="van-picker-column"><ul style="transform:translate3d(0, 50px, 0)"><li class="van-picker-column__item van-picker-column__item--selected">杭州</li><li>宁波</li></ul></div></div></div>', code: '<van-picker :columns="columns" />' }] },
-    cascader: { 
-        name: '5.4 级联选择器', 
-        demos: [{ title: '级联选择', id: 'cascader', type: 'custom', code: '<van-cascader v-model="value" :options="options" />' }], 
-        rules: ['<strong>单选模式</strong>：仅支持左右两列布局；选中项右侧显示对勾图标，底部为蓝色主按钮。', '<strong>多选模式</strong>：左右两列布局，左侧为一级分类，右侧为二级选项，支持勾选多个。'] 
+    picker: {
+        name: '5.3 选择器',
+        demos: [
+            {
+                title: '页面级示例',
+                type: 'vue',
+                setupStr: "return (() => { const show = Vue.ref(false); const mode = Vue.ref('city'); const title = Vue.ref('请选择'); const values = Vue.ref([]); const resultCity = Vue.ref('杭州'); const resultTime = Vue.ref('周一-上午'); const resultArea = Vue.ref('浙江/杭州/西湖区'); const cityColumns = [{ text: '杭州', value: 'Hangzhou' }, { text: '宁波', value: 'Ningbo' }, { text: '温州', value: 'Wenzhou' }, { text: '绍兴', value: 'Shaoxing' }, { text: '湖州', value: 'Huzhou' }]; const timeColumns = [[{ text: '周一', value: 'Monday' }, { text: '周二', value: 'Tuesday' }, { text: '周三', value: 'Wednesday' }, { text: '周四', value: 'Thursday' }, { text: '周五', value: 'Friday' }], [{ text: '上午', value: 'Morning' }, { text: '下午', value: 'Afternoon' }, { text: '晚上', value: 'Evening' }]]; const areaColumns = [{ text: '浙江', value: 'Zhejiang', children: [{ text: '杭州', value: 'Hangzhou', children: [{ text: '西湖区', value: 'Xihu' }, { text: '余杭区', value: 'Yuhang' }] }, { text: '温州', value: 'Wenzhou', children: [{ text: '鹿城区', value: 'Lucheng' }, { text: '瓯海区', value: 'Ouhai' }] }] }, { text: '福建', value: 'Fujian', children: [{ text: '福州', value: 'Fuzhou', children: [{ text: '鼓楼区', value: 'Gulou' }, { text: '台江区', value: 'Taijiang' }] }, { text: '厦门', value: 'Xiamen', children: [{ text: '思明区', value: 'Siming' }, { text: '海沧区', value: 'Haicang' }] }] }]; const columns = Vue.computed(() => (mode.value === 'city' ? cityColumns : mode.value === 'time' ? timeColumns : areaColumns)); const open = (m) => { mode.value = m; show.value = true; if (m === 'city') { title.value = '选择城市'; values.value = ['Hangzhou']; } else if (m === 'time') { title.value = '选择时间段'; values.value = ['Monday', 'Morning']; } else { title.value = '选择地区'; values.value = ['Zhejiang', 'Hangzhou', 'Xihu']; } }; const onCancel = () => { show.value = false; }; const onConfirm = ({ selectedOptions, selectedValues }) => { values.value = selectedValues; const text = (selectedOptions || []).map(o => o && o.text).filter(Boolean).join(mode.value === 'time' ? '-' : '/'); if (mode.value === 'city') resultCity.value = text; if (mode.value === 'time') resultTime.value = text; if (mode.value === 'area') resultArea.value = text; show.value = false; vant.showToast('已选择'); }; return { show, title, values, columns, resultCity, resultTime, resultArea, open, onCancel, onConfirm }; })();",
+                template: `
+                    <div class="h-full min-h-0 bg-[#f7f8fa] flex flex-col overflow-hidden">
+                        <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar py-3">
+                            <div class="px-4 text-xs text-[#969799] mb-2">触发入口（页面级示例）</div>
+                            <van-cell-group inset :border="false">
+                                <van-cell title="选择城市" :value="resultCity" is-link clickable @click="open('city')" />
+                                <van-cell title="选择时间段" :value="resultTime" is-link clickable @click="open('time')" />
+                                <van-cell title="选择地区（级联）" :value="resultArea" is-link clickable @click="open('area')" />
+                            </van-cell-group>
+
+                            <div class="px-4 py-3">
+                                <div class="h-px bg-[#ebedf0]"></div>
+                            </div>
+
+                            <div class="px-4 text-xs text-[#969799] mb-2">页面级说明</div>
+                            <div class="px-4 text-sm text-[#323233] leading-6">
+                                选择器用于从有限列表中快速选值；建议通过输入框/Cell 触发，以底部弹层承载选择区域，确认后回填到入口处。
+                            </div>
+                        </div>
+
+                        <van-popup v-model:show="show" position="bottom" round>
+                            <van-picker
+                                :title="title"
+                                v-model="values"
+                                :columns="columns"
+                                @cancel="onCancel"
+                                @confirm="onConfirm"
+                            />
+                        </van-popup>
+                    </div>
+                `,
+                code: `<van-cell title="选择城市" is-link @click="show = true" />\n<van-popup v-model:show="show" position="bottom" round>\n  <van-picker v-model="values" :columns="columns" @confirm="onConfirm" @cancel="show = false" />\n</van-popup>`
+            },
+            {
+                title: '演示场景一：基础用法',
+                type: 'vue',
+                setupStr: "return { columns: [{ text: '杭州', value: 'Hangzhou' }, { text: '宁波', value: 'Ningbo' }, { text: '温州', value: 'Wenzhou' }, { text: '绍兴', value: 'Shaoxing' }, { text: '湖州', value: 'Huzhou' }], onConfirm: ({ selectedOptions }) => vant.showToast(`当前值: ${selectedOptions[0].text}`), onChange: ({ selectedOptions }) => vant.showToast(`当前值: ${selectedOptions[0].text}`), onCancel: () => vant.showToast('取消') };",
+                template: `<van-picker title="标题" :columns="columns" @confirm="onConfirm" @cancel="onCancel" @change="onChange" />`,
+                code: `<van-picker title="标题" :columns="columns" @confirm="onConfirm" @cancel="onCancel" />`
+            },
+            {
+                title: '演示场景二：双向绑定',
+                type: 'vue',
+                setupStr: "return { selectedValues: Vue.ref(['Wenzhou']), columns: [{ text: '杭州', value: 'Hangzhou' }, { text: '宁波', value: 'Ningbo' }, { text: '温州', value: 'Wenzhou' }, { text: '绍兴', value: 'Shaoxing' }, { text: '湖州', value: 'Huzhou' }] };",
+                template: `<van-picker v-model="selectedValues" title="标题" :columns="columns" />`,
+                code: `<van-picker v-model="selectedValues" :columns="columns" />`
+            },
+            {
+                title: '演示场景三：多列选择',
+                type: 'vue',
+                setupStr: "return { columns: [[{ text: '周一', value: 'Monday' }, { text: '周二', value: 'Tuesday' }, { text: '周三', value: 'Wednesday' }, { text: '周四', value: 'Thursday' }, { text: '周五', value: 'Friday' }], [{ text: '上午', value: 'Morning' }, { text: '下午', value: 'Afternoon' }, { text: '晚上', value: 'Evening' }]], onConfirm: ({ selectedOptions }) => vant.showToast(`当前值: ${selectedOptions.map(o => o.text).join('-')}`) };",
+                template: `<van-picker title="标题" :columns="columns" @confirm="onConfirm" />`,
+                code: `<van-picker :columns="columns" @confirm="onConfirm" />`
+            },
+            {
+                title: '演示场景四：级联选择',
+                type: 'vue',
+                setupStr: "return { columns: [{ text: '浙江', value: 'Zhejiang', children: [{ text: '杭州', value: 'Hangzhou', children: [{ text: '西湖区', value: 'Xihu' }, { text: '余杭区', value: 'Yuhang' }] }, { text: '温州', value: 'Wenzhou', children: [{ text: '鹿城区', value: 'Lucheng' }, { text: '瓯海区', value: 'Ouhai' }] }] }, { text: '福建', value: 'Fujian', children: [{ text: '福州', value: 'Fuzhou', children: [{ text: '鼓楼区', value: 'Gulou' }, { text: '台江区', value: 'Taijiang' }] }, { text: '厦门', value: 'Xiamen', children: [{ text: '思明区', value: 'Siming' }, { text: '海沧区', value: 'Haicang' }] }] }], onConfirm: ({ selectedOptions }) => vant.showToast(`当前值: ${selectedOptions.map(o => o.text).join('/')}`) };",
+                template: `<van-picker title="标题" :columns="columns" @confirm="onConfirm" />`,
+                code: `<van-picker :columns="columns" @confirm="onConfirm" />`
+            },
+            {
+                title: '演示场景五：禁用选项',
+                type: 'vue',
+                setupStr: "return { columns: [{ text: '杭州', value: 'Hangzhou', disabled: true }, { text: '宁波', value: 'Ningbo' }, { text: '温州', value: 'Wenzhou' }] };",
+                template: `<van-picker title="标题" :columns="columns" />`,
+                code: `<van-picker :columns="columns" />`
+            },
+            {
+                title: '演示场景六：加载状态',
+                type: 'vue',
+                template: `<van-picker loading title="标题" />`,
+                code: `<van-picker loading />`
+            }
+        ],
+        rules: [
+            '<strong>使用场景</strong>：从有限候选项中选值（城市/时段/类目等）；推荐用输入框或 Cell 触发，避免页面内直接露出选择区。',
+            '<strong>结构</strong>：底部弹层 + 工具栏（取消/确认）+ 选择区；确认后回填入口并关闭弹层。',
+            '<strong>数据</strong>：单列/多列/级联三种列结构；选项可设置 disabled；默认值建议提供，减少空状态。',
+            '<strong>反馈</strong>：确认后可 toast 提示；取消不改值；滚动选择过程不建议频繁 toast（避免打扰）。'
+        ]
+    },
+    cascader: {
+        name: '5.4 级联选择器',
+        demos: [
+            {
+                title: '页面级示例',
+                type: 'vue',
+                setupStr: "return (() => { const showArea = Vue.ref(false); const showCate = Vue.ref(false); const areaText = Vue.ref(''); const cateText = Vue.ref(''); const areaValue = Vue.ref(''); const cateValue = Vue.ref(''); const areaOptions = [{ text: '浙江省', value: '330000', children: [{ text: '杭州市', value: '330100', children: [{ text: '西湖区', value: '330106' }, { text: '余杭区', value: '330110' }] }, { text: '宁波市', value: '330200', children: [{ text: '海曙区', value: '330203' }, { text: '鄞州区', value: '330212' }] }] }, { text: '江苏省', value: '320000', children: [{ text: '南京市', value: '320100', children: [{ text: '玄武区', value: '320102' }, { text: '鼓楼区', value: '320106' }] }, { text: '无锡市', value: '320200', children: [{ text: '梁溪区', value: '320213' }, { text: '滨湖区', value: '320211' }] }] }]; const cateOptions = [{ text: '工单类型', value: 'a', children: [{ text: '巡检', value: 'a1' }, { text: '报修', value: 'a2' }, { text: '保养', value: 'a3' }] }, { text: '优先级', value: 'b', children: [{ text: '高', value: 'b1' }, { text: '中', value: 'b2' }, { text: '低', value: 'b3' }] }]; const openArea = () => (showArea.value = true); const openCate = () => (showCate.value = true); const onFinishArea = ({ selectedOptions }) => { areaText.value = (selectedOptions || []).map(o => o.text).join('/'); showArea.value = false; vant.showToast('已选择'); }; const onFinishCate = ({ selectedOptions }) => { cateText.value = (selectedOptions || []).map(o => o.text).join('/'); showCate.value = false; vant.showToast('已选择'); }; return { showArea, showCate, areaText, cateText, areaValue, cateValue, areaOptions, cateOptions, openArea, openCate, onFinishArea, onFinishCate }; })();",
+                template: `
+                    <div class="h-full min-h-0 bg-[#f7f8fa] flex flex-col overflow-hidden">
+                        <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar py-3">
+                            <div class="px-4 text-xs text-[#969799] mb-2">触发入口（页面级示例）</div>
+                            <van-cell-group inset :border="false">
+                                <van-cell title="所在地区" :value="areaText || '请选择'" is-link clickable @click="openArea" />
+                                <van-cell title="业务分类" :value="cateText || '请选择'" is-link clickable @click="openCate" />
+                            </van-cell-group>
+
+                            <div class="px-4 py-3">
+                                <div class="h-px bg-[#ebedf0]"></div>
+                            </div>
+
+                            <div class="px-4 text-xs text-[#969799] mb-2">页面级说明</div>
+                            <div class="px-4 text-sm text-[#323233] leading-6">
+                                级联选择器适用于多级联动数据（地区/类目）；建议以底部弹层承载，完成选择后自动回填并关闭。
+                            </div>
+                        </div>
+
+                        <van-popup v-model:show="showArea" round position="bottom">
+                            <van-cascader
+                                v-model="areaValue"
+                                title="请选择所在地区"
+                                :options="areaOptions"
+                                @close="showArea = false"
+                                @finish="onFinishArea"
+                            />
+                        </van-popup>
+
+                        <van-popup v-model:show="showCate" round position="bottom">
+                            <van-cascader
+                                v-model="cateValue"
+                                title="请选择业务分类"
+                                :options="cateOptions"
+                                @close="showCate = false"
+                                @finish="onFinishCate"
+                            />
+                        </van-popup>
+                    </div>
+                `,
+                code: `<van-field v-model="text" is-link readonly @click="show = true" />\n<van-popup v-model:show="show" round position="bottom">\n  <van-cascader v-model="value" :options="options" @finish="onFinish" @close="show = false" />\n</van-popup>`
+            },
+            {
+                title: '演示场景一：基础用法',
+                type: 'vue',
+                setupStr: "return { show: Vue.ref(false), fieldValue: Vue.ref(''), cascaderValue: Vue.ref(''), options: [{ text: '浙江省', value: '330000', children: [{ text: '杭州市', value: '330100' }, { text: '宁波市', value: '330200' }] }, { text: '江苏省', value: '320000', children: [{ text: '南京市', value: '320100' }, { text: '无锡市', value: '320200' }] }], onFinish: ({ selectedOptions }) => { show.value = false; fieldValue.value = selectedOptions.map((option) => option.text).join('/'); } };",
+                template: `<div><van-field v-model="fieldValue" is-link readonly label="地区" placeholder="请选择所在地区" @click="show = true" /><van-popup v-model:show="show" round position="bottom"><van-cascader v-model="cascaderValue" title="请选择所在地区" :options="options" @close="show = false" @finish="onFinish" /></van-popup></div>`,
+                code: `<van-cascader v-model="value" :options="options" @finish="onFinish" />`
+            },
+            {
+                title: '演示场景二：自定义颜色',
+                type: 'vue',
+                setupStr: "return { show: Vue.ref(false), fieldValue: Vue.ref(''), cascaderValue: Vue.ref(''), options: [{ text: '浙江省', value: '330000', children: [{ text: '杭州市', value: '330100' }] }, { text: '江苏省', value: '320000', children: [{ text: '南京市', value: '320100' }] }], onFinish: ({ selectedOptions }) => { show.value = false; fieldValue.value = selectedOptions.map((option) => option.text).join('/'); } };",
+                template: `<div><van-field v-model="fieldValue" is-link readonly label="地区" placeholder="请选择所在地区" @click="show = true" /><van-popup v-model:show="show" round position="bottom"><van-cascader v-model="cascaderValue" title="请选择所在地区" :options="options" active-color="#ee0a24" @close="show = false" @finish="onFinish" /></van-popup></div>`,
+                code: `<van-cascader active-color="#ee0a24" />`
+            },
+            {
+                title: '演示场景三：异步加载选项',
+                type: 'vue',
+                setupStr: "return { show: Vue.ref(false), fieldValue: Vue.ref(''), cascaderValue: Vue.ref(''), options: Vue.ref([{ text: '浙江省', value: '330000', children: [] }]), loaded: Vue.ref(false), loadDynamicOptions: ({ value }) => { if (value !== '330000' || loaded.value) return; loaded.value = true; setTimeout(() => { options.value[0].children = [{ text: '杭州市', value: '330100' }, { text: '宁波市', value: '330200' }]; }, 500); }, onFinish: ({ selectedOptions }) => { show.value = false; fieldValue.value = selectedOptions.map((option) => option.text).join('/'); } };",
+                template: `<div><van-field v-model="fieldValue" is-link readonly label="地区" placeholder="请选择所在地区" @click="show = true" /><van-popup v-model:show="show" round position="bottom"><van-cascader v-model="cascaderValue" title="请选择所在地区" :options="options" @close="show = false" @change="loadDynamicOptions" @finish="onFinish" /></van-popup></div>`,
+                code: `<van-cascader :options="options" @change="loadDynamicOptions" />`
+            },
+            {
+                title: '演示场景四：自定义字段名',
+                type: 'vue',
+                setupStr: "return { show: Vue.ref(false), fieldValue: Vue.ref(''), cascaderValue: Vue.ref(''), fieldNames: { text: 'name', value: 'code', children: 'items' }, options: [{ name: '浙江省', code: '330000', items: [{ name: '杭州市', code: '330100' }] }, { name: '江苏省', code: '320000', items: [{ name: '南京市', code: '320100' }] }], onFinish: ({ selectedOptions }) => { show.value = false; fieldValue.value = selectedOptions.map((option) => option.name).join('/'); } };",
+                template: `<div><van-field v-model="fieldValue" is-link readonly label="地区" placeholder="请选择所在地区" @click="show = true" /><van-popup v-model:show="show" round position="bottom"><van-cascader v-model="cascaderValue" title="请选择所在地区" :options="options" :field-names="fieldNames" @close="show = false" @finish="onFinish" /></van-popup></div>`,
+                code: `<van-cascader :field-names="{ text: 'name', value: 'code', children: 'items' }" />`
+            },
+            {
+                title: '演示场景五：自定义选项上方内容',
+                type: 'vue',
+                setupStr: "return { show: Vue.ref(false), fieldValue: Vue.ref(''), cascaderValue: Vue.ref(''), options: [{ text: '浙江省', value: '330000', children: [{ text: '杭州市', value: '330100' }] }, { text: '江苏省', value: '320000', children: [{ text: '南京市', value: '320100' }] }], onFinish: ({ selectedOptions }) => { show.value = false; fieldValue.value = selectedOptions.map((option) => option.text).join('/'); } };",
+                template: `<div><van-field v-model="fieldValue" is-link readonly label="地区" placeholder="请选择所在地区" @click="show = true" /><van-popup v-model:show="show" round position="bottom"><van-cascader v-model="cascaderValue" title="请选择所在地区" :options="options" @close="show = false" @finish="onFinish"><template #options-top="{ tabIndex }"><div style="padding:16px;color:#969799;font-size:14px;">当前为第 {{ tabIndex + 1 }} 级</div></template></van-cascader></van-popup></div>`,
+                code: `<van-cascader>\n  <template #options-top="{ tabIndex }">...</template>\n</van-cascader>`
+            }
+        ],
+        rules: [
+            '<strong>使用场景</strong>：多级联动数据选择（地区/类目）；入口建议为 Field/Cell，减少页面占用。',
+            '<strong>结构</strong>：底部弹层 + 标题栏 + 两列/多列联动；完成选择（finish）后回填并关闭。',
+            '<strong>状态</strong>：支持自定义 active-color；异步加载建议只触发一次并提供 loading/占位反馈。',
+            '<strong>可扩展</strong>：支持 field-names 适配后端数据结构；可通过插槽在选项区上方展示辅助说明。'
+        ]
     },
     datetime: { 
         name: '5.5 时间选择器', 
@@ -1965,7 +2153,217 @@ window.RongHeComponents = {
         rules: ['同意/审批中：背景 #ECF2FE 文字 #0088FF', '警示/拒绝：背景 #FFEEAA 文字 #FF3030', '成功/通过：背景 #E5F9F5 文字 #00C797'] 
     },
     divider: { name: '6.13 分割线', demos: [{ title: '分割线', type: 'simple', component: 'van-divider', text: '文本', code: '<van-divider>文本</van-divider>' }] },
-    empty: { name: '6.15 空状态', demos: [{ title: '空状态', type: 'simple', component: 'van-empty', props: { description: '描述文字' }, code: '<van-empty description="描述文字" />' }] },
+    empty: {
+        name: '5.2 空状态',
+        demos: [
+            {
+                title: '页面级示例',
+                type: 'vue',
+                setupStr: "return (() => { const active = Vue.ref('list'); const onRetry = () => vant.showToast('重试'); const onCreate = () => vant.showToast('去创建'); return { active, onRetry, onCreate }; })();",
+                template: `
+                    <div class="h-full min-h-0 bg-[#f7f8fa] flex flex-col overflow-hidden">
+                        <div class="bg-white">
+                            <van-tabs v-model:active="active" color="#1890FF" class="shrink-0">
+                                <van-tab name="list" title="列表空"></van-tab>
+                                <van-tab name="search" title="搜索空"></van-tab>
+                                <van-tab name="network" title="网络异常"></van-tab>
+                            </van-tabs>
+                        </div>
+
+                        <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+                            <div v-if="active === 'list'" class="h-full min-h-0 flex items-center justify-center">
+                                <van-empty description="暂无数据">
+                                    <van-button round type="primary" color="#1890FF" class="w-[160px]" @click="onCreate">去创建</van-button>
+                                </van-empty>
+                            </div>
+
+                            <div v-else-if="active === 'search'" class="h-full min-h-0 flex flex-col">
+                                <div class="bg-white">
+                                    <van-search model-value="" placeholder="请输入关键字" disabled></van-search>
+                                </div>
+                                <div class="flex-1 min-h-0 flex items-center justify-center">
+                                    <van-empty image="search" description="未找到相关内容"></van-empty>
+                                </div>
+                            </div>
+
+                            <div v-else class="h-full min-h-0 flex items-center justify-center">
+                                <van-empty image="network" description="网络异常，请稍后再试">
+                                    <van-button round type="primary" color="#1890FF" class="w-[160px]" @click="onRetry">点击重试</van-button>
+                                </van-empty>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                code: `<van-empty description="暂无数据">\n  <van-button round type="primary">去创建</van-button>\n</van-empty>`
+            },
+            {
+                title: '演示场景一：基础用法',
+                type: 'vue',
+                template: `<van-empty description="暂无数据"></van-empty>`,
+                code: `<van-empty description="暂无数据" />`
+            },
+            {
+                title: '演示场景二：图片类型（error/network/search）',
+                type: 'vue',
+                setupStr: "return { active: Vue.ref('error') };",
+                template: `
+                    <div class="bg-white">
+                        <van-tabs v-model:active="active">
+                            <van-tab name="error" title="通用错误">
+                                <van-empty image="error" description="出错了"></van-empty>
+                            </van-tab>
+                            <van-tab name="network" title="网络错误">
+                                <van-empty image="network" description="网络异常"></van-empty>
+                            </van-tab>
+                            <van-tab name="search" title="搜索提示">
+                                <van-empty image="search" description="暂无结果"></van-empty>
+                            </van-tab>
+                        </van-tabs>
+                    </div>
+                `,
+                code: `<van-empty image="network" description="网络异常" />`
+            },
+            {
+                title: '演示场景三：自定义图片',
+                type: 'vue',
+                template: `<van-empty image="https://img01.yzcdn.cn/vant/custom-empty-image.png" description="自定义图片"></van-empty>`,
+                code: `<van-empty image="https://img01.yzcdn.cn/vant/custom-empty-image.png" description="自定义图片" />`
+            },
+            {
+                title: '演示场景四：底部内容（操作按钮）',
+                type: 'vue',
+                setupStr: "return { onClick: () => vant.showToast('点击按钮') };",
+                template: `
+                    <van-empty description="描述文字">
+                        <van-button round type="primary" color="#1890FF" class="w-[160px]" @click="onClick">操作按钮</van-button>
+                    </van-empty>
+                `,
+                code: `<van-empty description="描述文字">\n  <van-button round type="primary">操作按钮</van-button>\n</van-empty>`
+            }
+        ],
+        rules: [
+            '<strong>使用场景</strong>：列表无数据、搜索无结果、网络异常、功能未开通等页面内容为空场景。',
+            '<strong>结构</strong>：插画/图标 + 说明文案 + 可选操作（按钮/引导）；建议垂直居中展示并留足上下间距。',
+            '<strong>文案</strong>：描述尽量明确原因与下一步；按钮动词化（如“去创建/点击重试/返回首页”）。',
+            '<strong>交互</strong>：错误/网络类空状态建议提供“重试”；无数据类可提供引导入口；避免在滚动过程中频繁打扰用户。'
+        ]
+    },
+    'default-page': {
+        name: '5.3 缺省页',
+        demos: [
+            {
+                title: '页面级示例',
+                type: 'vue',
+                setupStr: "return (() => { const active = Vue.ref('nodata'); const onBack = () => vant.showToast('返回'); const onRetry = () => vant.showToast('重试'); const config = Vue.computed(() => { if (active.value === 'nodata') return { image: 'default', desc: '暂无内容', btn: { text: '返回首页', action: onBack } }; if (active.value === 'network') return { image: 'network', desc: '网络异常，请检查网络', btn: { text: '点击重试', action: onRetry } }; if (active.value === 'error') return { image: 'error', desc: '服务异常，请稍后再试', btn: { text: '点击重试', action: onRetry } }; return { image: 'search', desc: '未找到相关内容', btn: { text: '返回首页', action: onBack } }; }); return { active, config }; })();",
+                template: `
+                    <div class="h-full min-h-0 bg-[#f7f8fa] flex flex-col overflow-hidden">
+                        <div class="bg-white">
+                            <van-tabs v-model:active="active" color="#1890FF">
+                                <van-tab name="nodata" title="暂无内容"></van-tab>
+                                <van-tab name="network" title="网络异常"></van-tab>
+                                <van-tab name="error" title="服务异常"></van-tab>
+                                <van-tab name="notfound" title="未找到"></van-tab>
+                            </van-tabs>
+                        </div>
+
+                        <div class="flex-1 min-h-0 flex items-center justify-center">
+                            <van-empty :image="config.image" :description="config.desc">
+                                <van-button round type="primary" color="#1890FF" class="w-[160px]" @click="config.btn.action">{{ config.btn.text }}</van-button>
+                            </van-empty>
+                        </div>
+                    </div>
+                `,
+                code: `<van-empty image="network" description="网络异常">\n  <van-button round type="primary">点击重试</van-button>\n</van-empty>`
+            },
+            {
+                title: '演示场景一：无数据（引导创建）',
+                type: 'vue',
+                setupStr: "return { onClick: () => vant.showToast('去创建') };",
+                template: `<van-empty description="暂无数据"><van-button round type="primary" color="#1890FF" class="w-[160px]" @click="onClick">去创建</van-button></van-empty>`,
+                code: `<van-empty description="暂无数据">\n  <van-button round type="primary">去创建</van-button>\n</van-empty>`
+            },
+            {
+                title: '演示场景二：网络异常（重试）',
+                type: 'vue',
+                setupStr: "return { onRetry: () => vant.showToast('重试') };",
+                template: `<van-empty image="network" description="网络异常，请稍后再试"><van-button round type="primary" color="#1890FF" class="w-[160px]" @click="onRetry">点击重试</van-button></van-empty>`,
+                code: `<van-empty image="network" description="网络异常">\n  <van-button round type="primary">点击重试</van-button>\n</van-empty>`
+            },
+            {
+                title: '演示场景三：服务异常（错误页）',
+                type: 'vue',
+                template: `<van-empty image="error" description="服务异常，请稍后再试"></van-empty>`,
+                code: `<van-empty image="error" description="服务异常，请稍后再试" />`
+            }
+        ],
+        rules: [
+            '<strong>使用场景</strong>：整页级别的“无数据/未找到/网络异常/服务异常”等缺省状态。',
+            '<strong>与空状态区别</strong>：缺省页通常占满内容区，替代原页面内容展示；空状态更偏模块级或局部区域占位。',
+            '<strong>按钮策略</strong>：无数据提供“去创建/去添加”；网络/服务异常提供“重试”；未找到提供“返回/去首页”。',
+            '<strong>一致性</strong>：同一产品内建议统一插画风格、文案语气与按钮层级（主按钮 1 个为主）。'
+        ]
+    },
+    'image-preview': {
+        name: '5.4 图片预览',
+        demos: [
+            {
+                title: '页面级示例',
+                type: 'vue',
+                setupStr: "return (() => { const images = ['https://fastly.jsdelivr.net/npm/@vant/assets/apple-1.jpeg', 'https://fastly.jsdelivr.net/npm/@vant/assets/apple-2.jpeg', 'https://fastly.jsdelivr.net/npm/@vant/assets/apple-3.jpeg', 'https://fastly.jsdelivr.net/npm/@vant/assets/apple-4.jpeg']; const openAt = (index) => { vant.showImagePreview({ images, startPosition: index, closeable: true, onClose: () => vant.showToast('关闭') }); }; const openSingle = () => { vant.showImagePreview(['https://fastly.jsdelivr.net/npm/@vant/assets/apple-1.jpeg']); }; const openNoIndex = () => { vant.showImagePreview({ images, showIndex: false, closeable: true }); }; return { images, openAt, openSingle, openNoIndex }; })();",
+                template: `
+                    <div class="h-full min-h-0 bg-[#f7f8fa] flex flex-col overflow-hidden">
+                        <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar py-3">
+                            <div class="px-4 text-xs text-[#969799] mb-2">触发入口（页面级示例）</div>
+                            <van-cell-group inset :border="false">
+                                <van-cell title="单张预览" value="函数调用" is-link clickable @click="openSingle" />
+                                <van-cell title="多图预览" value="从第 2 张开始" is-link clickable @click="openAt(1)" />
+                                <van-cell title="隐藏索引" value="showIndex=false" is-link clickable @click="openNoIndex" />
+                            </van-cell-group>
+
+                            <div class="px-4 py-3">
+                                <div class="h-px bg-[#ebedf0]"></div>
+                            </div>
+
+                            <div class="px-4 text-xs text-[#969799] mb-2">图片网格（点击预览）</div>
+                            <div class="px-4 grid grid-cols-4 gap-2">
+                                <div v-for="(img, index) in images" :key="img" class="rounded-lg overflow-hidden bg-white border border-[#ebedf0]" @click="openAt(index)">
+                                    <van-image :src="img" width="100%" height="80" fit="cover"></van-image>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                code: `vant.showImagePreview({\n  images,\n  startPosition: 1,\n  closeable: true,\n});`
+            },
+            {
+                title: '演示场景一：基础用法',
+                type: 'vue',
+                setupStr: "return { onClick: () => vant.showImagePreview(['https://fastly.jsdelivr.net/npm/@vant/assets/apple-1.jpeg','https://fastly.jsdelivr.net/npm/@vant/assets/apple-2.jpeg']) };",
+                template: `<van-button type="primary" color="#1890FF" block @click="onClick">打开图片预览</van-button>`,
+                code: `vant.showImagePreview([\n  'https://fastly.jsdelivr.net/npm/@vant/assets/apple-1.jpeg',\n  'https://fastly.jsdelivr.net/npm/@vant/assets/apple-2.jpeg',\n]);`
+            },
+            {
+                title: '演示场景二：指定初始位置',
+                type: 'vue',
+                setupStr: "return { onClick: () => vant.showImagePreview({ images: ['https://fastly.jsdelivr.net/npm/@vant/assets/apple-1.jpeg','https://fastly.jsdelivr.net/npm/@vant/assets/apple-2.jpeg'], startPosition: 1 }) };",
+                template: `<van-button plain type="primary" color="#1890FF" block @click="onClick">从第 2 张开始预览</van-button>`,
+                code: `vant.showImagePreview({ images, startPosition: 1 });`
+            },
+            {
+                title: '演示场景三：展示关闭按钮 + 关闭回调',
+                type: 'vue',
+                setupStr: "return { onClick: () => vant.showImagePreview({ images: ['https://fastly.jsdelivr.net/npm/@vant/assets/apple-1.jpeg','https://fastly.jsdelivr.net/npm/@vant/assets/apple-2.jpeg'], closeable: true, onClose: () => vant.showToast('关闭') }) };",
+                template: `<van-button plain type="primary" color="#1890FF" block @click="onClick">带关闭按钮</van-button>`,
+                code: `vant.showImagePreview({ images, closeable: true, onClose() {} });`
+            }
+        ],
+        rules: [
+            '<strong>使用场景</strong>：查看大图、多图轮播、图片详情（支持缩放/滑动切换）。',
+            '<strong>触发方式</strong>：推荐点击缩略图或列表项唤起；多图场景支持指定 startPosition 对齐用户点击的那张。',
+            '<strong>关闭</strong>：建议开启 closeable；支持遮罩/返回手势关闭，关闭后可回到原位置。',
+            '<strong>性能</strong>：多图预览建议控制图片数量与分辨率；必要时开启懒加载或使用缩略图。'
+        ]
+    },
 
     // 7. 反馈
     dialog: { 
