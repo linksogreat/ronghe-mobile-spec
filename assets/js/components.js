@@ -2372,7 +2372,120 @@ window.RongHeComponents = {
         rules: ['<strong>尺寸参数</strong>：宽度约80%，圆角8px，遮罩层50%透明度。']
     },
     toast: { name: '7.2 轻提示', demos: [{ title: 'Toast', type: 'action', actions: [{text:'成功', action:'toast-success'}, {text:'加载', action:'toast-loading'}], code: 'showToast("内容")' }] },
-    noticebar: { name: '7.3 通知栏', demos: [{ title: '通知栏', type: 'simple', component: 'van-notice-bar', props: { text: '通知内容，通知内容，通知内容', leftIcon: 'volume-o' }, code: '<van-notice-bar text="内容" />' }] },
+    noticebar: {
+        name: '9.3 通知栏',
+        demos: [
+            {
+                title: '页面级示例',
+                type: 'vue',
+                setupStr: "return (() => { const showClose = Vue.ref(true); const longText = '通知内容较长时会自动滚动展示，通知内容较长时会自动滚动展示。'; const warnText = '警告：请确认信息后再提交，避免误操作。'; const infoText = '通知：你有新的消息待处理，点击查看详情。'; const onLink = () => vant.showToast('点击通知'); const onClose = () => { showClose.value = false; vant.showToast('已关闭'); }; const onResetClose = () => { showClose.value = true; }; return { showClose, longText, warnText, infoText, onLink, onClose, onResetClose }; })();",
+                template: `
+                    <div class="h-full min-h-0 bg-[#f7f8fa] flex flex-col overflow-hidden">
+                        <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar py-3 space-y-3">
+                            <div class="px-4 text-xs text-[#969799]">常规（滚动）</div>
+                            <div class="px-4">
+                                <van-notice-bar left-icon="volume-o" :text="longText" />
+                            </div>
+
+                            <div class="px-4 text-xs text-[#969799]">不同类型（不同颜色）</div>
+                            <div class="px-4 space-y-2">
+                                <van-notice-bar left-icon="volume-o" text="常规：系统将于今晚 23:00 进行维护升级" />
+                                <van-notice-bar left-icon="warning-o" :text="warnText" color="#d48806" background="#fffbe8" />
+                                <van-notice-bar left-icon="info-o" :text="infoText" color="#096dd9" background="#e6f7ff" mode="link" @click="onLink" />
+                                <van-notice-bar left-icon="passed" text="成功：已完成同步，点击可继续下一步" color="#389e0d" background="#f6ffed" mode="link" @click="onLink" />
+                                <van-notice-bar left-icon="cross" text="错误：服务异常，请稍后重试" color="#cf1322" background="#fff1f0" />
+                            </div>
+
+                            <div class="px-4 text-xs text-[#969799]">可关闭</div>
+                            <div class="px-4">
+                                <van-notice-bar
+                                    v-if="showClose"
+                                    left-icon="volume-o"
+                                    text="可关闭通知：点击右侧关闭按钮关闭"
+                                    mode="closeable"
+                                    @close="onClose"
+                                />
+                                <van-button v-else plain type="primary" color="#1890FF" block @click="onResetClose">重新显示</van-button>
+                            </div>
+
+                            <div class="px-4 text-xs text-[#969799]">多行展示（不滚动）</div>
+                            <div class="px-4">
+                                <van-notice-bar
+                                    left-icon="volume-o"
+                                    scrollable="false"
+                                    wrapable
+                                    text="多行通知：当内容较长时可开启 wrapable，通知栏会自动换行展示；适用于需要用户完整阅读的提示。"
+                                />
+                            </div>
+
+                            <div class="px-4 text-xs text-[#969799]">自定义滚动速度</div>
+                            <div class="px-4">
+                                <van-notice-bar
+                                    left-icon="volume-o"
+                                    :scrollable="true"
+                                    :speed="80"
+                                    :delay="1"
+                                    text="自定义滚动：speed 控制滚动速度（越大越快），delay 控制开始滚动前的延迟。"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                `,
+                code: `<van-notice-bar left-icon="volume-o" text="通知内容" />\n<van-notice-bar color="#d48806" background="#fffbe8" text="警告通知" />\n<van-notice-bar mode="closeable" text="可关闭通知" />`
+            },
+            {
+                title: '演示场景一：常规滚动',
+                type: 'vue',
+                template: `<van-notice-bar left-icon="volume-o" text="通知内容较长时会自动滚动展示，通知内容较长时会自动滚动展示。" />`,
+                code: `<van-notice-bar left-icon="volume-o" text="通知内容..." />`
+            },
+            {
+                title: '演示场景二：警告/通知/成功/错误（不同颜色）',
+                type: 'vue',
+                setupStr: "return { onClick: () => vant.showToast('点击通知') };",
+                template: `
+                    <div class="space-y-2">
+                        <van-notice-bar left-icon="volume-o" text="常规：系统维护通知" />
+                        <van-notice-bar left-icon="warning-o" text="警告：请确认信息后再提交" color="#d48806" background="#fffbe8" />
+                        <van-notice-bar left-icon="info-o" text="通知：你有新的消息" color="#096dd9" background="#e6f7ff" mode="link" @click="onClick" />
+                        <van-notice-bar left-icon="passed" text="成功：操作已完成" color="#389e0d" background="#f6ffed" />
+                        <van-notice-bar left-icon="cross" text="错误：服务异常" color="#cf1322" background="#fff1f0" />
+                    </div>
+                `,
+                code: `<van-notice-bar color="#096dd9" background="#e6f7ff" mode="link" text="通知：点击查看" />`
+            },
+            {
+                title: '演示场景三：可关闭 & 链接',
+                type: 'vue',
+                setupStr: "return { onClick: () => vant.showToast('点击链接'), onClose: () => vant.showToast('关闭') };",
+                template: `
+                    <div class="space-y-2">
+                        <van-notice-bar text="可关闭通知" mode="closeable" @close="onClose" />
+                        <van-notice-bar text="链接模式通知" mode="link" @click="onClick" />
+                    </div>
+                `,
+                code: `<van-notice-bar mode="closeable" text="可关闭通知" />\n<van-notice-bar mode="link" text="链接模式通知" />`
+            },
+            {
+                title: '演示场景四：多行展示（wrapable）',
+                type: 'vue',
+                template: `<van-notice-bar scrollable="false" wrapable text="多行通知：当内容较长时可开启 wrapable，通知栏会自动换行展示；适用于需要用户完整阅读的提示。" />`,
+                code: `<van-notice-bar scrollable="false" wrapable text="多行通知..." />`
+            },
+            {
+                title: '演示场景五：自定义滚动速度',
+                type: 'vue',
+                template: `<van-notice-bar :speed="80" :delay="1" text="自定义滚动：speed 控制滚动速度，delay 控制开始滚动前延迟。" />`,
+                code: `<van-notice-bar :speed="80" :delay="1" text="自定义滚动..." />`
+            }
+        ],
+        rules: [
+            '<strong>使用场景</strong>：系统公告、活动通知、风险提示、状态提醒；适合在页面顶部或列表上方展示。',
+            '<strong>类型与颜色</strong>：常规（默认样式）、警告（黄底黄字）、通知/信息（蓝底蓝字）、成功（绿底绿字）、错误（红底红字）；建议全站统一配色与文案语气。',
+            '<strong>滚动策略</strong>：短文案优先不滚动；超出时默认滚动；需要完整阅读时使用 wrapable 且 scrollable=false。',
+            '<strong>交互</strong>：重要通知可用 link 模式引导查看详情；可关闭通知用于一次性提示，关闭后不应频繁再次弹出。'
+        ]
+    },
     loading: { name: '7.5 加载', demos: [{ title: '加载', type: 'simple', component: 'van-loading', props: { type: 'spinner' }, code: '<van-loading />' }] },
 
     // 8. 业务模版

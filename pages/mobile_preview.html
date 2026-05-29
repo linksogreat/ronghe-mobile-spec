@@ -289,7 +289,7 @@
             <div
                 :id="key"
                 class="mobile-section"
-                :class="{ active: currentId === key, 'mobile-section--fullscreen': key === 'sidebar' || key === 'tabbar' || key === 'cell' || key === 'search' || key === 'radio' || key === 'picker' || key === 'cascader' || key === 'empty' || key === 'default-page' || key === 'image-preview' || key === 'keyboard' || key === 'field' || key === 'dialog-modal' || key === 'business-popup' || key === 'drawer-popup' }"
+                :class="{ active: currentId === key, 'mobile-section--fullscreen': key === 'sidebar' || key === 'tabbar' || key === 'cell' || key === 'search' || key === 'radio' || key === 'picker' || key === 'cascader' || key === 'empty' || key === 'default-page' || key === 'image-preview' || key === 'noticebar' || key === 'keyboard' || key === 'field' || key === 'dialog-modal' || key === 'business-popup' || key === 'drawer-popup' }"
             >
                 <!-- 模拟导航栏 -->
                 <van-nav-bar
@@ -303,7 +303,7 @@
                 </div>
                 <template v-else>
                     <div
-                        v-if="(key === 'sidebar' || key === 'tabbar' || key === 'cell' || key === 'search' || key === 'radio' || key === 'picker' || key === 'cascader' || key === 'empty' || key === 'default-page' || key === 'image-preview' || key === 'keyboard' || key === 'field' || key === 'dialog-modal' || key === 'business-popup' || key === 'drawer-popup') && comp.demos && comp.demos.length && comp.demos[0].type === 'vue'"
+                        v-if="(key === 'sidebar' || key === 'tabbar' || key === 'cell' || key === 'search' || key === 'radio' || key === 'picker' || key === 'cascader' || key === 'empty' || key === 'default-page' || key === 'image-preview' || key === 'noticebar' || key === 'keyboard' || key === 'field' || key === 'dialog-modal' || key === 'business-popup' || key === 'drawer-popup') && comp.demos && comp.demos.length && comp.demos[0].type === 'vue'"
                         class="flex-1 overflow-hidden min-h-0"
                     >
                         <div v-if="key === 'radio'" class="h-full min-h-0 flex flex-col overflow-hidden">
@@ -426,6 +426,27 @@
                                     <div v-for="(demo, dIndex) in comp.demos.slice(1)" :key="dIndex" class="px-4 mb-4">
                                         <div class="text-xs text-[#969799] mb-2">{{ demo.title.replace(/^演示场景\\S+：/, '') }}</div>
                                         <div class="bg-white rounded-xl border border-[#ebedf0] overflow-hidden">
+                                            <component :is="defineDemoComponent(demo)" class="w-full"></component>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-else-if="key === 'noticebar'" class="h-full min-h-0 flex flex-col overflow-hidden">
+                            <van-tabs v-model:active="state.noticebarPreviewTab" class="shrink-0" color="#1890FF">
+                                <van-tab title="页面示例"></van-tab>
+                                <van-tab title="交互示例"></van-tab>
+                            </van-tabs>
+                            <div class="flex-1 min-h-0 overflow-hidden">
+                                <component
+                                    v-if="state.noticebarPreviewTab === 0"
+                                    :is="defineDemoComponent(comp.demos[0])"
+                                    class="h-full min-h-0"
+                                ></component>
+                                <div v-else class="h-full min-h-0 overflow-y-auto custom-scrollbar bg-[#f7f8fa] py-3">
+                                    <div v-for="(demo, dIndex) in comp.demos.slice(1)" :key="dIndex" class="px-4 mb-4">
+                                        <div class="text-xs text-[#969799] mb-2">{{ demo.title.replace(/^演示场景\\S+：/, '') }}</div>
+                                        <div class="bg-white rounded-xl border border-[#ebedf0] overflow-hidden p-3">
                                             <component :is="defineDemoComponent(demo)" class="w-full"></component>
                                         </div>
                                     </div>
@@ -760,7 +781,7 @@
                 dropdownVal1: 0, dropdownOpt1: [{ text: '全部商品', value: 0 }, { text: '新款商品', value: 1 }],
                 switchVal: true, radioVal: '1', checkVal: ['a'], rateVal: 3, sliderVal: 50, stepperVal: 1, pageNum: 1,
                 searchVal: '', showPopover: false, activeSidebar: 0, activeTabbar: 0,
-                radioPreviewTab: 0, pickerPreviewTab: 0, cascaderPreviewTab: 0, emptyPreviewTab: 0, defaultPagePreviewTab: 0, imagePreviewTab: 0,
+                radioPreviewTab: 0, pickerPreviewTab: 0, cascaderPreviewTab: 0, emptyPreviewTab: 0, defaultPagePreviewTab: 0, imagePreviewTab: 0, noticebarPreviewTab: 0,
                 showPopup: false, popupPosition: 'center', showCalendar: false, showActionSheet: false,
                 showTimePicker: false, showDatePicker: false, currentTime: ['12', '00'], currentDate: ['2023', '01', '01'],
                 showCascader: false, cascaderValue: '', cascaderOptions: [{ text: '浙江省', value: '330000', children: [{ text: '杭州市', value: '330100' }] }],
