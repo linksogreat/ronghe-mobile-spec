@@ -2486,7 +2486,155 @@ window.RongHeComponents = {
             '<strong>交互</strong>：重要通知可用 link 模式引导查看详情；可关闭通知用于一次性提示，关闭后不应频繁再次弹出。'
         ]
     },
-    loading: { name: '7.5 加载', demos: [{ title: '加载', type: 'simple', component: 'van-loading', props: { type: 'spinner' }, code: '<van-loading />' }] },
+    loading: {
+        name: '9.5 加载',
+        demos: [
+            {
+                title: '页面级示例',
+                type: 'vue',
+                setupStr: "return (() => { const { ref, computed, onBeforeUnmount } = Vue; const showSpinner = ref(false); const showProgress = ref(false); const showHourglass = ref(false); const showCountdown = ref(false); const percent = ref(0); const progressTimer = ref(null); const countdownText = computed(() => Math.ceil(60000 / 1000) + 's'); const startSpinner = () => { showSpinner.value = true; setTimeout(() => (showSpinner.value = false), 1600); }; const startProgress = () => { showProgress.value = true; percent.value = 0; if (progressTimer.value) clearInterval(progressTimer.value); progressTimer.value = setInterval(() => { percent.value = Math.min(100, percent.value + 6); if (percent.value >= 100) { clearInterval(progressTimer.value); progressTimer.value = null; setTimeout(() => (showProgress.value = false), 300); } }, 160); }; const startHourglass = () => { showHourglass.value = true; setTimeout(() => (showHourglass.value = false), 1600); }; const startCountdown = () => { showCountdown.value = true; }; const stopCountdown = () => { showCountdown.value = false; }; const onCountdownFinish = () => { showCountdown.value = false; vant.showToast('倒计时结束'); }; onBeforeUnmount(() => { if (progressTimer.value) clearInterval(progressTimer.value); }); return { showSpinner, showProgress, showHourglass, showCountdown, percent, startSpinner, startProgress, startHourglass, startCountdown, stopCountdown, onCountdownFinish }; })();",
+                template: `
+                    <div class="h-full min-h-0 bg-[#f7f8fa] flex flex-col overflow-hidden">
+                        <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar py-3">
+                            <div class="px-4 text-xs text-[#969799] mb-2">触发入口（页面级示例）</div>
+                            <van-cell-group inset :border="false">
+                                <van-cell title="Loading 加载" value="遮罩 + 菊花" is-link clickable @click="startSpinner" />
+                                <van-cell title="进度条加载" value="模拟进度" is-link clickable @click="startProgress" />
+                                <van-cell title="沙漏加载" value="自定义动画" is-link clickable @click="startHourglass" />
+                                <van-cell title="60 秒倒计时加载" value="可取消" is-link clickable @click="startCountdown" />
+                            </van-cell-group>
+
+                            <div class="px-4 py-3">
+                                <div class="h-px bg-[#ebedf0]"></div>
+                            </div>
+
+                            <div class="px-4 text-xs text-[#969799] mb-2">组件式展示（不遮罩）</div>
+                            <div class="px-4 space-y-3">
+                                <div class="bg-white rounded-xl border border-[#ebedf0] p-4 flex items-center gap-3">
+                                    <van-loading size="20px" color="#1890FF"></van-loading>
+                                    <div class="text-sm text-[#323233]">加载中…</div>
+                                </div>
+                                <div class="bg-white rounded-xl border border-[#ebedf0] p-4">
+                                    <div class="flex items-center justify-between">
+                                        <div class="text-sm text-[#323233]">同步中</div>
+                                        <div class="text-xs text-[#969799]">请稍候</div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <van-progress :percentage="62" stroke-width="8" color="#1890FF" track-color="#f2f3f5" pivot-text="62%" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <van-overlay :show="showSpinner" class="flex items-center justify-center" @click="showSpinner = false">
+                            <div class="bg-white rounded-xl px-6 py-5 flex flex-col items-center">
+                                <van-loading type="spinner" color="#1890FF" />
+                                <div class="text-sm text-[#323233] mt-3">加载中</div>
+                            </div>
+                        </van-overlay>
+
+                        <van-overlay :show="showProgress" class="flex items-center justify-center" @click="showProgress = false">
+                            <div class="bg-white rounded-xl px-6 py-5 w-[280px]">
+                                <div class="text-sm font-medium text-[#323233]">数据同步中</div>
+                                <div class="text-xs text-[#969799] mt-1">请勿退出页面</div>
+                                <div class="mt-3">
+                                    <van-progress :percentage="percent" stroke-width="8" color="#1890FF" track-color="#f2f3f5" :pivot-text="percent + '%'" />
+                                </div>
+                            </div>
+                        </van-overlay>
+
+                        <van-overlay :show="showHourglass" class="flex items-center justify-center" @click="showHourglass = false">
+                            <div class="bg-white rounded-xl px-6 py-5 flex flex-col items-center">
+                                <van-icon name="clock-o" size="28" color="#1890FF" class="animate-spin"></van-icon>
+                                <div class="text-sm text-[#323233] mt-3">处理中</div>
+                            </div>
+                        </van-overlay>
+
+                        <van-overlay :show="showCountdown" class="flex items-center justify-center">
+                            <div class="bg-white rounded-xl px-6 py-5 w-[280px]">
+                                <div class="text-sm font-medium text-[#323233]">正在处理</div>
+                                <div class="text-xs text-[#969799] mt-1">预计 60 秒内完成，可手动取消</div>
+                                <div class="mt-4 flex items-center justify-center">
+                                    <van-count-down :time="60000" format="ss" @finish="onCountdownFinish">
+                                        <template #default="timeData">
+                                            <div class="flex items-center gap-3">
+                                                <van-loading size="18px" color="#1890FF"></van-loading>
+                                                <div class="text-[14px] text-[#323233]">{{ timeData.seconds }}s</div>
+                                            </div>
+                                        </template>
+                                    </van-count-down>
+                                </div>
+                                <div class="mt-4">
+                                    <van-button block plain color="#1890FF" @click="stopCountdown">取消</van-button>
+                                </div>
+                            </div>
+                        </van-overlay>
+                    </div>
+                `,
+                code: `<!-- overlay loading -->\nvant.showLoadingToast({ message: '加载中...', forbidClick: true });\n\n<!-- progress -->\n<van-progress :percentage=\"percent\" />\n\n<!-- countdown -->\n<van-count-down :time=\"60000\" format=\"ss\" />`
+            },
+            {
+                title: '演示场景一：基础 Loading（spinner/circular）',
+                type: 'vue',
+                template: `
+                    <div class="p-4 space-y-3">
+                        <div class="flex items-center gap-3">
+                            <van-loading type="spinner" color="#1890FF" size="20px"></van-loading>
+                            <div class="text-sm text-[#323233]">spinner</div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <van-loading type="circular" color="#1890FF" size="20px"></van-loading>
+                            <div class="text-sm text-[#323233]">circular</div>
+                        </div>
+                        <van-loading vertical color="#1890FF">加载中...</van-loading>
+                    </div>
+                `,
+                code: `<van-loading type="spinner" />\n<van-loading type="circular" />\n<van-loading vertical>加载中...</van-loading>`
+            },
+            {
+                title: '演示场景二：进度条加载（Progress）',
+                type: 'vue',
+                setupStr: "return (() => { const { ref } = Vue; const percent = ref(30); const inc = () => (percent.value = Math.min(100, percent.value + 10)); return { percent, inc }; })();",
+                template: `
+                    <div class="p-4 space-y-3">
+                        <van-progress :percentage="percent" stroke-width="8" color="#1890FF" track-color="#f2f3f5" :pivot-text="percent + '%'" />
+                        <van-button type="primary" color="#1890FF" block @click="inc">增加进度</van-button>
+                    </div>
+                `,
+                code: `<van-progress :percentage="percent" />`
+            },
+            {
+                title: '演示场景三：沙漏加载（自定义）',
+                type: 'vue',
+                template: `
+                    <div class="p-6 flex flex-col items-center justify-center gap-3">
+                        <van-icon name="clock-o" size="32" color="#1890FF" class="animate-spin"></van-icon>
+                        <div class="text-sm text-[#323233]">处理中...</div>
+                    </div>
+                `,
+                code: `<van-icon name="clock-o" class="animate-spin" />`
+            },
+            {
+                title: '演示场景四：60 秒倒计时加载',
+                type: 'vue',
+                setupStr: "return { onFinish: () => vant.showToast('倒计时结束') };",
+                template: `
+                    <div class="p-6 flex flex-col items-center justify-center gap-3">
+                        <van-loading size="18px" color="#1890FF"></van-loading>
+                        <van-count-down :time="60000" format="ss" @finish="onFinish"></van-count-down>
+                        <div class="text-xs text-[#969799]">示例：60 秒倒计时</div>
+                    </div>
+                `,
+                code: `<van-count-down :time="60000" format="ss" />`
+            }
+        ],
+        rules: [
+            '<strong>使用场景</strong>：异步请求、数据同步、提交表单、跳转前等待等需要反馈“正在处理”的场景。',
+            '<strong>Loading 类型</strong>：短等待用菊花（spinner/circular）；可量化进度用进度条（Progress）；引导用户等待可用倒计时（如 60s）；特殊业务可用自定义图标/动效。',
+            '<strong>遮罩策略</strong>：关键动作建议使用遮罩并禁止误触（forbidClick）；非关键加载可用局部组件式展示避免打断操作。',
+            '<strong>可取消</strong>：超过 3s 的等待建议提供“取消/返回”入口；倒计时类提示需明确预计耗时与结果。'
+        ]
+    },
 
     // 8. 业务模版
     'login-template': { 
