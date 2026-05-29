@@ -920,24 +920,55 @@
         ]
     },
     "dialog-modal": {
-        "name": "对话弹窗",
-        "demos": [],
+        "name": "6.1 对话弹窗",
+        "demos": [
+            {
+                "title": "页面级示例",
+                "type": "vue",
+                "setupStr": "return (() => { const promptShow = Vue.ref(false); const promptVal = Vue.ref(''); const promptInput = Vue.ref(''); const asyncShow = Vue.ref(false); const asyncLoading = Vue.ref(false); const onAlert = () => vant.showDialog({ title: '提示', message: '这是一个对话弹窗示例' }); const onConfirm = () => vant.showConfirmDialog({ title: '确认', message: '是否确认提交？' }).then(() => vant.showToast('已确认')).catch(() => {}); const openPrompt = () => { promptInput.value = promptVal.value; promptShow.value = true; }; const onPromptConfirm = () => { promptVal.value = String(promptInput.value || ''); promptShow.value = false; vant.showToast('已保存'); }; const openAsync = () => { asyncShow.value = true; asyncLoading.value = false; }; const onAsyncConfirm = () => { asyncLoading.value = true; setTimeout(() => { asyncLoading.value = false; asyncShow.value = false; vant.showToast('已完成'); }, 800); }; return { promptShow, promptVal, promptInput, asyncShow, asyncLoading, onAlert, onConfirm, openPrompt, onPromptConfirm, openAsync, onAsyncConfirm }; })();",
+                "template": "<div class=\"h-full min-h-0 bg-[#f7f8fa] flex flex-col overflow-hidden\"><div class=\"flex-1 min-h-0 overflow-y-auto custom-scrollbar py-3\"><div class=\"px-4 text-xs text-[#969799] mb-2\">基础用法</div><van-cell-group inset :border=\"false\"><van-cell title=\"提示弹窗\" is-link clickable @click=\"onAlert\" /><van-cell title=\"确认弹窗\" is-link clickable @click=\"onConfirm\" /><van-cell title=\"带输入弹窗\" :value=\"promptVal || '未填写'\" is-link clickable @click=\"openPrompt\" /><van-cell title=\"异步确认\" is-link clickable @click=\"openAsync\" /></van-cell-group><div class=\"px-4 py-3\"><div class=\"h-px bg-[#ebedf0]\"></div></div><div class=\"px-4 text-xs text-[#969799] mb-2\">页面级说明</div><div class=\"px-4 text-sm text-[#323233] leading-6\">对话弹窗用于二次确认、风险告知或补充信息输入等场景；建议文案明确、按钮动词化，避免连续弹出影响操作。</div></div><van-dialog v-model:show=\"promptShow\" title=\"补充信息\" show-cancel-button confirm-button-text=\"保存\" @confirm=\"onPromptConfirm\"><div class=\"px-4 pt-2\"><van-field v-model=\"promptInput\" label=\"备注\" placeholder=\"请输入\" /></div></van-dialog><van-dialog v-model:show=\"asyncShow\" title=\"异步确认\" show-cancel-button confirm-button-text=\"确认\" :confirm-button-loading=\"asyncLoading\" @confirm=\"onAsyncConfirm\"><div class=\"px-4 pt-2 text-sm text-[#323233] leading-6\">点击“确认”后模拟请求，完成后自动关闭。</div></van-dialog></div>",
+                "code": "// API 方式\nvant.showDialog({ title: '提示', message: '内容' });\nvant.showConfirmDialog({ title: '确认', message: '内容' }).then(() => {}).catch(() => {});\n\n// 组件方式（适合自定义内容/输入）\n<van-dialog v-model:show=\"show\" title=\"标题\" show-cancel-button @confirm=\"onConfirm\">\n  <van-field v-model=\"value\" label=\"备注\" placeholder=\"请输入\" />\n</van-dialog>"
+            }
+        ],
         "rules": [
-            "待补充"
+            "<strong>使用场景</strong>：二次确认、风险告知、重要操作前提示；避免用于高频轻量操作。",
+            "<strong>文案</strong>：标题简短清晰；正文说明原因与后果；确认按钮使用动词（如“删除/提交/同意”）。",
+            "<strong>交互</strong>：支持确认/取消；必要时支持输入补充信息；异步操作建议提供 loading 与结果反馈；支持遮罩关闭与返回手势关闭需谨慎（避免误触）。"
         ]
     },
     "business-popup": {
-        "name": "业务弹窗",
-        "demos": [],
+        "name": "6.2 业务弹窗",
+        "demos": [
+            {
+                "title": "页面级示例",
+                "type": "vue",
+                "setupStr": "return (() => { const showBottom = Vue.ref(false); const showCenter = Vue.ref(false); const dontShow = Vue.ref(false); const openBottom = () => (showBottom.value = true); const openCenter = () => (showCenter.value = true); const onPrimary = () => { vant.showToast('已确认'); showBottom.value = false; showCenter.value = false; }; return { showBottom, showCenter, dontShow, openBottom, openCenter, onPrimary }; })();",
+                "template": "<div class=\"h-full min-h-0 bg-[#f7f8fa] flex flex-col overflow-hidden\"><div class=\"flex-1 min-h-0 overflow-y-auto custom-scrollbar py-3\"><div class=\"px-4 text-xs text-[#969799] mb-2\">触发入口（页面级示例）</div><van-cell-group inset :border=\"false\"><van-cell title=\"底部业务弹窗\" value=\"协议确认/引导\" is-link clickable @click=\"openBottom\" /><van-cell title=\"居中业务弹窗\" value=\"营销/提醒\" is-link clickable @click=\"openCenter\" /></van-cell-group><div class=\"px-4 py-3\"><div class=\"h-px bg-[#ebedf0]\"></div></div><div class=\"px-4 text-xs text-[#969799] mb-2\">页面级说明</div><div class=\"px-4 text-sm text-[#323233] leading-6\">业务弹窗通常承载信息说明、用户确认、活动引导等内容；建议使用圆角卡片、主次按钮清晰，并提供关闭/遮罩点击关闭能力。</div></div><van-popup v-model:show=\"showBottom\" position=\"bottom\" round><div class=\"px-4 pt-4 pb-3\" style=\"padding-bottom: calc(12px + env(safe-area-inset-bottom));\"><div class=\"text-base font-medium text-[#323233]\">服务协议</div><div class=\"mt-2 text-sm text-[#646566] leading-6\">请阅读并同意服务协议后继续使用。你也可以勾选“不再提示”减少打扰。</div><van-checkbox v-model=\"dontShow\" class=\"mt-3\" icon-size=\"16\">不再提示</van-checkbox><div class=\"mt-4 flex gap-3\"><van-button block plain @click=\"showBottom = false\">取消</van-button><van-button block type=\"primary\" color=\"#1890FF\" @click=\"onPrimary\">同意</van-button></div></div></van-popup><van-popup v-model:show=\"showCenter\" round><div class=\"w-[280px] px-5 pt-5 pb-4\"><div class=\"flex items-center justify-center mb-3\"><div class=\"w-12 h-12 rounded-full bg-[#eef2ff] flex items-center justify-center\"><van-icon name=\"gift-o\" color=\"#1890FF\" size=\"26\" /></div></div><div class=\"text-base font-medium text-center text-[#323233]\">新人礼包已到账</div><div class=\"mt-2 text-sm text-center text-[#646566] leading-6\">完成一次下单即可使用，优惠将自动抵扣。</div><div class=\"mt-4\"><van-button type=\"primary\" block color=\"#1890FF\" @click=\"onPrimary\">去使用</van-button><div class=\"mt-2 text-center text-sm text-[#969799]\" @click=\"showCenter = false\">稍后再说</div></div></div></van-popup></div>",
+                "code": "<van-popup v-model:show=\"show\" position=\"bottom\" round>\n  <div class=\"px-4 pt-4 pb-3\">\n    <div class=\"text-base font-medium\">标题</div>\n    <div class=\"mt-2 text-sm text-[#646566]\">说明内容</div>\n    <div class=\"mt-4 flex gap-3\">\n      <van-button block plain @click=\"show = false\">取消</van-button>\n      <van-button block type=\"primary\" color=\"#1890FF\" @click=\"onConfirm\">确定</van-button>\n    </div>\n  </div>\n</van-popup>"
+            }
+        ],
         "rules": [
-            "待补充"
+            "<strong>结构</strong>：标题 + 说明 + 操作；可包含插图/图标增强表达；主次按钮层级清晰。",
+            "<strong>关闭</strong>：支持遮罩点击关闭与关闭按钮（或“稍后再说”）；避免强制打断用户主流程。",
+            "<strong>状态</strong>：异步提交建议提供 loading；操作完成给出 toast/状态回显。"
         ]
     },
     "drawer-popup": {
-        "name": "抽屉弹窗",
-        "demos": [],
+        "name": "6.3 抽屉弹窗",
+        "demos": [
+            {
+                "title": "页面级示例",
+                "type": "vue",
+                "setupStr": "return (() => { const showDrawer = Vue.ref(false); const periods = ['今日','本周','本月','全部']; const period = Vue.ref('本周'); const status = Vue.ref(['进行中']); const channel = Vue.ref('全部'); const minAmount = Vue.ref(''); const maxAmount = Vue.ref(''); const onlyAvailable = Vue.ref(false); const sorts = ['最新','最早','金额最高','金额最低']; const sort = Vue.ref('最新'); const openDrawer = () => (showDrawer.value = true); const onPickDate = () => vant.showToast('日期选择器示例'); const onReset = () => { period.value = '本周'; status.value = []; channel.value = '全部'; minAmount.value = ''; maxAmount.value = ''; onlyAvailable.value = false; sort.value = '最新'; }; const onApply = () => { showDrawer.value = false; vant.showToast('已应用筛选'); }; return { showDrawer, periods, period, status, channel, minAmount, maxAmount, onlyAvailable, sorts, sort, openDrawer, onPickDate, onReset, onApply }; })();",
+                "template": "<div class=\"h-full min-h-0 bg-[#f7f8fa] flex flex-col overflow-hidden\"><div class=\"flex-1 min-h-0 overflow-y-auto custom-scrollbar py-3\"><div class=\"px-4 text-xs text-[#969799] mb-2\">筛选抽屉（页面级示例）</div><van-cell-group inset :border=\"false\"><van-cell title=\"打开筛选抽屉\" value=\"右侧抽屉\" is-link clickable @click=\"openDrawer\" /></van-cell-group></div><van-popup v-model:show=\"showDrawer\" position=\"right\" :style=\"{ width: '86vw', maxWidth: '340px', height: '100%' }\"><div class=\"h-full flex flex-col bg-white\"><div class=\"px-4 h-12 flex items-center justify-between border-b border-[#ebedf0]\"><div class=\"text-base font-medium text-[#323233]\">筛选</div><van-icon name=\"cross\" size=\"18\" color=\"#969799\" @click=\"showDrawer = false\" /></div><div class=\"flex-1 min-h-0 overflow-y-auto custom-scrollbar\"><div class=\"px-4 py-4\"><div class=\"text-sm text-[#323233] font-medium\">快捷筛选</div><div class=\"mt-3 flex flex-wrap gap-2\"><button v-for=\"opt in periods\" :key=\"opt\" class=\"px-3 h-8 rounded-full text-sm border\" :class=\"period === opt ? 'bg-[#1890FF] text-white border-[#1890FF]' : 'bg-white text-[#323233] border-[#ebedf0]'\" @click=\"period = opt\">{{ opt }}</button></div></div><div class=\"px-4 py-4 border-t border-[#f7f7f7]\"><div class=\"text-sm text-[#323233] font-medium mb-3\">状态（多选）</div><van-checkbox-group v-model=\"status\" direction=\"horizontal\"><van-checkbox name=\"进行中\">进行中</van-checkbox><van-checkbox name=\"已完成\">已完成</van-checkbox><van-checkbox name=\"已取消\">已取消</van-checkbox><van-checkbox name=\"待处理\">待处理</van-checkbox></van-checkbox-group></div><div class=\"px-4 py-4 border-t border-[#f7f7f7]\"><div class=\"text-sm text-[#323233] font-medium mb-3\">来源渠道（单选）</div><van-radio-group v-model=\"channel\"><van-radio name=\"全部\">全部</van-radio><van-radio name=\"线上\">线上</van-radio><van-radio name=\"线下\">线下</van-radio><van-radio name=\"线索导入\">线索导入</van-radio></van-radio-group></div><div class=\"px-4 py-4 border-t border-[#f7f7f7]\"><div class=\"text-sm text-[#323233] font-medium\">金额区间</div><div class=\"mt-3 flex items-center gap-2\"><input v-model=\"minAmount\" inputmode=\"decimal\" class=\"flex-1 h-9 px-3 rounded-lg bg-[#f7f8fa] text-sm text-[#323233] outline-none\" placeholder=\"最低金额\" /><span class=\"text-xs text-[#969799]\">—</span><input v-model=\"maxAmount\" inputmode=\"decimal\" class=\"flex-1 h-9 px-3 rounded-lg bg-[#f7f8fa] text-sm text-[#323233] outline-none\" placeholder=\"最高金额\" /></div></div><div class=\"px-4 py-4 border-t border-[#f7f7f7]\"><div class=\"text-sm text-[#323233] font-medium\">日期范围</div><div class=\"mt-3 flex items-center gap-2\"><button class=\"flex-1 h-9 px-3 rounded-lg bg-[#f7f8fa] text-left text-sm text-[#323233]\" @click=\"onPickDate\">开始日期</button><span class=\"text-xs text-[#969799]\">—</span><button class=\"flex-1 h-9 px-3 rounded-lg bg-[#f7f8fa] text-left text-sm text-[#323233]\" @click=\"onPickDate\">结束日期</button></div></div><div class=\"px-4 py-4 border-t border-[#f7f7f7]\"><div class=\"flex items-center justify-between\"><div class=\"text-sm text-[#323233] font-medium\">仅看可用</div><van-switch v-model=\"onlyAvailable\" size=\"20\" active-color=\"#1890FF\" /></div></div><div class=\"px-4 py-4 border-t border-[#f7f7f7]\"><div class=\"text-sm text-[#323233] font-medium\">排序</div><div class=\"mt-3 flex flex-wrap gap-2\"><button v-for=\"opt in sorts\" :key=\"opt\" class=\"px-3 h-8 rounded-full text-sm border\" :class=\"sort === opt ? 'bg-[#1890FF] text-white border-[#1890FF]' : 'bg-white text-[#323233] border-[#ebedf0]'\" @click=\"sort = opt\">{{ opt }}</button></div></div></div><div class=\"p-3 border-t border-[#ebedf0] flex gap-3\"><van-button block plain @click=\"onReset\">重置</van-button><van-button block type=\"primary\" color=\"#1890FF\" @click=\"onApply\">确定</van-button></div></div></van-popup></div>",
+                "code": "<van-popup v-model:show=\"show\" position=\"right\" :style=\"{ width: '86vw', maxWidth: '340px', height: '100%' }\">\n  <div class=\"h-full flex flex-col bg-white\">\n    <div class=\"px-4 h-12 flex items-center justify-between border-b\">筛选</div>\n    <div class=\"flex-1 overflow-y-auto\">\n      <!-- 多种筛选样式：标签/多选/单选/区间/日期/开关/排序 -->\n    </div>\n    <div class=\"p-3 border-t flex gap-3\">\n      <van-button block plain @click=\"onReset\">重置</van-button>\n      <van-button block type=\"primary\" color=\"#1890FF\" @click=\"onApply\">确定</van-button>\n    </div>\n  </div>\n</van-popup>"
+            }
+        ],
         "rules": [
-            "待补充"
+            "<strong>使用场景</strong>：筛选/编辑等“在当前页面完成”的操作；抽屉不跳转页面，便于快速返回。",
+            "<strong>布局</strong>：头部标题 + 关闭；内容区可滚动；底部固定操作栏（重置/确定）。",
+            "<strong>筛选样式</strong>：支持标签（单选/多选）、checkbox 多选、radio 单选、区间输入、日期范围、开关、排序等多种组合。",
+            "<strong>交互</strong>：支持遮罩关闭；提交后关闭并回显筛选结果；内容超出时内部滚动而非页面滚动。"
         ]
     },
     "overlay-guide": {
