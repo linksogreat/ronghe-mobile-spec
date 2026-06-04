@@ -1597,7 +1597,7 @@ window.RongHeComponents = {
                     };
                 },
                 template: `
-                    <div class="w-full rh-calendar-combo">
+                    <div class="w-full">
                         <van-cell-group inset>
                             <van-field
                                 :model-value="result"
@@ -1650,6 +1650,7 @@ window.RongHeComponents = {
                                             <van-picker
                                                 v-model="pickerValue"
                                                 :columns="timeColumns"
+                                                :show-toolbar="false"
                                                 @change="onPickerChange"
                                             ></van-picker>
                                         </div>
@@ -1667,9 +1668,6 @@ window.RongHeComponents = {
                                 </div>
                             </div>
                         </van-popup>
-                        <style>
-                            .rh-calendar-combo .van-calendar__footer{display:none}
-                        </style>
                     </div>
                 `
             }
