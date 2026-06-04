@@ -1429,19 +1429,18 @@ window.RongHeComponents = {
                 `
             },
             {
-                title: '日期区间回显（开始/结束联动）',
+                title: '日期区间回显（合并输入框）',
                 type: 'vue',
                 setup: () => {
                     const { ref } = Vue;
                     const show = ref(false);
-                    const startValue = ref('');
-                    const endValue = ref('');
+                    const rangeValue = ref('');
 
                     const formatDate = (d) => {
                         const y = d.getFullYear();
                         const m = String(d.getMonth() + 1).padStart(2, '0');
                         const day = String(d.getDate()).padStart(2, '0');
-                        return `${y}-${m}-${day}`;
+                        return `${y}.${m}.${day}`;
                     };
 
                     const defaultDate = (() => {
@@ -1452,8 +1451,7 @@ window.RongHeComponents = {
 
                     const onConfirm = (values) => {
                         const [start, end] = values;
-                        startValue.value = formatDate(start);
-                        endValue.value = formatDate(end);
+                        rangeValue.value = `${formatDate(start)} - ${formatDate(end)}`;
                         show.value = false;
                     };
 
@@ -1466,23 +1464,15 @@ window.RongHeComponents = {
                         return day;
                     };
 
-                    return { show, startValue, endValue, defaultDate, onConfirm, formatter };
+                    return { show, rangeValue, defaultDate, onConfirm, formatter };
                 },
                 template: `
                     <div class="w-full">
                         <van-cell-group inset>
                             <van-field
-                                v-model="startValue"
-                                label="开始日期"
-                                placeholder="请选择开始日期"
-                                readonly
-                                is-link
-                                @click="show = true"
-                            ></van-field>
-                            <van-field
-                                v-model="endValue"
-                                label="结束日期"
-                                placeholder="请选择结束日期"
+                                v-model="rangeValue"
+                                label="选择日期"
+                                placeholder="请选择日期区间"
                                 readonly
                                 is-link
                                 @click="show = true"
@@ -1508,48 +1498,74 @@ window.RongHeComponents = {
                 type: 'vue',
                 setup: () => {
                     const { ref, computed } = Vue;
-                    const showCalendar = ref(false);
-                    const showStartTime = ref(false);
-                    const showEndTime = ref(false);
+                    const show = ref(false);
+                    const range = ref([]);
+                    const active = ref('start');
+                    const startTime = ref(['12', '00']);
+                    const endTime = ref(['12', '00']);
+                    const pickerValue = ref(['12', '00']);
+                    const now = new Date();
+                    const minDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                    const maxDate = new Date(now.getFullYear(), now.getMonth() + 2, 0);
 
-                    const startDateValue = ref('');
-                    const endDateValue = ref('');
-                    const startTimeValue = ref('08:00');
-                    const endTimeValue = ref('18:00');
-
-                    const startTimePicker = ref(['08', '00']);
-                    const endTimePicker = ref(['18', '00']);
+                    const timeColumns = [
+                        { values: Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')) },
+                        { values: Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0')) }
+                    ];
 
                     const formatDate = (d) => {
                         const y = d.getFullYear();
                         const m = String(d.getMonth() + 1).padStart(2, '0');
                         const day = String(d.getDate()).padStart(2, '0');
-                        return `${y}-${m}-${day}`;
+                        return `${y}.${m}.${day}`;
                     };
 
-                    const onConfirmRange = (values) => {
-                        const [start, end] = values;
-                        startDateValue.value = formatDate(start);
-                        endDateValue.value = formatDate(end);
-                        showCalendar.value = false;
-                    };
+                    const formatTime = (v) => (Array.isArray(v) ? v.join(':') : '');
 
-                    const onConfirmStartTime = ({ selectedValues }) => {
-                        startTimePicker.value = selectedValues;
-                        startTimeValue.value = selectedValues.join(':');
-                        showStartTime.value = false;
-                    };
-
-                    const onConfirmEndTime = ({ selectedValues }) => {
-                        endTimePicker.value = selectedValues;
-                        endTimeValue.value = selectedValues.join(':');
-                        showEndTime.value = false;
-                    };
+                    const dateText = computed(() => {
+                        if (!Array.isArray(range.value) || range.value.length !== 2) return '';
+                        return `${formatDate(range.value[0])} - ${formatDate(range.value[1])}`;
+                    });
 
                     const result = computed(() => {
-                        if (!startDateValue.value || !endDateValue.value) return '';
-                        return `${startDateValue.value} 至 ${endDateValue.value} ${startTimeValue.value}-${endTimeValue.value}`;
+                        if (!Array.isArray(range.value) || range.value.length !== 2) return '';
+                        return `${formatDate(range.value[0])} ${formatTime(startTime.value)} - ${formatDate(range.value[1])} ${formatTime(endTime.value)}`;
                     });
+
+                    const syncPicker = () => {
+                        pickerValue.value = active.value === 'start' ? [...startTime.value] : [...endTime.value];
+                    };
+
+                    const onSelect = (val) => {
+                        let next = [];
+                        if (Array.isArray(val)) next = val;
+                        else if (val && Array.isArray(val.selectedValues)) next = val.selectedValues;
+                        else if (val && Array.isArray(val.value)) next = val.value;
+                        else if (val instanceof Date) next = [val];
+
+                        if (next.length === 1) active.value = 'start';
+                        if (next.length === 2) active.value = 'end';
+                        range.value = next;
+                        syncPicker();
+                    };
+
+                    const onPickerChange = (val) => {
+                        const selectedValues = (val && val.selectedValues) || (val && val.value) || val;
+                        if (!Array.isArray(selectedValues)) return;
+                        if (active.value === 'start') startTime.value = selectedValues;
+                        else endTime.value = selectedValues;
+                        pickerValue.value = selectedValues;
+                    };
+
+                    const open = () => {
+                        show.value = true;
+                        active.value = 'start';
+                        syncPicker();
+                    };
+
+                    const close = () => {
+                        show.value = false;
+                    };
 
                     const formatter = (day) => {
                         const d = day.date;
@@ -1561,19 +1577,22 @@ window.RongHeComponents = {
                     };
 
                     return {
-                        showCalendar,
-                        showStartTime,
-                        showEndTime,
-                        startDateValue,
-                        endDateValue,
-                        startTimeValue,
-                        endTimeValue,
-                        startTimePicker,
-                        endTimePicker,
-                        onConfirmRange,
-                        onConfirmStartTime,
-                        onConfirmEndTime,
+                        show,
+                        open,
+                        close,
+                        range,
+                        active,
+                        startTime,
+                        endTime,
+                        pickerValue,
+                        timeColumns,
+                        minDate,
+                        maxDate,
+                        formatDate,
+                        dateText,
                         result,
+                        onSelect,
+                        onPickerChange,
                         formatter
                     };
                 },
@@ -1581,67 +1600,72 @@ window.RongHeComponents = {
                     <div class="w-full">
                         <van-cell-group inset>
                             <van-field
-                                v-model="startDateValue"
-                                label="开始日期"
-                                placeholder="请选择开始日期"
+                                :model-value="result"
+                                label="选择日期"
+                                placeholder="请选择日期区间与时间"
                                 readonly
                                 is-link
-                                @click="showCalendar = true"
+                                @click="open"
                             ></van-field>
-                            <van-field
-                                v-model="endDateValue"
-                                label="结束日期"
-                                placeholder="请选择结束日期"
-                                readonly
-                                is-link
-                                @click="showCalendar = true"
-                            ></van-field>
-                            <van-field
-                                v-model="startTimeValue"
-                                label="开始时间"
-                                placeholder="请选择开始时间"
-                                readonly
-                                is-link
-                                @click="showStartTime = true"
-                            ></van-field>
-                            <van-field
-                                v-model="endTimeValue"
-                                label="结束时间"
-                                placeholder="请选择结束时间"
-                                readonly
-                                is-link
-                                @click="showEndTime = true"
-                            ></van-field>
-                            <van-field label="结果回显" :model-value="result || '未完成选择'" readonly></van-field>
-                            <van-field label="禁用态" model-value="不可选择" readonly disabled></van-field>
                         </van-cell-group>
 
-                        <van-calendar
-                            v-model:show="showCalendar"
-                            type="range"
-                            allow-same-day
-                            color="#1890FF"
-                            show-mark
-                            :formatter="formatter"
-                            @confirm="onConfirmRange"
-                        ></van-calendar>
+                        <van-popup v-model:show="show" position="bottom" round :style="{ height: '80vh' }">
+                            <div class="h-full flex flex-col bg-white">
+                                <div class="h-12 px-4 flex items-center justify-between border-b border-[#f2f3f5]">
+                                    <div class="text-sm font-medium text-[#323233]">选择日期时间</div>
+                                    <van-icon name="cross" size="18" color="#969799" @click="close"></van-icon>
+                                </div>
 
-                        <van-popup v-model:show="showStartTime" position="bottom">
-                            <van-time-picker
-                                v-model="startTimePicker"
-                                title="选择开始时间"
-                                @confirm="onConfirmStartTime"
-                                @cancel="showStartTime = false"
-                            ></van-time-picker>
-                        </van-popup>
+                                <div class="flex-1 min-h-0 flex flex-col">
+                                    <div class="min-h-0" style="flex:3; overflow:hidden;">
+                                        <van-calendar
+                                            type="range"
+                                            allow-same-day
+                                            poppable="false"
+                                            :show-confirm="false"
+                                            :min-date="minDate"
+                                            :max-date="maxDate"
+                                            color="#1890FF"
+                                            show-mark
+                                            :formatter="formatter"
+                                            @select="onSelect"
+                                        ></van-calendar>
+                                    </div>
 
-                        <van-popup v-model:show="showEndTime" position="bottom">
-                            <van-time-picker
-                                v-model="endTimePicker"
-                                title="选择结束时间"
-                                @confirm="onConfirmEndTime"
-                                @cancel="showEndTime = false"
-                            ></van-time-picker>
+                                    <div class="min-h-0 border-t border-[#f2f3f5]" style="flex:2; overflow:hidden;">
+                                        <div class="px-4 pt-3 pb-2 flex items-center gap-2">
+                                            <div
+                                                class="px-3 h-7 rounded-full text-xs flex items-center border"
+                                                :class="active === 'start' ? 'border-[#1890FF] text-[#1890FF] bg-[#E6F7FF]' : 'border-[#ebedf0] text-[#646566] bg-white'"
+                                                @click="active = 'start'; pickerValue = [...startTime]"
+                                            >开始 {{ Array.isArray(range) && range[0] ? formatDate(range[0]) : '--' }} {{ startTime.join(':') }}</div>
+                                            <div
+                                                class="px-3 h-7 rounded-full text-xs flex items-center border"
+                                                :class="active === 'end' ? 'border-[#1890FF] text-[#1890FF] bg-[#E6F7FF]' : 'border-[#ebedf0] text-[#646566] bg-white'"
+                                                @click="active = 'end'; pickerValue = [...endTime]"
+                                            >结束 {{ Array.isArray(range) && range[1] ? formatDate(range[1]) : '--' }} {{ endTime.join(':') }}</div>
+                                        </div>
+
+                                        <div class="px-4 pb-3">
+                                            <van-picker
+                                                v-model="pickerValue"
+                                                :columns="timeColumns"
+                                                @change="onPickerChange"
+                                            ></van-picker>
+                                        </div>
+
+                                        <div class="px-4 pb-4">
+                                            <van-button
+                                                block
+                                                type="primary"
+                                                color="#1890FF"
+                                                :disabled="!(Array.isArray(range) && range.length === 2)"
+                                                @click="close"
+                                            >确定</van-button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </van-popup>
                     </div>
                 `
@@ -1649,8 +1673,8 @@ window.RongHeComponents = {
         ],
         rules: [
             '<strong>单选回显</strong>：使用输入框触发日历，选择后回填到输入框中。',
-            '<strong>区间选择</strong>：支持开始/结束日期联动选择，选择后分别回填到起始与结束输入框。',
-            '<strong>复合筛选</strong>：支持日期区间 + 时间段双重筛选，结果需形成可见回显态。',
+            '<strong>区间选择</strong>：日期区间建议合并为单一输入框回显（选择日期：开始-结束），减少表单占用。',
+            '<strong>复合筛选</strong>：日期区间 + 时间段建议在同一弹窗内完成；日历区占比约 3/5，时间轮盘占比约 2/5；默认时间 12:00。',
             '<strong>状态与反馈</strong>：需包含今日标记、选中高亮、禁用灰显、禁用态输入框展示。'
         ] 
     },
@@ -2801,6 +2825,207 @@ window.RongHeComponents = {
             '<strong>表现</strong>：黑色遮罩层弱化背景；当前步骤目标区域镂空高亮（建议圆角与白色描边），并给出指向箭头与简短引导文案。',
             '<strong>交互</strong>：支持“跳过/上一步/下一步”；推荐允许用户直接点击高亮目标进入下一步；引导结束后应恢复页面可操作。',
             '<strong>文案</strong>：每步一句话说明目标与动作（动词开头），尽量控制在 18~24 字以内；重要信息优先放在前半句。'
+        ]
+    },
+
+    overlay: {
+        name: '9.4 遮罩',
+        demos: [
+            {
+                title: '页面级示例',
+                type: 'vue',
+                setupStr: "return (() => { const { ref, computed } = Vue; const show = ref(false); const mode = ref('basic'); const open = (m) => { mode.value = m; show.value = true; }; const close = () => { show.value = false; }; const overlayStyle = computed(() => { if (mode.value === 'light') return { backgroundColor: 'rgba(0,0,0,0.35)' }; if (mode.value === 'transparent') return { backgroundColor: 'rgba(0,0,0,0)' }; return { backgroundColor: 'rgba(0,0,0,0.7)' }; }); const title = computed(() => ({ basic: '基础遮罩', light: '浅色遮罩', transparent: '透明遮罩（拦截点击）', loading: '遮罩加载' }[mode.value] || '遮罩')); return { show, mode, open, close, overlayStyle, title }; })();",
+                template: `
+                    <div class="h-full min-h-0 bg-[#f7f8fa] flex flex-col overflow-hidden">
+                        <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar py-3">
+                            <div class="px-4 text-xs text-[#969799] mb-2">触发入口（页面级示例）</div>
+                            <van-cell-group inset :border="false">
+                                <van-cell title="基础遮罩" value="rgba(0,0,0,0.7)" is-link clickable @click="open('basic')" />
+                                <van-cell title="浅色遮罩" value="更轻的遮罩" is-link clickable @click="open('light')" />
+                                <van-cell title="透明遮罩" value="仅拦截点击" is-link clickable @click="open('transparent')" />
+                                <van-cell title="遮罩加载" value="loading + 文案" is-link clickable @click="open('loading')" />
+                            </van-cell-group>
+
+                            <div class="px-4 py-3">
+                                <div class="h-px bg-[#ebedf0]"></div>
+                            </div>
+
+                            <div class="px-4 text-xs text-[#969799] mb-2">局部遮罩（示意）</div>
+                            <div class="px-4">
+                                <div class="bg-white rounded-xl border border-[#ebedf0] p-4 relative overflow-hidden">
+                                    <div class="text-sm font-medium text-[#323233]">内容区域</div>
+                                    <div class="text-xs text-[#969799] mt-1 leading-5">可用于局部模块“提交中/不可操作”状态（示意实现，不依赖全屏覆盖）。</div>
+                                    <div class="mt-3 flex items-center gap-2">
+                                        <van-button size="small" type="primary" color="#1890FF" @click="open('light')">展示遮罩</van-button>
+                                        <van-button size="small" plain color="#1890FF" @click="close">关闭遮罩</van-button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <van-overlay :show="show" :style="overlayStyle" @click="close" class="flex items-center justify-center">
+                            <div v-if="mode !== 'transparent'" class="bg-white rounded-xl px-6 py-5 w-[280px]" @click.stop>
+                                <div class="text-sm font-medium text-[#323233]">{{ title }}</div>
+                                <div v-if="mode === 'loading'" class="mt-4 flex items-center justify-center gap-3">
+                                    <van-loading size="18px" color="#1890FF"></van-loading>
+                                    <div class="text-[14px] text-[#323233]">处理中...</div>
+                                </div>
+                                <div v-else class="text-xs text-[#969799] mt-2 leading-5">点击遮罩空白区域关闭</div>
+                                <div class="mt-4">
+                                    <van-button block type="primary" color="#1890FF" @click="close">我知道了</van-button>
+                                </div>
+                            </div>
+                        </van-overlay>
+                    </div>
+                `,
+                code: `<van-overlay :show=\"show\" @click=\"show = false\">\n  <div class=\"wrapper\" @click.stop>\n    <!-- 内容 -->\n  </div>\n</van-overlay>`
+            },
+            {
+                title: '演示场景一：基础（点击遮罩关闭）',
+                type: 'vue',
+                setupStr: "return (() => { const show = Vue.ref(false); return { show }; })();",
+                template: `<div class="p-4"><van-button type="primary" color="#1890FF" block @click="show = true">打开遮罩</van-button><van-overlay :show="show" @click="show = false" class="flex items-center justify-center"><div class="bg-white rounded-xl px-6 py-4 text-sm text-[#323233]" @click.stop>点击遮罩关闭</div></van-overlay></div>`,
+                code: `<van-overlay :show=\"show\" @click=\"show = false\" />`
+            },
+            {
+                title: '演示场景二：自定义透明度',
+                type: 'vue',
+                setupStr: "return (() => { const show = Vue.ref(false); return { show }; })();",
+                template: `<div class="p-4"><van-button plain color="#1890FF" block @click="show = true">打开浅色遮罩</van-button><van-overlay :show="show" :style="{ backgroundColor: 'rgba(0,0,0,0.35)' }" @click="show = false" /></div>`,
+                code: `<van-overlay :show=\"show\" :style=\"{ backgroundColor: 'rgba(0,0,0,0.35)' }\" />`
+            }
+        ],
+        rules: [
+            '<strong>使用场景</strong>：阻止误触、突出当前操作（弹层/引导/加载中）、或在提交中禁止交互。',
+            '<strong>透明度</strong>：常规遮罩建议 0.55~0.75；轻提示/弱阻断可用 0.25~0.4；透明遮罩仅用于拦截点击（需避免用户迷失）。',
+            '<strong>交互</strong>：非强制流程建议支持点击遮罩关闭；强制流程（支付/风控）应提供明确按钮而不是只能点遮罩。',
+            '<strong>层级</strong>：避免多个遮罩叠加；同一时刻只允许一个全屏遮罩，必要时统一管理 show 状态。'
+        ]
+    },
+
+    'pull-refresh': {
+        name: '9.6 下拉刷新',
+        demos: [
+            {
+                title: '页面级示例',
+                type: 'vue',
+                setupStr: "return (() => { const { ref } = Vue; const refreshing = ref(false); const last = ref('刚刚'); const list = ref([ { title: '订单列表', desc: '下拉刷新获取最新数据' }, { title: '通知消息', desc: '支持 successText 提示' }, { title: '数据看板', desc: '刷新结束自动回弹' }, { title: '任务清单', desc: '可配置 disabled' }, { title: '收藏列表', desc: '可自定义 loading 插槽' } ]); const onRefresh = () => { refreshing.value = true; setTimeout(() => { last.value = new Date().toLocaleTimeString(); refreshing.value = false; }, 1000); }; return { refreshing, last, list, onRefresh }; })();",
+                template: `
+                    <div class="h-full min-h-0 bg-[#f7f8fa] flex flex-col overflow-hidden">
+                        <div class="px-4 pt-3 pb-2 text-xs text-[#969799]">最近更新：{{ last }}</div>
+                        <div class="flex-1 min-h-0 overflow-hidden">
+                            <van-pull-refresh
+                                v-model="refreshing"
+                                success-text="已更新"
+                                pulling-text="下拉即可刷新"
+                                loosing-text="释放立即刷新"
+                                loading-text="刷新中..."
+                                @refresh="onRefresh"
+                            >
+                                <div class="px-4 pb-4 space-y-3">
+                                    <div v-for="(it, i) in list" :key="i" class="bg-white rounded-xl border border-[#ebedf0] px-4 py-3">
+                                        <div class="text-[14px] text-[#323233]">{{ it.title }}</div>
+                                        <div class="text-[12px] text-[#969799] mt-1">{{ it.desc }}</div>
+                                    </div>
+                                </div>
+                            </van-pull-refresh>
+                        </div>
+                    </div>
+                `,
+                code: `<van-pull-refresh v-model=\"refreshing\" @refresh=\"onRefresh\">\n  <!-- 列表内容 -->\n</van-pull-refresh>`
+            },
+            {
+                title: '演示场景一：自定义文案',
+                type: 'vue',
+                setupStr: "return (() => { const refreshing = Vue.ref(false); const onRefresh = () => { refreshing.value = true; setTimeout(() => (refreshing.value = false), 800); }; return { refreshing, onRefresh }; })();",
+                template: `<div class="p-4"><van-pull-refresh v-model="refreshing" pulling-text="下拉刷新" loosing-text="松手刷新" loading-text="加载中..." success-text="刷新成功" @refresh="onRefresh"><div class="bg-white rounded-xl border border-[#ebedf0] p-4 text-sm text-[#323233]">下拉这个区域触发刷新</div></van-pull-refresh></div>`,
+                code: `<van-pull-refresh pulling-text=\"下拉刷新\" success-text=\"刷新成功\" />`
+            },
+            {
+                title: '演示场景二：禁用状态',
+                type: 'vue',
+                template: `<div class="p-4"><van-pull-refresh :disabled="true"><div class="bg-white rounded-xl border border-[#ebedf0] p-4 text-sm text-[#323233]">disabled=true（不会触发刷新）</div></van-pull-refresh></div>`,
+                code: `<van-pull-refresh :disabled=\"true\" />`
+            },
+            {
+                title: '演示场景三：自定义 loading 插槽',
+                type: 'vue',
+                setupStr: "return (() => { const refreshing = Vue.ref(false); const onRefresh = () => { refreshing.value = true; setTimeout(() => (refreshing.value = false), 1000); }; return { refreshing, onRefresh }; })();",
+                template: `<div class="p-4"><van-pull-refresh v-model="refreshing" @refresh="onRefresh"><template #loading><div class="py-3 flex items-center justify-center gap-2 text-xs text-[#969799]"><van-loading size="14px" color="#1890FF"></van-loading><span>同步中…</span></div></template><div class="bg-white rounded-xl border border-[#ebedf0] p-4 text-sm text-[#323233]">使用 #loading 自定义头部</div></van-pull-refresh></div>`,
+                code: `<template #loading>...</template>`
+            }
+        ],
+        rules: [
+            '<strong>使用场景</strong>：列表页/消息页/订单页等“向下拉=刷新”符合用户预期的页面；非列表场景谨慎使用。',
+            '<strong>反馈</strong>：建议设置 pulling/loosing/loading/success 文案；成功提示建议 0.8~1.2s 自动消失。',
+            '<strong>冲突处理</strong>：与横向滑动组件（Tabs/Swiper/SwipeCell）同屏时注意手势冲突，必要时减少可刷新区域或禁用刷新。',
+            '<strong>性能</strong>：刷新应只拉取增量或分页首屏数据；避免每次刷新都重建大列表导致卡顿。'
+        ]
+    },
+
+    'swipe-cell': {
+        name: '9.7 滑动单元格',
+        demos: [
+            {
+                title: '页面级示例',
+                type: 'vue',
+                setupStr: "return (() => { const { ref } = Vue; const list = ref([ { id: 1, title: '消息通知', desc: '右滑显示操作按钮' }, { id: 2, title: '订单记录', desc: '支持多操作与确认删除' }, { id: 3, title: '收藏内容', desc: '左滑/右滑均可配置' }, { id: 4, title: '禁用示例', desc: '不可滑动', disabled: true } ]); const onAction = (type, item) => { if (type === 'delete') { vant.showConfirmDialog({ title: '确认删除？', message: item.title }).then(() => { list.value = list.value.filter(x => x.id !== item.id); vant.showToast('已删除'); }).catch(() => {}); return; } vant.showToast(type + '：' + item.title); }; return { list, onAction }; })();",
+                template: `
+                    <div class="h-full min-h-0 bg-[#f7f8fa] flex flex-col overflow-hidden">
+                        <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar py-3">
+                            <div class="px-4 text-xs text-[#969799] mb-2">向左滑动或向右滑动查看操作</div>
+                            <div class="px-4 space-y-3">
+                                <div v-for="it in list" :key="it.id" class="bg-white rounded-xl border border-[#ebedf0] overflow-hidden">
+                                    <van-swipe-cell :disabled="!!it.disabled">
+                                        <template #left>
+                                            <van-button square type="primary" color="#1890FF" class="!h-full" @click="onAction('置顶', it)">置顶</van-button>
+                                        </template>
+
+                                        <div class="px-4 py-3">
+                                            <div class="text-[14px] text-[#323233]">{{ it.title }}</div>
+                                            <div class="text-[12px] text-[#969799] mt-1">{{ it.desc }}</div>
+                                        </div>
+
+                                        <template #right>
+                                            <div class="flex h-full">
+                                                <van-button square type="primary" color="#34d399" class="!h-full" @click="onAction('收藏', it)">收藏</van-button>
+                                                <van-button square type="danger" class="!h-full" @click="onAction('delete', it)">删除</van-button>
+                                            </div>
+                                        </template>
+                                    </van-swipe-cell>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                code: `<van-swipe-cell>\n  <template #right>\n    <van-button type=\"danger\">删除</van-button>\n  </template>\n  <van-cell title=\"标题\" />\n</van-swipe-cell>`
+            },
+            {
+                title: '演示场景一：基础右侧删除',
+                type: 'vue',
+                setupStr: "return { onDel: () => vant.showToast('删除') };",
+                template: `<div class="p-4"><van-swipe-cell><template #right><van-button square type="danger" class="!h-full" @click="onDel">删除</van-button></template><van-cell title="向左滑动" value="删除"></van-cell></van-swipe-cell></div>`,
+                code: `<template #right><van-button type=\"danger\">删除</van-button></template>`
+            },
+            {
+                title: '演示场景二：删除前确认（before-close）',
+                type: 'vue',
+                setupStr: "return (() => { const beforeClose = ({ position, instance }) => { if (position === 'right') { return vant.showConfirmDialog({ title: '确认删除？', message: '该操作不可撤销' }).then(() => { instance.close(); vant.showToast('已删除'); }).catch(() => instance.close()); } instance.close(); }; return { beforeClose }; })();",
+                template: `<div class="p-4"><van-swipe-cell :before-close="beforeClose"><template #right><van-button square type="danger" class="!h-full">删除</van-button></template><van-cell title="向左滑动" value="确认删除"></van-cell></van-swipe-cell></div>`,
+                code: `<van-swipe-cell :before-close=\"beforeClose\">...</van-swipe-cell>`
+            },
+            {
+                title: '演示场景三：禁用滑动',
+                type: 'vue',
+                template: `<div class="p-4"><van-swipe-cell disabled><template #right><van-button square type="danger" class="!h-full">删除</van-button></template><van-cell title="disabled=true" value="不可滑动"></van-cell></van-swipe-cell></div>`,
+                code: `<van-swipe-cell disabled />`
+            }
+        ],
+        rules: [
+            '<strong>使用场景</strong>：列表项快捷操作（置顶/已读/收藏/删除），适合“轻操作”且不影响主流程的辅助入口。',
+            '<strong>按钮数量</strong>：右侧建议 1~2 个为佳；超过 2 个会降低可发现性与误触率增高。',
+            '<strong>危险操作</strong>：删除/退订等不可逆操作建议二次确认（before-close + confirmDialog），并提供撤销或 toast 反馈。',
+            '<strong>手势冲突</strong>：与下拉刷新、横向滑动 Tabs 同屏时，需注意滑动方向冲突，必要时减少可滑动区域或分区展示。'
         ]
     },
 
