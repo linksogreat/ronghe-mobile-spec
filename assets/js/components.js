@@ -1647,12 +1647,12 @@ window.RongHeComponents = {
                                         </div>
 
                                         <div class="px-4 pb-3">
-                                            <van-picker
+                                            <van-time-picker
                                                 v-model="pickerValue"
-                                                :columns="timeColumns"
+                                                :columns-type="['hour','minute']"
                                                 :show-toolbar="false"
                                                 @change="onPickerChange"
-                                            ></van-picker>
+                                            ></van-time-picker>
                                         </div>
 
                                         <div class="px-4 pb-4">
