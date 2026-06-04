@@ -1621,7 +1621,7 @@ window.RongHeComponents = {
                                         <van-calendar
                                             type="range"
                                             allow-same-day
-                                            poppable="false"
+                                            :poppable="false"
                                             :show-confirm="false"
                                             :min-date="minDate"
                                             :max-date="maxDate"

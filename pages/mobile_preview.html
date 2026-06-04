@@ -764,7 +764,7 @@
 <script src="../assets/js/data.js"></script>
 <script src="../assets/js/components.js?v=1"></script>
 <script>
-    const { createApp, reactive, ref, computed, onMounted } = Vue;
+    const { createApp, reactive, ref, computed, onMounted, onBeforeUnmount } = Vue;
 
     createApp({
         setup() {
@@ -846,10 +846,73 @@
                 }
             };
 
+            const setupMouseAsTouch = () => {
+                const root = document.getElementById('app');
+                if (!root) return () => {};
+                const ignore = (el) => !!(el && (el.closest('input,textarea,select') || el.isContentEditable));
+                const makeTouch = (target, e, identifier) => ({
+                    identifier,
+                    target,
+                    clientX: e.clientX,
+                    clientY: e.clientY,
+                    pageX: e.pageX,
+                    pageY: e.pageY,
+                    screenX: e.screenX,
+                    screenY: e.screenY
+                });
+                const makeEvent = (type, touches, changedTouches) => {
+                    const ev = new Event(type, { bubbles: true, cancelable: true });
+                    Object.defineProperty(ev, 'touches', { value: touches });
+                    Object.defineProperty(ev, 'targetTouches', { value: touches });
+                    Object.defineProperty(ev, 'changedTouches', { value: changedTouches || touches });
+                    return ev;
+                };
+                let down = false;
+                let activeTarget = null;
+                let activeId = 0;
+                const onDown = (e) => {
+                    if (e.button !== 0) return;
+                    if (ignore(e.target)) return;
+                    down = true;
+                    activeTarget = e.target;
+                    activeId = Date.now();
+                    const t = makeTouch(activeTarget, e, activeId);
+                    activeTarget.dispatchEvent(makeEvent('touchstart', [t]));
+                };
+                const onMove = (e) => {
+                    if (!down || !activeTarget) return;
+                    e.preventDefault();
+                    const t = makeTouch(activeTarget, e, activeId);
+                    activeTarget.dispatchEvent(makeEvent('touchmove', [t]));
+                };
+                const onUp = (e) => {
+                    if (!down || !activeTarget) return;
+                    down = false;
+                    const t = makeTouch(activeTarget, e, activeId);
+                    activeTarget.dispatchEvent(makeEvent('touchend', [], [t]));
+                    activeTarget = null;
+                };
+                root.addEventListener('mousedown', onDown);
+                window.addEventListener('mousemove', onMove, { passive: false });
+                window.addEventListener('mouseup', onUp);
+                return () => {
+                    root.removeEventListener('mousedown', onDown);
+                    window.removeEventListener('mousemove', onMove);
+                    window.removeEventListener('mouseup', onUp);
+                };
+            };
+
+            let cleanupMouseAsTouch = null;
+
             onMounted(() => {
+                cleanupMouseAsTouch = setupMouseAsTouch();
                 if (!(window.location.protocol === 'file:' && !apiBaseRaw)) {
                     loadData();
                 }
+            });
+
+            onBeforeUnmount(() => {
+                if (cleanupMouseAsTouch) cleanupMouseAsTouch();
             });
 
             // 扁平化颜色数据以便展示
