@@ -682,23 +682,22 @@
         ]
     },
     "popup": {
-        "name": "6.3 弹出层",
+        "name": "5.5 弹窗层",
         "demos": [
             {
-                "title": "位置",
-                "type": "action",
-                "actions": [
-                    {
-                        "text": "顶部弹出",
-                        "action": "popup-top"
-                    },
-                    {
-                        "text": "居中弹出",
-                        "action": "popup-center"
-                    }
-                ],
-                "code": "<van-popup v-model:show=\"show\" position=\"top\" />"
+                "title": "页面级示例",
+                "type": "vue",
+                "setupStr": "return (() => { const showTop = Vue.ref(false); const showCenter = Vue.ref(false); const showBottom = Vue.ref(false); const showSide = Vue.ref(false); const open = (pos) => { if (pos === 'top') showTop.value = true; if (pos === 'center') showCenter.value = true; if (pos === 'bottom') showBottom.value = true; if (pos === 'side') showSide.value = true; }; return { showTop, showCenter, showBottom, showSide, open }; })();",
+                "template": "<div class=\"h-full min-h-0 bg-[#f7f8fa] flex flex-col overflow-hidden\"><div class=\"flex-1 min-h-0 overflow-y-auto custom-scrollbar py-3\"><div class=\"px-4 text-xs text-[#969799] mb-2\">触发入口（页面级示例）</div><van-cell-group inset :border=\"false\"><van-cell title=\"顶部弹出\" value=\"position=top\" is-link clickable @click=\"open('top')\" /><van-cell title=\"居中弹出\" value=\"默认居中\" is-link clickable @click=\"open('center')\" /><van-cell title=\"底部弹出\" value=\"position=bottom\" is-link clickable @click=\"open('bottom')\" /><van-cell title=\"侧边弹出\" value=\"position=right\" is-link clickable @click=\"open('side')\" /></van-cell-group><div class=\"px-4 py-3\"><div class=\"h-px bg-[#ebedf0]\"></div></div><div class=\"px-4 text-xs text-[#969799] mb-2\">说明</div><div class=\"px-4 text-sm text-[#323233] leading-6\">弹窗层用于承载临时浮层内容，支持不同方向出现；本示例仅展示“内容区域容器”，不包含具体业务内容。点击遮罩关闭。</div></div><van-popup v-model:show=\"showTop\" position=\"top\"><div class=\"bg-white\" style=\"height: 180px;\"></div></van-popup><van-popup v-model:show=\"showCenter\" round><div class=\"bg-white rounded-xl\" style=\"width: 280px; height: 180px;\"></div></van-popup><van-popup v-model:show=\"showBottom\" position=\"bottom\" round><div class=\"bg-white\" style=\"height: 260px; padding-bottom: calc(env(safe-area-inset-bottom));\"></div></van-popup><van-popup v-model:show=\"showSide\" position=\"right\" :style=\"{ width: '72vw', maxWidth: '320px', height: '100%' }\"><div class=\"h-full bg-white\"></div></van-popup></div>",
+                "code": "<!-- 顶部/底部/侧边 -->\n<van-popup v-model:show=\"show\" position=\"top|bottom|left|right\">\n  <div style=\"height: 200px;\"></div>\n</van-popup>\n\n<!-- 居中（默认） -->\n<van-popup v-model:show=\"show\" round>\n  <div style=\"width: 280px; height: 180px;\"></div>\n</van-popup>"
             }
+        ],
+        "rules": [
+            "<strong>定位</strong>：顶部/底部弹窗适合临时提示、表单补充；侧边弹窗适合筛选/详情；居中弹窗适合轻量提示或短流程确认。",
+            "<strong>内容区</strong>：弹窗层应只承载“容器”，内容可滚动但结构需稳定；长内容建议内部滚动，避免挤压页面。",
+            "<strong>关闭</strong>：默认支持点击遮罩关闭；关键流程可增加显式关闭入口（关闭按钮/返回手势），避免用户迷失。",
+            "<strong>尺寸建议</strong>：居中弹窗建议宽 260~320px；侧边弹窗建议 72%~86% 视口宽度并设置 maxWidth；底部弹窗建议设置最大高度并考虑 safe-area-inset-bottom。",
+            "<strong>层级与遮罩</strong>：遮罩用于聚焦当前任务，避免叠层过多；同一时刻建议只出现一个弹窗层。"
         ]
     },
     "slider": {
