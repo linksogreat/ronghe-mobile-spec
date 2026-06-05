@@ -1573,8 +1573,8 @@ window.RongHeComponents = {
                             a.getFullYear() === b.getFullYear() &&
                             a.getMonth() === b.getMonth() &&
                             a.getDate() === b.getDate();
-                        if (Array.isArray(range.value) && range.value.length >= 1 && same(d, range.value[0])) day.topInfo = '取车';
-                        if (Array.isArray(range.value) && range.value.length === 2 && same(d, range.value[1])) day.topInfo = '还车';
+                        if (Array.isArray(range.value) && range.value.length >= 1 && same(d, range.value[0])) day.topInfo = '开始';
+                        if (Array.isArray(range.value) && range.value.length === 2 && same(d, range.value[1])) day.topInfo = '结束';
                         return day;
                     };
 
@@ -1638,8 +1638,8 @@ window.RongHeComponents = {
                                         </div>
 
                                         <div class="px-4 pt-3 pb-2 flex items-center">
-                                            <div class="flex-1 text-sm font-medium text-[#323233]">取车时间</div>
-                                            <div class="flex-1 text-sm font-medium text-[#323233] text-right">还车时间</div>
+                                            <div class="flex-1 text-sm font-medium text-[#323233] text-center">开始时间</div>
+                                            <div class="flex-1 text-sm font-medium text-[#323233] text-center">结束时间</div>
                                         </div>
 
                                         <div class="px-3">
@@ -1664,8 +1664,8 @@ window.RongHeComponents = {
 
                                         <div class="px-4 pt-3 pb-4 flex items-center gap-3">
                                             <div class="flex-1">
-                                                <div class="text-xs text-[#969799] leading-4">取 {{ pickupText }}</div>
-                                                <div class="text-xs text-[#969799] leading-4">还 {{ returnText }}</div>
+                                                <div class="text-xs text-[#969799] leading-4">开始 {{ pickupText }}</div>
+                                                <div class="text-xs text-[#969799] leading-4">结束 {{ returnText }}</div>
                                             </div>
                                             <div class="w-10 text-center text-xs text-[#969799]">{{ durationText }}</div>
                                             <van-button
@@ -1689,7 +1689,7 @@ window.RongHeComponents = {
         rules: [
             '<strong>单选回显</strong>：使用输入框触发日历，选择后回填到输入框中。',
             '<strong>区间选择</strong>：日期区间建议合并为单一输入框回显（选择日期：开始-结束），减少表单占用。',
-            '<strong>复合筛选</strong>：日期区间 + 时间段建议在同一弹窗内完成；日历区占比约 3/5，时间轮盘占比约 2/5；下方可同时展示取车/还车时间（四列：时分/时分）；默认时间 12:00。',
+            '<strong>复合筛选</strong>：日期区间 + 时间段建议在同一弹窗内完成；日历区占比约 3/5，时间轮盘占比约 2/5；下方可同时展示开始/结束时间（四列：时分/时分）；默认时间 12:00。',
             '<strong>状态与反馈</strong>：需包含今日标记、选中高亮、禁用灰显、禁用态输入框展示。'
         ] 
     },
