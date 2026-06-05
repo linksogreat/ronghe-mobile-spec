@@ -1075,14 +1075,44 @@
         ]
     },
     "card": {
-        "name": "6.21 卡片",
+        "name": "7.1 卡片",
         "demos": [
             {
-                "title": "商品卡片",
-                "type": "static",
-                "html": "<div class=\"van-card\"><div class=\"van-card__header\"><a class=\"van-card__thumb\"><div class=\"van-image\" style=\"width:100%;height:100%\"><img src=\"data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%22100%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23eeeeee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22sans-serif%22%20font-size%3D%2214%22%20fill%3D%22%23999%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3EImage%3C%2Ftext%3E%3C%2Fsvg%3E\" class=\"van-image__img\"></div></a><div class=\"van-card__content\"><div><div class=\"van-card__title van-multi-ellipsis--l2\">商品标题</div><div class=\"van-card__desc van-ellipsis\">描述信息</div></div><div class=\"van-card__bottom\"><div class=\"van-card__price\"><div><span class=\"van-card__price-currency\">¥</span><span class=\"van-card__price-integer\">2</span>.<span class=\"van-card__price-decimal\">00</span></div></div><div class=\"van-card__num\">x2</div></div></div></div></div>",
+                "title": "基础商品卡片",
+                "type": "vue",
+                "setupStr": "return { thumb: 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%22100%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23eeeeee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22sans-serif%22%20font-size%3D%2214%22%20fill%3D%22%23999%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3EImage%3C%2Ftext%3E%3C%2Fsvg%3E' };",
+                "template": "<div class=\"h-full min-h-0 bg-[#f7f8fa] p-4\"><van-card num=\"2\" price=\"2.00\" desc=\"描述信息\" title=\"商品标题\" :thumb=\"thumb\" /></div>",
                 "code": "<van-card num=\"2\" price=\"2.00\" desc=\"描述信息\" title=\"商品标题\" thumb=\"...\" />"
+            },
+            {
+                "title": "标签 + 操作区",
+                "type": "vue",
+                "setupStr": "return { thumb: 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%22100%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23eeeeee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22sans-serif%22%20font-size%3D%2214%22%20fill%3D%22%23999%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3EImage%3C%2Ftext%3E%3C%2Fsvg%3E', onAdd: () => vant.showToast('加入购物车'), onBuy: () => vant.showToast('立即购买') };",
+                "template": "<div class=\"h-full min-h-0 bg-[#f7f8fa] p-4\"><van-card num=\"1\" price=\"128.00\" origin-price=\"199.00\" desc=\"轻薄透气，适合夏季\" title=\"运动短袖\" tag=\"热销\" :thumb=\"thumb\"><template #tags><van-tag plain type=\"danger\" class=\"mr-1\">限时</van-tag><van-tag plain type=\"primary\">包邮</van-tag></template><template #footer><van-button size=\"mini\" plain type=\"primary\" color=\"#1890FF\" @click=\"onAdd\">加入</van-button><van-button size=\"mini\" type=\"primary\" color=\"#1890FF\" class=\"ml-2\" @click=\"onBuy\">购买</van-button></template></van-card></div>",
+                "code": "<van-card title=\"运动短袖\" desc=\"轻薄透气，适合夏季\" price=\"128.00\" origin-price=\"199.00\" tag=\"热销\" thumb=\"...\">\\n  <template #tags>\\n    <van-tag plain type=\\\"danger\\\">限时</van-tag>\\n    <van-tag plain type=\\\"primary\\\">包邮</van-tag>\\n  </template>\\n  <template #footer>\\n    <van-button size=\\\"mini\\\" plain type=\\\"primary\\\" color=\\\"#1890FF\\\">加入</van-button>\\n    <van-button size=\\\"mini\\\" type=\\\"primary\\\" color=\\\"#1890FF\\\">购买</van-button>\\n  </template>\\n</van-card>"
+            },
+            {
+                "title": "列表选择态",
+                "type": "vue",
+                "setupStr": "return (() => { const active = Vue.ref('a'); const list = [ { id: 'a', title: '基础套餐', desc: '含基础服务与保障', price: '99.00', num: '1' }, { id: 'b', title: '升级套餐', desc: '含更多权益', price: '159.00', num: '1' } ]; const thumb = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%22100%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23eeeeee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22sans-serif%22%20font-size%3D%2214%22%20fill%3D%22%23999%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3EImage%3C%2Ftext%3E%3C%2Fsvg%3E'; const onSelect = (id) => { active.value = id; }; return { active, list, thumb, onSelect }; })();",
+                "template": "<div class=\"h-full min-h-0 bg-[#f7f8fa] p-4\"><div class=\"space-y-3\"><div v-for=\"item in list\" :key=\"item.id\" class=\"rounded-xl overflow-hidden\" :class=\"active === item.id ? 'ring-2 ring-[#1890FF]' : 'ring-1 ring-[#ebedf0]'\" @click=\"onSelect(item.id)\"><div class=\"bg-white relative\"><div class=\"absolute top-3 right-3 z-10\"><van-checkbox :model-value=\"active === item.id\" checked-color=\"#1890FF\" /></div><van-card :title=\"item.title\" :desc=\"item.desc\" :price=\"item.price\" :num=\"item.num\" :thumb=\"thumb\" /></div></div></div></div>",
+                "code": "<div class=\"rounded-xl overflow-hidden\" :class=\"active ? 'ring-2 ring-[#1890FF]' : 'ring-1 ring-[#ebedf0]'\">\\n  <van-card title=\"基础套餐\" desc=\"含基础服务与保障\" price=\"99.00\" num=\"1\" thumb=\"...\" />\\n</div>"
+            },
+            {
+                "title": "加载态（骨架切换）",
+                "type": "vue",
+                "setupStr": "return (() => { const loading = Vue.ref(true); const thumb = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%22100%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23eeeeee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22sans-serif%22%20font-size%3D%2214%22%20fill%3D%22%23999%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3EImage%3C%2Ftext%3E%3C%2Fsvg%3E'; return { loading, thumb }; })();",
+                "template": "<div class=\"h-full min-h-0 bg-[#f7f8fa] p-4\"><div class=\"bg-white rounded-xl p-3\"><div class=\"flex items-center justify-between mb-3\"><div class=\"text-sm font-medium text-[#333]\">加载态</div><van-switch v-model=\"loading\" size=\"20px\" active-color=\"#1890FF\" /></div><div v-if=\"loading\"><van-skeleton title :row=\"2\" /></div><div v-else><van-card num=\"2\" price=\"2.00\" desc=\"描述信息\" title=\"商品标题\" :thumb=\"thumb\" /></div></div></div>",
+                "code": "<van-switch v-model=\"loading\" active-color=\"#1890FF\" />\\n<van-skeleton v-if=\"loading\" title :row=\"2\" />\\n<van-card v-else title=\"商品标题\" desc=\"描述信息\" price=\"2.00\" num=\"2\" thumb=\"...\" />"
             }
+        ],
+        "rules": [
+            "<strong>信息结构</strong>：优先保证主信息可读（标题、价格），描述信息为辅；标题建议 1-2 行，描述建议 1 行。",
+            "<strong>点击反馈</strong>：当卡片可点击/可跳转时，整卡作为点击热区；避免在同一卡片内堆叠过多同级按钮。",
+            "<strong>标签策略</strong>：角标/Tag 用于表达状态（热销/限时/包邮等），数量保持克制（建议 1-2 个）。",
+            "<strong>行动区</strong>：操作按钮放在 footer 区，主按钮使用主题色 #1890FF；次要操作使用描边/弱化样式。",
+            "<strong>列表间距</strong>：卡片列表建议外边距 16px，卡片间距 12px，圆角 12px；浅色背景下可用细描边 #ebedf0 或轻投影区分层级。",
+            "<strong>状态表达</strong>：支持加载态（骨架占位）与选择态（主题色描边/高亮），状态变化应保持布局稳定。"
         ]
     },
     "action-bar": {
