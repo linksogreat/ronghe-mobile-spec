@@ -2092,7 +2092,13 @@ window.RongHeComponents = {
 
     // 6. 数据展示
     cell: { 
-        name: '6.1 单元格', 
+        name: '6.1 单元格',
+        rules: [
+            "<strong>基础用法</strong>：通常包含左侧标题与右侧内容，支持可点击（clickable）及跳转箭头（is-link）。",
+            "<strong>个人资料（大尺寸）</strong>：使用 size=\"large\"，可通过 title 插槽自定义左侧复杂结构（如头像+主副标题）。",
+            "<strong>联系方式（带图标）</strong>：使用 icon 属性在左侧展示图标，可配合 van-cell-group inset 实现圆角分组。",
+            "<strong>操作型（如退出登录）</strong>：通过 title 插槽自定义文本颜色与居中对齐，突出核心操作（如红色警示文字）。"
+        ],
         demos: [
             {
                 title: '完整演示',
@@ -2156,7 +2162,31 @@ window.RongHeComponents = {
                             </van-cell-group>
                         </div>
                     </div>
-                `
+                `,
+                code: `<van-cell-group inset>
+  <!-- 基础用法 -->
+  <van-cell title="单元格" value="内容" is-link clickable />
+  
+  <!-- 图标与右侧内容 -->
+  <van-cell title="手机号" value="138****8000" icon="phone-o" is-link />
+  
+  <!-- 大尺寸自定义内容 -->
+  <van-cell size="large" is-link>
+    <template #title>
+      <div class="flex items-center gap-3">
+        <van-icon name="user-o" size="22" />
+        <div>
+          <div>张三</div><div class="text-xs">ID：RH-1024</div>
+        </div>
+      </div>
+    </template>
+  </van-cell>
+  
+  <!-- 操作型单元格 -->
+  <van-cell center clickable>
+    <template #title><div class="text-center text-[#ee0a24]">退出登录</div></template>
+  </van-cell>
+</van-cell-group>`
             }
         ] 
     },
