@@ -1500,18 +1500,11 @@ window.RongHeComponents = {
                     const { ref, computed } = Vue;
                     const show = ref(false);
                     const range = ref([]);
-                    const active = ref('start');
                     const startTime = ref(['12', '00']);
                     const endTime = ref(['12', '00']);
-                    const pickerValue = ref(['12', '00']);
                     const now = new Date();
                     const minDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
                     const maxDate = new Date(now.getFullYear(), now.getMonth() + 2, 0);
-
-                    const timeColumns = [
-                        { values: Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')) },
-                        { values: Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0')) }
-                    ];
 
                     const formatDate = (d) => {
                         const y = d.getFullYear();
@@ -1520,21 +1513,36 @@ window.RongHeComponents = {
                         return `${y}.${m}.${day}`;
                     };
 
-                    const formatTime = (v) => (Array.isArray(v) ? v.join(':') : '');
-
-                    const dateText = computed(() => {
-                        if (!Array.isArray(range.value) || range.value.length !== 2) return '';
-                        return `${formatDate(range.value[0])} - ${formatDate(range.value[1])}`;
-                    });
+                    const formatShortDate = (d) => {
+                        const m = String(d.getMonth() + 1).padStart(2, '0');
+                        const day = String(d.getDate()).padStart(2, '0');
+                        return `${m}月${day}日`;
+                    };
 
                     const result = computed(() => {
                         if (!Array.isArray(range.value) || range.value.length !== 2) return '';
-                        return `${formatDate(range.value[0])} ${formatTime(startTime.value)} - ${formatDate(range.value[1])} ${formatTime(endTime.value)}`;
+                        return `${formatDate(range.value[0])} ${startTime.value.join(':')} - ${formatDate(range.value[1])} ${endTime.value.join(':')}`;
                     });
 
-                    const syncPicker = () => {
-                        pickerValue.value = active.value === 'start' ? [...startTime.value] : [...endTime.value];
-                    };
+                    const pickupText = computed(() => {
+                        if (!Array.isArray(range.value) || range.value.length < 1) return '--';
+                        return `${formatShortDate(range.value[0])} ${startTime.value.join(':')}`;
+                    });
+
+                    const returnText = computed(() => {
+                        if (!Array.isArray(range.value) || range.value.length !== 2) return '--';
+                        return `${formatShortDate(range.value[1])} ${endTime.value.join(':')}`;
+                    });
+
+                    const durationText = computed(() => {
+                        if (!Array.isArray(range.value) || range.value.length !== 2) return '';
+                        const [s, e] = range.value;
+                        const msDay = 24 * 60 * 60 * 1000;
+                        const start = new Date(s.getFullYear(), s.getMonth(), s.getDate()).getTime();
+                        const end = new Date(e.getFullYear(), e.getMonth(), e.getDate()).getTime();
+                        const diff = Math.max(0, Math.round((end - start) / msDay));
+                        return diff > 0 ? `${diff}天` : '当天';
+                    });
 
                     const onSelect = (val) => {
                         let next = [];
@@ -1542,25 +1550,11 @@ window.RongHeComponents = {
                         else if (val && Array.isArray(val.selectedValues)) next = val.selectedValues;
                         else if (val && Array.isArray(val.value)) next = val.value;
                         else if (val instanceof Date) next = [val];
-
-                        if (next.length === 1) active.value = 'start';
-                        if (next.length === 2) active.value = 'end';
                         range.value = next;
-                        syncPicker();
-                    };
-
-                    const onPickerChange = (val) => {
-                        const selectedValues = (val && val.selectedValues) || (val && val.value) || val;
-                        if (!Array.isArray(selectedValues)) return;
-                        if (active.value === 'start') startTime.value = selectedValues;
-                        else endTime.value = selectedValues;
-                        pickerValue.value = selectedValues;
                     };
 
                     const open = () => {
                         show.value = true;
-                        active.value = 'start';
-                        syncPicker();
                     };
 
                     const close = () => {
@@ -1573,6 +1567,14 @@ window.RongHeComponents = {
                         if (d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate()) {
                             day.bottomInfo = '今天';
                         }
+                        const same = (a, b) =>
+                            a &&
+                            b &&
+                            a.getFullYear() === b.getFullYear() &&
+                            a.getMonth() === b.getMonth() &&
+                            a.getDate() === b.getDate();
+                        if (Array.isArray(range.value) && range.value.length >= 1 && same(d, range.value[0])) day.topInfo = '取车';
+                        if (Array.isArray(range.value) && range.value.length === 2 && same(d, range.value[1])) day.topInfo = '还车';
                         return day;
                     };
 
@@ -1581,18 +1583,16 @@ window.RongHeComponents = {
                         open,
                         close,
                         range,
-                        active,
                         startTime,
                         endTime,
-                        pickerValue,
-                        timeColumns,
                         minDate,
                         maxDate,
                         formatDate,
-                        dateText,
                         result,
+                        pickupText,
+                        returnText,
+                        durationText,
                         onSelect,
-                        onPickerChange,
                         formatter
                     };
                 },
@@ -1632,37 +1632,51 @@ window.RongHeComponents = {
                                         ></van-calendar>
                                     </div>
 
-                                    <div class="min-h-0 border-t border-[#f2f3f5]" style="flex:2; overflow:hidden;">
-                                        <div class="px-4 pt-3 pb-2 flex items-center gap-2">
-                                            <div
-                                                class="px-3 h-7 rounded-full text-xs flex items-center border"
-                                                :class="active === 'start' ? 'border-[#1890FF] text-[#1890FF] bg-[#E6F7FF]' : 'border-[#ebedf0] text-[#646566] bg-white'"
-                                                @click="active = 'start'; pickerValue = [...startTime]"
-                                            >开始 {{ Array.isArray(range) && range[0] ? formatDate(range[0]) : '--' }} {{ startTime.join(':') }}</div>
-                                            <div
-                                                class="px-3 h-7 rounded-full text-xs flex items-center border"
-                                                :class="active === 'end' ? 'border-[#1890FF] text-[#1890FF] bg-[#E6F7FF]' : 'border-[#ebedf0] text-[#646566] bg-white'"
-                                                @click="active = 'end'; pickerValue = [...endTime]"
-                                            >结束 {{ Array.isArray(range) && range[1] ? formatDate(range[1]) : '--' }} {{ endTime.join(':') }}</div>
+                                    <div class="min-h-0 border-t border-[#f2f3f5] bg-[#f7f8fa]" style="flex:2; overflow:hidden;">
+                                        <div class="pt-2">
+                                            <div class="mx-auto w-10 h-1 rounded-full bg-[#dcdee0]"></div>
                                         </div>
 
-                                        <div class="px-4 pb-3">
-                                            <van-time-picker
-                                                v-model="pickerValue"
-                                                :columns-type="['hour','minute']"
-                                                :show-toolbar="false"
-                                                @change="onPickerChange"
-                                            ></van-time-picker>
+                                        <div class="px-4 pt-3 pb-2 flex items-center">
+                                            <div class="flex-1 text-sm font-medium text-[#323233]">取车时间</div>
+                                            <div class="flex-1 text-sm font-medium text-[#323233] text-right">还车时间</div>
                                         </div>
 
-                                        <div class="px-4 pb-4">
+                                        <div class="px-3">
+                                            <div class="bg-white rounded-2xl px-2 py-2 flex items-stretch">
+                                                <div class="flex-1">
+                                                    <van-time-picker
+                                                        v-model="startTime"
+                                                        :columns-type="['hour','minute']"
+                                                        :show-toolbar="false"
+                                                    ></van-time-picker>
+                                                </div>
+                                                <div class="w-px bg-[#f2f3f5] mx-1"></div>
+                                                <div class="flex-1">
+                                                    <van-time-picker
+                                                        v-model="endTime"
+                                                        :columns-type="['hour','minute']"
+                                                        :show-toolbar="false"
+                                                    ></van-time-picker>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="px-4 pt-3 pb-4 flex items-center gap-3">
+                                            <div class="flex-1">
+                                                <div class="text-xs text-[#969799] leading-4">取 {{ pickupText }}</div>
+                                                <div class="text-xs text-[#969799] leading-4">还 {{ returnText }}</div>
+                                            </div>
+                                            <div class="w-10 text-center text-xs text-[#969799]">{{ durationText }}</div>
                                             <van-button
-                                                block
+                                                round
                                                 type="primary"
-                                                color="#1890FF"
+                                                color="#FADB14"
+                                                text-color="#323233"
+                                                class="min-w-[120px]"
                                                 :disabled="!(Array.isArray(range) && range.length === 2)"
                                                 @click="close"
-                                            >确定</van-button>
+                                            >确认</van-button>
                                         </div>
                                     </div>
                                 </div>
@@ -1675,7 +1689,7 @@ window.RongHeComponents = {
         rules: [
             '<strong>单选回显</strong>：使用输入框触发日历，选择后回填到输入框中。',
             '<strong>区间选择</strong>：日期区间建议合并为单一输入框回显（选择日期：开始-结束），减少表单占用。',
-            '<strong>复合筛选</strong>：日期区间 + 时间段建议在同一弹窗内完成；日历区占比约 3/5，时间轮盘占比约 2/5；默认时间 12:00。',
+            '<strong>复合筛选</strong>：日期区间 + 时间段建议在同一弹窗内完成；日历区占比约 3/5，时间轮盘占比约 2/5；下方可同时展示取车/还车时间（四列：时分/时分）；默认时间 12:00。',
             '<strong>状态与反馈</strong>：需包含今日标记、选中高亮、禁用灰显、禁用态输入框展示。'
         ] 
     },
