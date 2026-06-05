@@ -1533,6 +1533,16 @@ window.RongHeComponents = {
                         return `${formatDate(draftRange.value[0])} ${draftStartTime.value.join(':')} - ${formatDate(draftRange.value[1])} ${draftEndTime.value.join(':')}`;
                     });
 
+                    const draftStartFull = computed(() => {
+                        if (!Array.isArray(draftRange.value) || draftRange.value.length < 1) return '--';
+                        return `${formatDate(draftRange.value[0])} ${draftStartTime.value.join(':')}`;
+                    });
+
+                    const draftEndFull = computed(() => {
+                        if (!Array.isArray(draftRange.value) || draftRange.value.length !== 2) return '--';
+                        return `${formatDate(draftRange.value[1])} ${draftEndTime.value.join(':')}`;
+                    });
+
                     const pickupText = computed(() => {
                         if (!Array.isArray(draftRange.value) || draftRange.value.length < 1) return '--';
                         return `${formatShortDate(draftRange.value[0])} ${draftStartTime.value.join(':')}`;
@@ -1614,6 +1624,8 @@ window.RongHeComponents = {
                         formatDate,
                         result,
                         draftResult,
+                        draftStartFull,
+                        draftEndFull,
                         pickupText,
                         returnText,
                         durationText,
@@ -1691,16 +1703,16 @@ window.RongHeComponents = {
                                     <div class="px-4 py-3 border-t border-[#f2f3f5] bg-white">
                                         <div class="flex items-center gap-3">
                                             <div class="flex-1 min-w-0">
-                                                <div class="text-xs text-[#969799] leading-4">已选时间范围</div>
-                                                <div class="text-sm text-[#323233] truncate">
-                                                    {{ draftResult || '--' }}
+                                                <div class="text-sm text-[#323233] leading-5">
+                                                    <div>开始：{{ draftStartFull }}</div>
+                                                    <div>结束：{{ draftEndFull }}</div>
                                                 </div>
                                             </div>
                                             <van-button
                                                 round
                                                 type="primary"
-                                                color="#FADB14"
-                                                text-color="#323233"
+                                                color="#1890FF"
+                                                text-color="#FFFFFF"
                                                 class="min-w-[120px]"
                                                 :disabled="!(Array.isArray(draftRange) && draftRange.length === 2)"
                                                 @click="confirm"
