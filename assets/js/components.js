@@ -1502,6 +1502,10 @@ window.RongHeComponents = {
                     const range = ref([]);
                     const startTime = ref(['12', '00']);
                     const endTime = ref(['12', '00']);
+
+                    const draftRange = ref([]);
+                    const draftStartTime = ref(['12', '00']);
+                    const draftEndTime = ref(['12', '00']);
                     const now = new Date();
                     const minDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
                     const maxDate = new Date(now.getFullYear(), now.getMonth() + 2, 0);
@@ -1524,19 +1528,24 @@ window.RongHeComponents = {
                         return `${formatDate(range.value[0])} ${startTime.value.join(':')} - ${formatDate(range.value[1])} ${endTime.value.join(':')}`;
                     });
 
+                    const draftResult = computed(() => {
+                        if (!Array.isArray(draftRange.value) || draftRange.value.length !== 2) return '';
+                        return `${formatDate(draftRange.value[0])} ${draftStartTime.value.join(':')} - ${formatDate(draftRange.value[1])} ${draftEndTime.value.join(':')}`;
+                    });
+
                     const pickupText = computed(() => {
-                        if (!Array.isArray(range.value) || range.value.length < 1) return '--';
-                        return `${formatShortDate(range.value[0])} ${startTime.value.join(':')}`;
+                        if (!Array.isArray(draftRange.value) || draftRange.value.length < 1) return '--';
+                        return `${formatShortDate(draftRange.value[0])} ${draftStartTime.value.join(':')}`;
                     });
 
                     const returnText = computed(() => {
-                        if (!Array.isArray(range.value) || range.value.length !== 2) return '--';
-                        return `${formatShortDate(range.value[1])} ${endTime.value.join(':')}`;
+                        if (!Array.isArray(draftRange.value) || draftRange.value.length !== 2) return '--';
+                        return `${formatShortDate(draftRange.value[1])} ${draftEndTime.value.join(':')}`;
                     });
 
                     const durationText = computed(() => {
-                        if (!Array.isArray(range.value) || range.value.length !== 2) return '';
-                        const [s, e] = range.value;
+                        if (!Array.isArray(draftRange.value) || draftRange.value.length !== 2) return '';
+                        const [s, e] = draftRange.value;
                         const msDay = 24 * 60 * 60 * 1000;
                         const start = new Date(s.getFullYear(), s.getMonth(), s.getDate()).getTime();
                         const end = new Date(e.getFullYear(), e.getMonth(), e.getDate()).getTime();
@@ -1550,14 +1559,25 @@ window.RongHeComponents = {
                         else if (val && Array.isArray(val.selectedValues)) next = val.selectedValues;
                         else if (val && Array.isArray(val.value)) next = val.value;
                         else if (val instanceof Date) next = [val];
-                        range.value = next;
+                        draftRange.value = next;
                     };
 
                     const open = () => {
+                        draftRange.value = Array.isArray(range.value) ? [...range.value] : [];
+                        draftStartTime.value = Array.isArray(startTime.value) ? [...startTime.value] : ['12', '00'];
+                        draftEndTime.value = Array.isArray(endTime.value) ? [...endTime.value] : ['12', '00'];
                         show.value = true;
                     };
 
                     const close = () => {
+                        show.value = false;
+                    };
+
+                    const confirm = () => {
+                        if (!Array.isArray(draftRange.value) || draftRange.value.length !== 2) return;
+                        range.value = [...draftRange.value];
+                        startTime.value = [...draftStartTime.value];
+                        endTime.value = [...draftEndTime.value];
                         show.value = false;
                     };
 
@@ -1573,8 +1593,8 @@ window.RongHeComponents = {
                             a.getFullYear() === b.getFullYear() &&
                             a.getMonth() === b.getMonth() &&
                             a.getDate() === b.getDate();
-                        if (Array.isArray(range.value) && range.value.length >= 1 && same(d, range.value[0])) day.topInfo = '开始';
-                        if (Array.isArray(range.value) && range.value.length === 2 && same(d, range.value[1])) day.topInfo = '结束';
+                        if (Array.isArray(draftRange.value) && draftRange.value.length >= 1 && same(d, draftRange.value[0])) day.topInfo = '开始';
+                        if (Array.isArray(draftRange.value) && draftRange.value.length === 2 && same(d, draftRange.value[1])) day.topInfo = '结束';
                         return day;
                     };
 
@@ -1582,13 +1602,18 @@ window.RongHeComponents = {
                         show,
                         open,
                         close,
+                        confirm,
                         range,
                         startTime,
                         endTime,
+                        draftRange,
+                        draftStartTime,
+                        draftEndTime,
                         minDate,
                         maxDate,
                         formatDate,
                         result,
+                        draftResult,
                         pickupText,
                         returnText,
                         durationText,
@@ -1646,7 +1671,7 @@ window.RongHeComponents = {
                                             <div class="bg-white rounded-2xl px-2 py-2 flex items-stretch">
                                                 <div class="flex-1">
                                                     <van-time-picker
-                                                        v-model="startTime"
+                                                        v-model="draftStartTime"
                                                         :columns-type="['hour','minute']"
                                                         :show-toolbar="false"
                                                     ></van-time-picker>
@@ -1654,29 +1679,32 @@ window.RongHeComponents = {
                                                 <div class="w-px bg-[#f2f3f5] mx-1"></div>
                                                 <div class="flex-1">
                                                     <van-time-picker
-                                                        v-model="endTime"
+                                                        v-model="draftEndTime"
                                                         :columns-type="['hour','minute']"
                                                         :show-toolbar="false"
                                                     ></van-time-picker>
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
 
-                                        <div class="px-4 pt-3 pb-4 flex items-center gap-3">
-                                            <div class="flex-1">
-                                                <div class="text-xs text-[#969799] leading-4">开始 {{ pickupText }}</div>
-                                                <div class="text-xs text-[#969799] leading-4">结束 {{ returnText }}</div>
+                                    <div class="px-4 py-3 border-t border-[#f2f3f5] bg-white">
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex-1 min-w-0">
+                                                <div class="text-xs text-[#969799] leading-4">已选时间范围</div>
+                                                <div class="text-sm text-[#323233] truncate">
+                                                    {{ draftResult || '--' }}
+                                                </div>
                                             </div>
-                                            <div class="w-10 text-center text-xs text-[#969799]">{{ durationText }}</div>
                                             <van-button
                                                 round
                                                 type="primary"
                                                 color="#FADB14"
                                                 text-color="#323233"
                                                 class="min-w-[120px]"
-                                                :disabled="!(Array.isArray(range) && range.length === 2)"
-                                                @click="close"
-                                            >确认</van-button>
+                                                :disabled="!(Array.isArray(draftRange) && draftRange.length === 2)"
+                                                @click="confirm"
+                                            >确定</van-button>
                                         </div>
                                     </div>
                                 </div>
@@ -1689,7 +1717,7 @@ window.RongHeComponents = {
         rules: [
             '<strong>单选回显</strong>：使用输入框触发日历，选择后回填到输入框中。',
             '<strong>区间选择</strong>：日期区间建议合并为单一输入框回显（选择日期：开始-结束），减少表单占用。',
-            '<strong>复合筛选</strong>：日期区间 + 时间段建议在同一弹窗内完成；日历区占比约 3/5，时间轮盘占比约 2/5；下方可同时展示开始/结束时间（四列：时分/时分）；默认时间 12:00。',
+            '<strong>复合筛选</strong>：日期区间 + 时间段建议在同一弹窗内完成；日历区占比约 3/5，时间轮盘占比约 2/5；下方可同时展示开始/结束时间（四列：时分/时分）；底部固定区展示已选时间范围（年月日时分-年月日时分）并提供确定按钮；默认时间 12:00。',
             '<strong>状态与反馈</strong>：需包含今日标记、选中高亮、禁用灰显、禁用态输入框展示。'
         ] 
     },
