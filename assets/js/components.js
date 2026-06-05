@@ -430,8 +430,125 @@ window.RongHeComponents = {
     },
     navbar: { 
         name: '4.3 导航栏', 
-        demos: [{ title: '导航栏', type: 'static', html: '<div class="van-nav-bar van-hairline--bottom" style="background:#0088FF"><div class="van-nav-bar__content"><div class="van-nav-bar__left"><i class="van-icon van-icon-arrow-left van-nav-bar__arrow" style="color:white;font-size:24px"></i><span class="van-nav-bar__text" style="color:white">返回</span></div><div class="van-nav-bar__title van-ellipsis" style="color:white;font-size:18px">标题</div><div class="van-nav-bar__right"><i class="van-icon van-icon-ellipsis" style="color:white;font-size:24px"></i></div></div></div>', code: '<van-nav-bar title="标题" left-text="返回" left-arrow style="--van-nav-bar-background:#0088FF;--van-nav-bar-title-text-color:white;--van-nav-bar-icon-color:white;--van-nav-bar-text-color:white" />' }], 
-        rules: ['<strong>尺寸参数</strong>：导航栏高度 88px，标题文字字号 18px。', '<strong>视觉样式</strong>：背景色 #0088FF（对内），文字色 #FFFFFF。'] 
+        demos: [
+            {
+                title: '基础用法（返回）',
+                type: 'vue',
+                setupStr: "return { onClickLeft: () => vant.showToast('返回') };",
+                template: `<div class="-mx-4 -my-4">
+                    <van-nav-bar
+                        title="标题"
+                        left-text="返回"
+                        left-arrow
+                        @click-left="onClickLeft"
+                    />
+                </div>`,
+                code: '<van-nav-bar title="标题" left-text="返回" left-arrow @click-left="onClickLeft" />'
+            },
+            {
+                title: '右侧文本按钮',
+                type: 'vue',
+                setupStr: "return { onClickLeft: () => vant.showToast('返回'), onClickRight: () => vant.showToast('更多') };",
+                template: `<div class="-mx-4 -my-4">
+                    <van-nav-bar
+                        title="订单详情"
+                        left-text="返回"
+                        right-text="更多"
+                        left-arrow
+                        @click-left="onClickLeft"
+                        @click-right="onClickRight"
+                    />
+                </div>`,
+                code: '<van-nav-bar title="订单详情" left-text="返回" right-text="更多" left-arrow />'
+            },
+            {
+                title: '右侧图标（插槽）',
+                type: 'vue',
+                setupStr: "return { onClickLeft: () => vant.showToast('返回'), onClickMore: () => vant.showToast('更多操作') };",
+                template: `<div class="-mx-4 -my-4">
+                    <van-nav-bar
+                        title="页面标题"
+                        left-text="返回"
+                        left-arrow
+                        @click-left="onClickLeft"
+                    >
+                        <template #right>
+                            <van-icon name="ellipsis" size="20" @click="onClickMore" />
+                        </template>
+                    </van-nav-bar>
+                </div>`,
+                code: '<van-nav-bar title="页面标题" left-text="返回" left-arrow><template #right><van-icon name="ellipsis" /></template></van-nav-bar>'
+            },
+            {
+                title: '自定义标题（搜索）',
+                type: 'vue',
+                setupStr: "return { keyword: Vue.ref(''), onClickLeft: () => vant.showToast('返回') };",
+                template: `<div class="-mx-4 -my-4 bg-white">
+                    <van-nav-bar left-arrow @click-left="onClickLeft">
+                        <template #title>
+                            <div class="w-full">
+                                <van-search
+                                    v-model="keyword"
+                                    placeholder="搜索"
+                                    shape="round"
+                                    background="transparent"
+                                    class="!p-0"
+                                />
+                            </div>
+                        </template>
+                    </van-nav-bar>
+                </div>`,
+                code: '<van-nav-bar left-arrow><template #title><van-search v-model="keyword" placeholder="搜索" /></template></van-nav-bar>'
+            },
+            {
+                title: '品牌蓝主题',
+                type: 'vue',
+                setupStr: "return { onClickLeft: () => vant.showToast('返回') };",
+                template: `<div class="-mx-4 -my-4">
+                    <van-nav-bar
+                        title="标题"
+                        left-text="返回"
+                        left-arrow
+                        @click-left="onClickLeft"
+                        style="--van-nav-bar-background:#1890FF;--van-nav-bar-title-text-color:#FFFFFF;--van-nav-bar-icon-color:#FFFFFF;--van-nav-bar-text-color:#FFFFFF;"
+                    />
+                </div>`,
+                code: '<van-nav-bar title="标题" left-text="返回" left-arrow style="--van-nav-bar-background:#1890FF;--van-nav-bar-title-text-color:#FFF;--van-nav-bar-icon-color:#FFF;--van-nav-bar-text-color:#FFF;" />'
+            },
+            {
+                title: '吸顶固定（placeholder）',
+                type: 'vue',
+                setupStr: "return { onClickLeft: () => vant.showToast('返回') };",
+                template: `<div class="-mx-4 -my-4 bg-[#f7f8fa]" style="height: 260px; overflow:auto;">
+                    <van-nav-bar
+                        title="吸顶示例"
+                        left-text="返回"
+                        left-arrow
+                        fixed
+                        placeholder
+                        safe-area-inset-top
+                        @click-left="onClickLeft"
+                    />
+                    <div class="pt-2">
+                        <van-cell-group inset>
+                            <van-cell title="列表项 1" />
+                            <van-cell title="列表项 2" />
+                            <van-cell title="列表项 3" />
+                            <van-cell title="列表项 4" />
+                            <van-cell title="列表项 5" />
+                        </van-cell-group>
+                    </div>
+                </div>`,
+                code: '<van-nav-bar fixed placeholder safe-area-inset-top />'
+            }
+        ], 
+        rules: [
+            '<strong>使用场景</strong>：页面顶部导航，提供返回/关闭、标题展示、右侧操作入口。',
+            '<strong>层级与吸顶</strong>：需要吸顶时使用 fixed + placeholder；建议同时开启 safe-area-inset-top 适配刘海屏。',
+            '<strong>交互区域</strong>：左侧默认返回（left-arrow），右侧用于更多/完成等操作；图标或文字点击需反馈（Toast/跳转）。',
+            '<strong>标题规则</strong>：标题居中，超长省略；复杂标题（如搜索）使用 title 插槽。',
+            '<strong>视觉规范</strong>：推荐主题蓝 #1890FF；深色背景时标题/图标/文字使用 #FFFFFF；分割线可按场景开启/关闭（border）。'
+        ] 
     },
     pagination: { name: '4.4 分页', demos: [{ title: '分页', type: 'input', component: 'van-pagination', model: 'pageNum', props: { totalItems: 24, itemsPerPage: 5 }, code: '<van-pagination v-model="currentPage" :total-items="24" :items-per-page="5" />' }] },
     sidebar: { 
