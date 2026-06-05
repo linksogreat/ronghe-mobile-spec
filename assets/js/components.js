@@ -2231,12 +2231,49 @@ window.RongHeComponents = {
                     </div>
                 `,
                 code: `// API 方式\nvant.showDialog({ title: '提示', message: '内容' });\nvant.showConfirmDialog({ title: '确认', message: '内容' }).then(() => {}).catch(() => {});\n\n// 组件方式（适合自定义内容/输入）\n<van-dialog v-model:show=\"show\" title=\"标题\" show-cancel-button @confirm=\"onConfirm\">\n  <van-field v-model=\"value\" label=\"备注\" placeholder=\"请输入\" />\n</van-dialog>`
+            },
+            {
+                title: '演示场景一：提示弹窗（API）',
+                type: 'vue',
+                setupStr: "return { onClick: () => vant.showDialog({ title: '提示', message: '这是一个提示弹窗示例' }) };",
+                template: `<div class="p-4">
+  <van-button type="primary" color="#1890FF" block @click="onClick">打开提示弹窗</van-button>
+</div>`,
+                code: `vant.showDialog({\n  title: '提示',\n  message: '这是一个提示弹窗示例',\n});`
+            },
+            {
+                title: '演示场景二：确认弹窗（API）',
+                type: 'vue',
+                setupStr:
+                    "return { onClick: () => vant.showConfirmDialog({ title: '确认提交', message: '是否确认提交？', confirmButtonText: '确认', cancelButtonText: '取消' }).then(() => vant.showToast('已确认')).catch(() => {}) };",
+                template: `<div class="p-4">
+  <van-button plain type="primary" color="#1890FF" block @click="onClick">打开确认弹窗</van-button>
+</div>`,
+                code: `vant.showConfirmDialog({\n  title: '确认提交',\n  message: '是否确认提交？',\n  confirmButtonText: '确认',\n  cancelButtonText: '取消',\n}).then(() => {}).catch(() => {});`
+            },
+            {
+                title: '演示场景三：带输入弹窗（组件）',
+                type: 'vue',
+                setupStr:
+                    "return (() => { const show = Vue.ref(false); const value = Vue.ref(''); const open = () => (show.value = true); const onConfirm = () => { show.value = false; vant.showToast('已保存'); }; return { show, value, open, onConfirm }; })();",
+                template: `<div class="p-4">
+  <van-button type="primary" color="#1890FF" block @click="open">打开输入弹窗</van-button>
+  <van-dialog v-model:show="show" title="补充信息" show-cancel-button confirm-button-text="保存" @confirm="onConfirm">
+    <div class="px-4 pt-2">
+      <van-field v-model="value" label="备注" placeholder="请输入" />
+    </div>
+  </van-dialog>
+</div>`,
+                code: `<van-dialog v-model:show="show" title="补充信息" show-cancel-button confirm-button-text="保存" @confirm="onConfirm">\n  <van-field v-model="value" label="备注" placeholder="请输入" />\n</van-dialog>`
             }
         ],
         rules: [
             '<strong>使用场景</strong>：二次确认、风险告知、重要操作前提示；避免用于高频轻量操作。',
             '<strong>文案</strong>：标题简短清晰；正文说明原因与后果；确认按钮使用动词（如“删除/提交/同意”）。',
-            '<strong>交互</strong>：支持确认/取消；必要时支持输入补充信息；异步操作建议提供 loading 与结果反馈；支持遮罩关闭与返回手势关闭需谨慎（避免误触）。'
+            '<strong>按钮层级</strong>：主按钮 1 个为主，避免多主按钮并列；危险操作应突出风险（如“删除”）。',
+            '<strong>交互</strong>：支持确认/取消；必要时支持输入补充信息；异步操作建议提供 loading 与结果反馈；遮罩点击关闭需谨慎（避免误触）。',
+            '<strong>连弹控制</strong>：尽量避免连续弹窗；若必须连弹，应保证关闭/确认后的状态反馈清晰，并避免遮挡 toast。',
+            '<strong>输入校验</strong>：输入弹窗需在确认前完成必填校验与错误提示，避免提交后再报错。'
         ]
     },
     'business-popup': {
@@ -2297,12 +2334,85 @@ window.RongHeComponents = {
                     </div>
                 `,
                 code: `<van-popup v-model:show=\"show\" position=\"bottom\" round>\n  <div class=\"px-4 pt-4 pb-3\">\n    <div class=\"text-base font-medium\">标题</div>\n    <div class=\"mt-2 text-sm text-[#646566]\">说明内容</div>\n    <div class=\"mt-4 flex gap-3\">\n      <van-button block plain @click=\"show = false\">取消</van-button>\n      <van-button block type=\"primary\" color=\"#1890FF\" @click=\"onConfirm\">确定</van-button>\n    </div>\n  </div>\n</van-popup>`
+            },
+            {
+                title: '演示场景一：底部协议确认',
+                type: 'vue',
+                setupStr:
+                    "return (() => { const show = Vue.ref(false); const dontShow = Vue.ref(false); const open = () => (show.value = true); const onConfirm = () => { show.value = false; vant.showToast('已同意'); }; return { show, dontShow, open, onConfirm }; })();",
+                template: `<div class="p-4">
+  <van-button type="primary" color="#1890FF" block @click="open">打开底部弹窗</van-button>
+  <van-popup v-model:show="show" position="bottom" round>
+    <div class="px-4 pt-4 pb-3" style="padding-bottom: calc(12px + env(safe-area-inset-bottom));">
+      <div class="text-base font-medium text-[#323233]">服务协议</div>
+      <div class="mt-2 text-sm text-[#646566] leading-6">请阅读并同意服务协议后继续使用。</div>
+      <van-checkbox v-model="dontShow" class="mt-3" icon-size="16">不再提示</van-checkbox>
+      <div class="mt-4 flex gap-3">
+        <van-button block plain @click="show = false">取消</van-button>
+        <van-button block type="primary" color="#1890FF" @click="onConfirm">同意</van-button>
+      </div>
+    </div>
+  </van-popup>
+</div>`,
+                code: `<van-popup v-model:show="show" position="bottom" round>\n  <div class="px-4 pt-4 pb-3">...\n  </div>\n</van-popup>`
+            },
+            {
+                title: '演示场景二：居中营销弹窗',
+                type: 'vue',
+                setupStr:
+                    "return (() => { const show = Vue.ref(false); const open = () => (show.value = true); const onPrimary = () => { show.value = false; vant.showToast('去使用'); }; return { show, open, onPrimary }; })();",
+                template: `<div class="p-4">
+  <van-button plain type="primary" color="#1890FF" block @click="open">打开居中弹窗</van-button>
+  <van-popup v-model:show="show" round>
+    <div class="w-[280px] px-5 pt-5 pb-4">
+      <div class="flex items-center justify-center mb-3">
+        <div class="w-12 h-12 rounded-full bg-[#eef2ff] flex items-center justify-center">
+          <van-icon name="gift-o" color="#1890FF" size="26" />
+        </div>
+      </div>
+      <div class="text-base font-medium text-center text-[#323233]">新人礼包已到账</div>
+      <div class="mt-2 text-sm text-center text-[#646566] leading-6">完成一次下单即可使用。</div>
+      <div class="mt-4">
+        <van-button type="primary" block color="#1890FF" @click="onPrimary">去使用</van-button>
+        <div class="mt-2 text-center text-sm text-[#969799]" @click="show = false">稍后再说</div>
+      </div>
+    </div>
+  </van-popup>
+</div>`,
+                code: `<van-popup v-model:show="show" round>\n  <div class="w-[280px] px-5 pt-5 pb-4">...\n  </div>\n</van-popup>`
+            },
+            {
+                title: '演示场景三：长内容可滚动（底部固定按钮）',
+                type: 'vue',
+                setupStr:
+                    "return (() => { const show = Vue.ref(false); const open = () => (show.value = true); const onConfirm = () => { show.value = false; vant.showToast('已知晓'); }; return { show, open, onConfirm }; })();",
+                template: `<div class="p-4">
+  <van-button plain type="primary" color="#1890FF" block @click="open">打开长内容弹窗</van-button>
+  <van-popup v-model:show="show" position="bottom" round :style="{ height: '72vh' }">
+    <div class="h-full flex flex-col">
+      <div class="px-4 pt-4 pb-3 border-b border-[#ebedf0]">
+        <div class="text-base font-medium text-[#323233]">隐私说明</div>
+        <div class="text-xs text-[#969799] mt-1">请阅读后继续</div>
+      </div>
+      <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar px-4 py-3 text-sm text-[#646566] leading-6 space-y-3">
+        <div v-for="i in 10" :key="i">第 {{ i }} 段：这里是较长的说明内容，用于演示弹窗内部滚动与布局稳定。</div>
+      </div>
+      <div class="p-3 border-t border-[#ebedf0]" style="padding-bottom: calc(12px + env(safe-area-inset-bottom));">
+        <van-button type="primary" block color="#1890FF" @click="onConfirm">我已知晓</van-button>
+      </div>
+    </div>
+  </van-popup>
+</div>`,
+                code: `<van-popup v-model:show="show" position="bottom" round :style="{ height: '72vh' }">\n  <div class="h-full flex flex-col">\n    <div class="flex-1 overflow-y-auto">...</div>\n    <div class="border-t">按钮区</div>\n  </div>\n</van-popup>`
             }
         ],
         rules: [
             '<strong>结构</strong>：标题 + 说明 + 操作；可包含插图/图标增强表达；主次按钮层级清晰。',
-            '<strong>关闭</strong>：支持遮罩点击关闭与关闭按钮（或“稍后再说”）；避免强制打断用户主流程。',
-            '<strong>状态</strong>：异步提交建议提供 loading；操作完成给出 toast/状态回显。'
+            '<strong>层级与尺寸</strong>：底部弹窗适合流程确认/协议；居中弹窗适合轻量提醒/营销；内容区高度过大时建议内部滚动。',
+            '<strong>按钮策略</strong>：主按钮使用主题色 #1890FF；次按钮用描边/弱化；避免同级按钮超过 2 个。',
+            '<strong>关闭</strong>：支持遮罩点击关闭与显式关闭入口（关闭按钮/“稍后再说”）；避免强制打断用户主流程。',
+            '<strong>安全区</strong>：底部弹窗需考虑 safe-area-inset-bottom，避免按钮被手势条遮挡。',
+            '<strong>状态</strong>：异步提交建议提供 loading；操作完成给出 toast/状态回显，并确保弹窗关闭后的页面状态一致。'
         ]
     },
     'drawer-popup': {
@@ -2408,13 +2518,83 @@ window.RongHeComponents = {
                     </div>
                 `,
                 code: `<van-popup v-model:show=\"show\" position=\"right\" :style=\"{ width: '86vw', maxWidth: '340px', height: '100%' }\">\n  <div class=\"h-full flex flex-col bg-white\">\n    <div class=\"px-4 h-12 flex items-center justify-between border-b\">筛选</div>\n    <div class=\"flex-1 overflow-y-auto\">\n      <!-- 多种筛选样式：标签/多选/单选/区间/日期/开关/排序 -->\n    </div>\n    <div class=\"p-3 border-t flex gap-3\">\n      <van-button block plain @click=\"onReset\">重置</van-button>\n      <van-button block type=\"primary\" color=\"#1890FF\" @click=\"onApply\">确定</van-button>\n    </div>\n  </div>\n</van-popup>`
+            },
+            {
+                title: '演示场景一：基础筛选抽屉（轻量）',
+                type: 'vue',
+                setupStr:
+                    "return (() => { const show = Vue.ref(false); const period = Vue.ref('本周'); const periods = ['今日','本周','本月']; const open = () => (show.value = true); const onReset = () => { period.value = '本周'; }; const onApply = () => { show.value = false; vant.showToast('已应用'); }; return { show, period, periods, open, onReset, onApply }; })();",
+                template: `<div class="h-full min-h-0 bg-[#f7f8fa] p-4">
+  <van-button type="primary" color="#1890FF" block @click="open">打开抽屉</van-button>
+  <van-popup v-model:show="show" position="right" :style="{ width: '80vw', maxWidth: '320px', height: '100%' }">
+    <div class="h-full flex flex-col bg-white">
+      <div class="px-4 h-12 flex items-center justify-between border-b border-[#ebedf0]">
+        <div class="text-base font-medium text-[#323233]">筛选</div>
+        <van-icon name="cross" size="18" color="#969799" @click="show = false" />
+      </div>
+      <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+        <div class="px-4 py-4">
+          <div class="text-sm text-[#323233] font-medium">时间范围</div>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <button
+              v-for="opt in periods"
+              :key="opt"
+              class="px-3 h-8 rounded-full text-sm border"
+              :class="period === opt ? 'bg-[#1890FF] text-white border-[#1890FF]' : 'bg-white text-[#323233] border-[#ebedf0]'"
+              @click="period = opt"
+            >{{ opt }}</button>
+          </div>
+        </div>
+      </div>
+      <div class="p-3 border-t border-[#ebedf0] flex gap-3" style="padding-bottom: calc(12px + env(safe-area-inset-bottom));">
+        <van-button block plain @click="onReset">重置</van-button>
+        <van-button block type="primary" color="#1890FF" @click="onApply">确定</van-button>
+      </div>
+    </div>
+  </van-popup>
+</div>`,
+                code: `<van-popup v-model:show="show" position="right" :style="{ width: '80vw', maxWidth: '320px', height: '100%' }">... </van-popup>`
+            },
+            {
+                title: '演示场景二：详情抽屉（信息展示）',
+                type: 'vue',
+                setupStr: "return (() => { const show = Vue.ref(false); const open = () => (show.value = true); return { show, open }; })();",
+                template: `<div class="h-full min-h-0 bg-[#f7f8fa] p-4">
+  <van-button plain type="primary" color="#1890FF" block @click="open">打开详情抽屉</van-button>
+  <van-popup v-model:show="show" position="right" :style="{ width: '86vw', maxWidth: '360px', height: '100%' }">
+    <div class="h-full flex flex-col bg-white">
+      <div class="px-4 h-12 flex items-center justify-between border-b border-[#ebedf0]">
+        <div class="text-base font-medium text-[#323233]">订单详情</div>
+        <van-icon name="cross" size="18" color="#969799" @click="show = false" />
+      </div>
+      <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+        <van-cell-group :border="false">
+          <van-cell title="订单号" value="RH-20260605" />
+          <van-cell title="状态" value="进行中" />
+          <van-cell title="金额" value="¥ 128.00" />
+          <van-cell title="创建时间" value="2026-06-05 10:30" />
+        </van-cell-group>
+        <div class="px-4 py-4 border-t border-[#f7f7f7]">
+          <div class="text-sm font-medium text-[#323233]">备注</div>
+          <div class="mt-2 text-sm text-[#646566] leading-6">抽屉适合在当前页面补充信息展示，关闭后仍停留在原列表位置。</div>
+        </div>
+      </div>
+      <div class="p-3 border-t border-[#ebedf0]" style="padding-bottom: calc(12px + env(safe-area-inset-bottom));">
+        <van-button type="primary" block color="#1890FF" @click="show = false">我知道了</van-button>
+      </div>
+    </div>
+  </van-popup>
+</div>`,
+                code: `<van-popup v-model:show="show" position="right" :style="{ width: '86vw', height: '100%' }">\n  <!-- 标题/内容滚动/底部按钮 -->\n</van-popup>`
             }
         ],
         rules: [
             '<strong>使用场景</strong>：筛选/编辑等“在当前页面完成”的操作；抽屉不跳转页面，便于快速返回。',
             '<strong>布局</strong>：头部标题 + 关闭；内容区可滚动；底部固定操作栏（重置/确定）。',
             '<strong>筛选样式</strong>：支持标签（单选/多选）、checkbox 多选、radio 单选、区间输入、日期范围、开关、排序等多种组合。',
-            '<strong>交互</strong>：支持遮罩关闭；提交后关闭并回显筛选结果；内容超出时内部滚动而非页面滚动。'
+            '<strong>交互</strong>：支持遮罩关闭；提交后关闭并回显筛选结果；内容超出时内部滚动而非页面滚动。',
+            '<strong>宽度建议</strong>：建议 80%~86% 视口宽度，最大宽度 320~360px，确保主页面仍可被感知（层级明确）。',
+            '<strong>底部安全区</strong>：底部操作栏需考虑 safe-area-inset-bottom，避免按钮被遮挡。'
         ]
     },
     slider: { name: '6.4 滑块', demos: [{ title: '滑块', type: 'input', component: 'van-slider', model: 'sliderVal', code: '<van-slider v-model="value" />' }] },
